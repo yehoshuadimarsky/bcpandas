@@ -64,7 +64,7 @@ def bcp(
     # prepare SQL item string
     if sql_type == QUERY:
         # remove newlines for queries, otherwise messes up BCP
-        sql_item_string = "".join(sql_item).splitlines()
+        sql_item_string = "".join(sql_item.splitlines()) 
     else:
         sql_item_string = f"{schema}.{sql_item}"
 
@@ -135,12 +135,13 @@ def build_format_file(df):
     -------------
     A string containing the format file
     """
+    _space = "   " 
     format_file = f"9.0\n{len(df.columns)}\n"
-    for col_num, col in enumerate(df.columns, start=1):
+    for col_num, col_name in enumerate(df.columns, start=1):
         _delim = (
             DELIMITER if col_num != len(df.columns) else NEWLINE
         )  # last col gets a newline sep
-        _line = f"{col_num}  {SQLCHAR}  0  0  {_escape(_delim)}  {col_num}  {col}  {sql_collation}\n"
+        _line = f"{col_num}{_space}{SQLCHAR}{_space} 0{_space}0{_space}{_escape(_delim)}{_space} {col_num}{_space}{col_name}{_space} {sql_collation}\n"
         format_file += _line
     return format_file
 
