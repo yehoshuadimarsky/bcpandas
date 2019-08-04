@@ -10,9 +10,9 @@ This package is a wrapper for seamlessly using the bcp utility from Python using
 
 <table>
 <tr>
-  <td>Name</td>
-  <td>GitHub</td>
-  <td>PyPI</td>
+  <td><b>Name</b></td>
+  <td><b>GitHub</b></td>
+  <td><b>PyPI</b></td>
 </tr>
 <tr>
   <td>bcpy</td>
