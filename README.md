@@ -1,6 +1,6 @@
 # bcpandas
 
-:warning: :construction: This library is still under active development, should be considered in "alpha". Use at your own risk. :warning: :construction:
+:warning: :construction: This library is still under active development, should be considered in "alpha". Use at your own risk. :construction: :warning:
 
 (That said, the source code is very small and easy to understand, so you should feel comfortable pretty quickly)
 
