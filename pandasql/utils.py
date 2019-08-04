@@ -39,7 +39,7 @@ def bcp(
     creds,
     sql_type: str = "table",
     schema: str = "dbo",
-    format_file: str = None,
+    format_file_path: str = None,
     batch_size: int = 100000,
 ):
 
@@ -84,7 +84,7 @@ def bcp(
 
     # formats
     if direc == IN:
-        bcp_command += ["-f", format_file]
+        bcp_command += ["-f", format_file_path]
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
             "-c",  # marking as character data, not Unicode (maybe make as param?)
@@ -136,24 +136,24 @@ def build_format_file(df):
     A string containing the format file
     """
     _space = "   " 
-    format_file = f"9.0\n{len(df.columns)}\n"
+    format_file_str = f"9.0\n{len(df.columns)}\n"
     for col_num, col_name in enumerate(df.columns, start=1):
         _delim = (
             DELIMITER if col_num != len(df.columns) else NEWLINE
         )  # last col gets a newline sep
         _line = _space.join([
-           {col_num},   # flat file column number
-           {SQLCHAR}, 
+           str(col_num),   # flat file column number
+           SQLCHAR, 
            str(0),  # char prefix 
            str(0), 
-           {_escape(_delim)},  # separator 
-           {col_num},  # sql column number 
-           {col_name},  # sql column name, sort of optional 
-           {sql_collation}, 
+           _escape(_delim),  # separator 
+           str(col_num),  # sql column number 
+           col_name,  # sql column name, sort of optional 
+           sql_collation, 
            "\n", 
          ]) 
-        format_file += _line
-    return format_file
+        format_file_str += _line
+    return format_file_str
 
 
 def _get_sql_create_statement(df, table_name, schema="dbo"):
