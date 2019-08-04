@@ -7,6 +7,7 @@ Created on Sat Aug  3 23:07:15 2019
 
 import logging
 import os
+from pprint import pprint
 import random
 import string
 import subprocess
@@ -93,9 +94,10 @@ def bcp(
 
     # execute
     # TODO better logging and error handling the return stream
-    result = subprocess.run(bcp_command, stderr=subprocess.PIPE)
+    result = subprocess.run(bcp_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.returncode:
-        raise Exception(f"Bcp command failed. Details:\n{result}")
+        msg = parse_subprocess_error(result)
+        raise Exception(f"Bcp command failed. Details:\n{msg}")
 
 
 def get_temp_file():
@@ -110,6 +112,9 @@ def get_temp_file():
 
 
 def _escape(input_string):
+    """
+    Adopted from https://github.com/titan550/bcpy/blob/master/bcpy/format_file_builder.py#L25
+    """
     return (
         input_string.replace('"', '\\"')
         .replace("'", "\\'")
@@ -124,8 +129,9 @@ def build_format_file(df):
     See https://docs.microsoft.com/en-us/sql/relational-databases/import-export/non-xml-format-files-sql-server
     for the specification of the file.
 
-    # TODO add params/options to control the char type (not just SQLCHAR),
-        and the ability to skip destination columns
+    # TODO add params/options to control:
+    #   - the char type (not just SQLCHAR),
+    #   - the ability to skip destination columns
 
     Parameters
     -------------
@@ -135,21 +141,20 @@ def build_format_file(df):
     -------------
     A string containing the format file
     """
-    _space = "   " 
-    format_file_str = f"9.0\n{len(df.columns)}\n"
+    _space = " " * 4 
+    format_file_str = f"9.0\n{len(df.columns)}\n"  # Version and Number of columns
     for col_num, col_name in enumerate(df.columns, start=1):
-        _delim = (
-            DELIMITER if col_num != len(df.columns) else NEWLINE
-        )  # last col gets a newline sep
+        # last col gets a newline sep
+        _delim = DELIMITER if col_num != len(df.columns) else NEWLINE  
         _line = _space.join([
-           str(col_num),   # flat file column number
-           SQLCHAR, 
-           str(0),  # char prefix 
-           str(0), 
-           _escape(_delim),  # separator 
-           str(col_num),  # sql column number 
-           col_name,  # sql column name, sort of optional 
-           sql_collation, 
+           str(col_num),        # Host file field order
+           SQLCHAR,             # Host file data type
+           str(0),              # Prefix length
+           str(0),              # Host file data length
+           _escape(_delim),     # Terminator 
+           str(col_num),        # Server column order
+           col_name,            # Server column name, optional as long as not blank
+           sql_collation,       # Column collation
            "\n", 
          ]) 
         format_file_str += _line
@@ -216,8 +221,8 @@ def sqlcmd(server, database, command, username=None, password=None):
         sqlcmd_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     if result.returncode:
-        print(result.stdout)
-        raise Exception(f"Sqlcmd command failed. Details:\n{result}")
+        msg = parse_subprocess_error(result)
+        raise Exception(f"Sqlcmd command failed. Details:\n{msg}")
     output = StringIO(result.stdout.decode("ascii"))
     first_line_output = output.readline().strip()
     if first_line_output == "":
@@ -230,3 +235,25 @@ def sqlcmd(server, database, command, username=None, password=None):
     except pd.errors.EmptyDataError:
         result = None
     return result
+
+
+
+
+def parse_subprocess_error(result):
+    msg = {}
+    for item in ['args', 'returncode', 'stdout', 'stderr']:
+        _i = getattr(result, item)
+        msg[item] =_i.decode() if isinstance(_i, bytes) else _i
+    return msg
+    
+        
+
+
+
+
+
+
+
+
+
+

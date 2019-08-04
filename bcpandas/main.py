@@ -122,7 +122,7 @@ def to_sql(
             sql_item=table_name,
             direction=IN,
             flat_file=csv_file_path,
-            format_file=fmt_file_path,
+            format_file_path=fmt_file_path,
             creds=creds,
             sql_type=sql_type,
             schema=schema,
