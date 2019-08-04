@@ -7,7 +7,6 @@ Created on Sat Aug  3 23:07:15 2019
 
 import logging
 import os
-from pprint import pprint
 import random
 import string
 import subprocess
@@ -147,17 +146,19 @@ def build_format_file(df):
         # last col gets a newline sep
         _delim = DELIMITER if col_num != len(df.columns) else NEWLINE  
         _line = _space.join([
-           str(col_num),        # Host file field order
-           SQLCHAR,             # Host file data type
-           str(0),              # Prefix length
-           str(0),              # Host file data length
-           _escape(_delim),     # Terminator 
-           str(col_num),        # Server column order
-           col_name,            # Server column name, optional as long as not blank
-           sql_collation,       # Column collation
-           "\n" if col_num != len(df.columns) else "", 
+           str(col_num),                # Host file field order
+           SQLCHAR,                     # Host file data type
+           str(0),                      # Prefix length
+           str(0),                      # Host file data length
+           f'"{_escape(_delim)}"',      # Terminator (see note below)
+           str(col_num),                # Server column order
+           col_name,                    # Server column name, optional as long as not blank
+           sql_collation,               # Column collation
+           "\n", 
          ]) 
         format_file_str += _line
+    # FYI very important to surround the Terminator with quotes, otherwise BCP fails with:
+    # "Unexpected EOF encountered in BCP data-file". Hugely frustrating bug.
     return format_file_str
 
 

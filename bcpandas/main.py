@@ -68,15 +68,15 @@ class SqlCreds:
 
 # DataFrame
 def to_sql(
-    df: pd.DataFrame,
-    table_name: str,
-    creds: SqlCreds,
-    sql_type: str = "table",
-    schema: str = "dbo",
-    index: bool = False,
-    if_exists: str = "replace",
-    batch_size: int = 10000,
-    debug: bool = False,
+    df,
+    table_name,
+    creds,
+    sql_type="table",
+    schema="dbo",
+    index=False,
+    if_exists="replace",
+    batch_size=10000,
+    debug=False,
 ):
     # validation
     assert sql_type in SQL_TYPES
@@ -132,6 +132,8 @@ def to_sql(
         if not debug:
             os.remove(csv_file_path)
             os.remove(fmt_file_path)
+        else:
+            print(f"DEBUG mode, not deleting the files. Path to CSV file is {csv_file_path}, format file is {fmt_file_path}")
 
 
 def read_sql(
