@@ -1,5 +1,9 @@
 # bcpandas
 
+:warning: :construction: This library is still under active development, should be considered in "alpha". Use at your own risk. :warning: :construction:
+
+(That said, the source code is very small and easy to understand, so you should feel comfortable pretty quickly)
+
 ## Motivations and Design
 ### Overview
 Reading and writing data from pandas DataFrames to/from a SQL database is very slow using the built-in `read_sql` and `to_sql` methods, even with the newly introduced `execute_many` option. For Microsoft SQL Server, a far far faster method is to use the BCP utility provided by Microsoft. This utility is a command line tool that transfers data to/from the database and flat text files.
