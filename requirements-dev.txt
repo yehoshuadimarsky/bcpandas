@@ -1,0 +1,3 @@
+pytest
+black
+spyder-kernels=0.*

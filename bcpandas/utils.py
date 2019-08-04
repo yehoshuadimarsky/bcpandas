@@ -155,7 +155,7 @@ def build_format_file(df):
            str(col_num),        # Server column order
            col_name,            # Server column name, optional as long as not blank
            sql_collation,       # Column collation
-           "\n", 
+           "\n" if col_num != len(df.columns) else "", 
          ]) 
         format_file_str += _line
     return format_file_str
