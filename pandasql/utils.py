@@ -141,7 +141,17 @@ def build_format_file(df):
         _delim = (
             DELIMITER if col_num != len(df.columns) else NEWLINE
         )  # last col gets a newline sep
-        _line = f"{col_num}{_space}{SQLCHAR}{_space} 0{_space}0{_space}{_escape(_delim)}{_space} {col_num}{_space}{col_name}{_space} {sql_collation}\n"
+        _line = _space.join([
+           {col_num},   # flat file column number
+           {SQLCHAR}, 
+           str(0),  # char prefix 
+           str(0), 
+           {_escape(_delim)},  # separator 
+           {col_num},  # sql column number 
+           {col_name},  # sql column name, sort of optional 
+           {sql_collation}, 
+           "\n", 
+         ]) 
         format_file += _line
     return format_file
 
