@@ -5,6 +5,7 @@
     - ~~`__init__.py`~~
     - ~~`setup.py`~~
 - ~~Fix up `setup.py`~~
+- Stream BCP stdout to logs in real time asynchronously
 - Upload to PyPI
 - Add conda recipe `meta.yaml` file
 - Upload to conda-forge
