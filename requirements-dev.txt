@@ -1,3 +1,4 @@
 pytest
 black
+pre-commit
 spyder-kernels=0.*
