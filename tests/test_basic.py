@@ -8,8 +8,9 @@ Created on Sat Aug  3 23:36:07 2019
 import pytest
 
 import pandas as pd
+import numpy as np
 import json
-from bcpandas import SqlCreds, to_sql, read_sql
+from bcpandas import SqlCreds, to_sql
 
 
 @pytest.fixture(scope="session")
@@ -29,6 +30,29 @@ def test_basic(sql_creds):
             "col4": [x for x in range(2107, 2110)],
         }
     )
-    to_sql(df=df, table_name="lotr1", creds=sql_creds, sql_type="table")
+    to_sql(
+        df=df,
+        table_name="lotr1",
+        creds=sql_creds,
+        index=False,
+        sql_type="table",
+        if_exists="replace",
+    )
+
+    assert 1 == 1
+
+
+def test_big(sql_creds):
+    df = pd.DataFrame(
+        data=np.ndarray(shape=(1_000_000, 6), dtype=float), columns=[f"col_{x}" for x in range(6)]
+    )
+    to_sql(
+        df=df,
+        table_name="test_floats_lots",
+        creds=sql_creds,
+        index=False,
+        sql_type="table",
+        if_exists="replace",
+    )
 
     assert 1 == 1

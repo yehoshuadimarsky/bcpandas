@@ -40,7 +40,7 @@ def bcp(
     sql_type: str = "table",
     schema: str = "dbo",
     format_file_path: str = None,
-    batch_size: int = 100000,
+    batch_size=None,
 ):
 
     combos = {TABLE: [IN, OUT], QUERY: [QUERYOUT]}
@@ -76,9 +76,10 @@ def bcp(
         creds.server,
         "-d",
         creds.database,
-        "-b",
-        str(batch_size),
     ] + auth
+
+    if batch_size:
+        bcp_command += ["-b", str(batch_size)]
 
     # formats
     if direc == IN:
@@ -91,8 +92,15 @@ def bcp(
 
     # execute
     # TODO better logging and error handling the return stream
-    result = subprocess.run(bcp_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
+
+    logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log}")
+    result = subprocess.run(
+        bcp_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8"
+    )
+    logger.debug(result.stdout)
     if result.returncode:
+        logger.error(result.stdout)
         msg = parse_subprocess_error(result)
         raise Exception(f"Bcp command failed. Details:\n{msg}")
 
@@ -131,11 +139,11 @@ def build_format_file(df):
     #   - the ability to skip destination columns
 
     Parameters
-    -------------
+    ----------
     df : pandas DataFrame
 
     Returns
-    -------------
+    -------
     A string containing the format file
     """
     _space = " " * 4

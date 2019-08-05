@@ -10,6 +10,7 @@ import logging
 import os
 
 import pandas as pd
+import pyodbc
 
 from .constants import (
     DELIMITER,
@@ -30,7 +31,20 @@ logger = logging.getLogger(__name__)
 
 class SqlCreds:
     """
-    Credential object for all SQL operations
+    Credential object for all SQL operations.
+
+    If `username` and `password` are not provided, `with_krb_auth` will be `True`.
+
+    Parameters
+    ----------
+    server : str
+    database : str
+    username : str, optional
+    password : str, optional
+
+    Returns
+    -------
+    `bcpandas.SqlCreds`
     """
 
     def __init__(self, server, database, username=None, password=None):
@@ -44,6 +58,7 @@ class SqlCreds:
             self.with_krb_auth = False
         else:
             self.with_krb_auth = True
+        logger.info(f"Created creds:\t{self}")
 
     def __repr__(self):
         # adopted from https://github.com/erdewit/ib_insync/blob/master/ib_insync/objects.py#L51
@@ -56,18 +71,49 @@ class SqlCreds:
     __str__ = __repr__
 
 
-# DataFrame
 def to_sql(
     df,
     table_name,
     creds,
     sql_type="table",
     schema="dbo",
-    index=False,
-    if_exists="replace",
-    batch_size=10000,
+    index=True,
+    if_exists="fail",
+    batch_size=None,
     debug=False,
 ):
+    """
+    Writes the pandas DataFrame to a SQL table or view.
+
+    Will write all columns to the table or view. 
+    Assumes the SQL table or view has the same number, name, and type of columns.
+    To only write parts of the DataFrame, filter it beforehand and pass that to this function.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+    table_name : str
+        Name of SQL table or view.
+    creds : bcpandas.SqlCreds
+        The credentials used in the SQL database.
+    sql_type : {'table', 'view'}, default 'table'
+        The type of SQL object of the destination.
+    schema : str, default 'dbo'
+        The SQL schema.
+    index : bool, default True
+        Write DataFrame index as a column. Uses the index name as the column
+        name in the table.
+    if_exists : {'fail', 'replace', 'append'}, default 'fail'
+        How to behave if the table already exists.
+        * fail: Raise a ValueError.
+        * replace: Drop the table before inserting new values.
+        * append: Insert new values to the existing table.
+    batch_size : int, optional
+        Rows will be written in batches of this size at a time. By default,
+        all rows will be written at once.
+    debug : bool, default False
+        If True, will not delete the temporary CSV and format files, and will output their location.
+    """
     # validation
     assert sql_type in SQL_TYPES
     assert if_exists in IF_EXISTS_OPTIONS
@@ -85,27 +131,30 @@ def to_sql(
         doublequote=True,
         escapechar=None,  # not needed, as using doublequote
     )
+    logger.debug(f"Saved dataframe to temp CSV file at {csv_file_path}")
 
     # build format file
     fmt_file_path = get_temp_file()
     fmt_file_txt = build_format_file(df=df)
     with open(fmt_file_path, "w") as ff:
         ff.write(fmt_file_txt)
+    logger.debug(f"Created BCP format file at {fmt_file_path}")
 
     try:
         if if_exists == "fail":
-            # TODO fix
+            # TODO check if db table/view exists, raise ValueError if exists
             raise NotImplementedError()
         elif if_exists == "replace":
+            # TODO fix
             sqlcmd(
-                command=_get_sql_create_statement(
-                    df=df, table_name=table_name, schema=schema
-                ),  # TODO fix
+                command=_get_sql_create_statement(df=df, table_name=table_name, schema=schema),
                 server=creds.server,
                 database=creds.database,
                 username=creds.username,
                 password=creds.password,
             )
+        elif if_exists == "append":
+            pass  # don't need to do anything
 
         # either way, BCP data in
         bcp(
@@ -120,31 +169,26 @@ def to_sql(
         )
     finally:
         if not debug:
+            logger.debug(f"Deleting temp CSV and format files")
             os.remove(csv_file_path)
             os.remove(fmt_file_path)
         else:
-            print(
-                f"DEBUG mode, not deleting the files. Path to CSV file is {csv_file_path}, format file is {fmt_file_path}"
+            logger.debug(
+                f"`to_sql` DEBUG mode, not deleting the files. CSV file is at {csv_file_path}, format file is at {fmt_file_path}"
             )
 
 
 def read_sql(
-    table_name: str,
-    creds: SqlCreds,
-    sql_type: str = "table",
-    schema: str = "dbo",
-    mssql_odbc_driver_version: int = 17,
-    batch_size: int = 10000,
+    table_name,
+    creds,
+    sql_type="table",
+    schema="dbo",
+    mssql_odbc_driver_version=17,
+    batch_size=10000,
 ):
     # check params
     assert sql_type in SQL_TYPES
     assert mssql_odbc_driver_version in {13, 17}, "SQL Server ODBC Driver must be either 13 or 17"
-
-    # ensure pyodbc installed
-    try:
-        import pyodbc
-    except ImportError:
-        raise ImportError("pyodbc library required.")
 
     # set up objects
     if ";" in table_name:
@@ -160,8 +204,8 @@ def read_sql(
 
     # read top 2 rows of query to get the columns
     _from_clause = table_name if sql_type in (TABLE, VIEW) else f"({table_name})"
-
     cols = pd.read_sql_query(sql=f"SELECT TOP 2 * FROM {_from_clause} as qry", con=db_conn).columns
+
     file_path = get_temp_file()
     try:
         bcp(
