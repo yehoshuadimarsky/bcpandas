@@ -92,3 +92,8 @@ conda install -c conda-forge bcpandas
 ### Python
 - pandas
 - pyodbc
+
+## Contributing
+Please, all contributions are very welcome! 
+
+I will attempt to use the `pandas` code style as detailed [here](https://pandas.pydata.org/pandas-docs/stable/development/contributing_docstring.html)
