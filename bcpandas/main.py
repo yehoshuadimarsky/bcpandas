@@ -22,13 +22,7 @@ from .constants import (
     TABLE,
     VIEW,
 )
-from .utils import (
-    _get_sql_create_statement,
-    bcp,
-    build_format_file,
-    get_temp_file,
-    sqlcmd,
-)
+from .utils import _get_sql_create_statement, bcp, build_format_file, get_temp_file, sqlcmd
 
 # TODO add logging
 logger = logging.getLogger(__name__)
@@ -41,9 +35,7 @@ class SqlCreds:
 
     def __init__(self, server, database, username=None, password=None):
         if not server or not database:
-            raise ValueError(
-                f"Server and database can't be None, you passed {server}, {database}"
-            )
+            raise ValueError(f"Server and database can't be None, you passed {server}, {database}")
         self.server = server
         self.database = database
         if username and password:
@@ -56,9 +48,7 @@ class SqlCreds:
     def __repr__(self):
         # adopted from https://github.com/erdewit/ib_insync/blob/master/ib_insync/objects.py#L51
         clsName = self.__class__.__qualname__
-        kwargs = ", ".join(
-            f"{k}={v!r}" for k, v in self.__dict__.items() if k != "password"
-        )
+        kwargs = ", ".join(f"{k}={v!r}" for k, v in self.__dict__.items() if k != "password")
         if hasattr(self, "password"):
             kwargs += ", password=[REDACTED]"
         return f"{clsName}({kwargs})"
@@ -133,7 +123,9 @@ def to_sql(
             os.remove(csv_file_path)
             os.remove(fmt_file_path)
         else:
-            print(f"DEBUG mode, not deleting the files. Path to CSV file is {csv_file_path}, format file is {fmt_file_path}")
+            print(
+                f"DEBUG mode, not deleting the files. Path to CSV file is {csv_file_path}, format file is {fmt_file_path}"
+            )
 
 
 def read_sql(
@@ -146,10 +138,7 @@ def read_sql(
 ):
     # check params
     assert sql_type in SQL_TYPES
-    assert mssql_odbc_driver_version in {
-        13,
-        17,
-    }, "SQL Server ODBC Driver must be either 13 or 17"
+    assert mssql_odbc_driver_version in {13, 17}, "SQL Server ODBC Driver must be either 13 or 17"
 
     # ensure pyodbc installed
     try:
@@ -172,9 +161,7 @@ def read_sql(
     # read top 2 rows of query to get the columns
     _from_clause = table_name if sql_type in (TABLE, VIEW) else f"({table_name})"
 
-    cols = pd.read_sql_query(
-        sql=f"SELECT TOP 2 * FROM {_from_clause} as qry", con=db_conn
-    ).columns
+    cols = pd.read_sql_query(sql=f"SELECT TOP 2 * FROM {_from_clause} as qry", con=db_conn).columns
     file_path = get_temp_file()
     try:
         bcp(
@@ -186,8 +173,6 @@ def read_sql(
             schema=schema,
             batch_size=batch_size,
         )
-        return pd.read_csv(
-            filepath_or_buffer=file_path, header=None, names=cols, index_col=False
-        )
+        return pd.read_csv(filepath_or_buffer=file_path, header=None, names=cols, index_col=False)
     finally:
         os.remove(file_path)

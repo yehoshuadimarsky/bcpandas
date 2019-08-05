@@ -11,8 +11,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yehoshuadimarsky/bcpandas",
-    packages=find_packages(exclude=["tests.*", "tests"]), 
-    python_requires='>=3.6',
+    packages=find_packages(exclude=["tests.*", "tests"]),
+    python_requires=">=3.6",
     keywords="bcp mssql pandas",
     classifiers=[
         "Topic :: Database",

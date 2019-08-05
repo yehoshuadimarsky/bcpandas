@@ -47,9 +47,7 @@ def bcp(
     direc = direction.lower()
     # validation
     if direc not in DIRECTIONS:
-        raise ValueError(
-            f"Param 'direction' must be one of {DIRECTIONS}, you passed {direc}"
-        )
+        raise ValueError(f"Param 'direction' must be one of {DIRECTIONS}, you passed {direc}")
     if direc not in combos[sql_type]:
         raise ValueError(
             f"Wrong combo of direction and SQL object, you passed {sql_type} and {direc} ."
@@ -64,7 +62,7 @@ def bcp(
     # prepare SQL item string
     if sql_type == QUERY:
         # remove newlines for queries, otherwise messes up BCP
-        sql_item_string = "".join(sql_item.splitlines()) 
+        sql_item_string = "".join(sql_item.splitlines())
     else:
         sql_item_string = f"{schema}.{sql_item}"
 
@@ -140,22 +138,24 @@ def build_format_file(df):
     -------------
     A string containing the format file
     """
-    _space = " " * 4 
+    _space = " " * 4
     format_file_str = f"9.0\n{len(df.columns)}\n"  # Version and Number of columns
     for col_num, col_name in enumerate(df.columns, start=1):
         # last col gets a newline sep
-        _delim = DELIMITER if col_num != len(df.columns) else NEWLINE  
-        _line = _space.join([
-           str(col_num),                # Host file field order
-           SQLCHAR,                     # Host file data type
-           str(0),                      # Prefix length
-           str(0),                      # Host file data length
-           f'"{_escape(_delim)}"',      # Terminator (see note below)
-           str(col_num),                # Server column order
-           col_name,                    # Server column name, optional as long as not blank
-           sql_collation,               # Column collation
-           "\n", 
-         ]) 
+        _delim = DELIMITER if col_num != len(df.columns) else NEWLINE
+        _line = _space.join(
+            [
+                str(col_num),  # Host file field order
+                SQLCHAR,  # Host file data type
+                str(0),  # Prefix length
+                str(0),  # Host file data length
+                f'"{_escape(_delim)}"',  # Terminator (see note below)
+                str(col_num),  # Server column order
+                col_name,  # Server column name, optional as long as not blank
+                sql_collation,  # Column collation
+                "\n",
+            ]
+        )
         format_file_str += _line
     # FYI very important to surround the Terminator with quotes, otherwise BCP fails with:
     # "Unexpected EOF encountered in BCP data-file". Hugely frustrating bug.
@@ -214,13 +214,9 @@ def sqlcmd(server, database, command, username=None, password=None):
         auth = ["-U", username, "-P", password]
     command = "set nocount on;" + command
     sqlcmd_command = (
-        ["sqlcmd", "-S", server, "-d", database, "-b"]
-        + auth
-        + ["-s,", "-W", "-Q", command]
+        ["sqlcmd", "-S", server, "-d", database, "-b"] + auth + ["-s,", "-W", "-Q", command]
     )
-    result = subprocess.run(
-        sqlcmd_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    result = subprocess.run(sqlcmd_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.returncode:
         msg = parse_subprocess_error(result)
         raise Exception(f"Sqlcmd command failed. Details:\n{msg}")
@@ -238,23 +234,9 @@ def sqlcmd(server, database, command, username=None, password=None):
     return result
 
 
-
-
 def parse_subprocess_error(result):
     msg = {}
-    for item in ['args', 'returncode', 'stdout', 'stderr']:
+    for item in ["args", "returncode", "stdout", "stderr"]:
         _i = getattr(result, item)
-        msg[item] =_i.decode() if isinstance(_i, bytes) else _i
+        msg[item] = _i.decode() if isinstance(_i, bytes) else _i
     return msg
-    
-        
-
-
-
-
-
-
-
-
-
-
