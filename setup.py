@@ -7,7 +7,7 @@ setup(
     name="bcpandas",
     version="0.1",
     author="Josh Dimarsky",
-    description="Microsoft SQL Server bcp (Bulk Copy) wrapper for pandas",
+    description="High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yehoshuadimarsky/bcpandas",
