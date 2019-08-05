@@ -5,7 +5,10 @@
     - ~~`__init__.py`~~
     - ~~`setup.py`~~
 - ~~Fix up `setup.py`~~
+- Upload to PyPI
 - Add conda recipe `meta.yaml` file
+- Upload to conda-forge
+- Set up CI/CD
 - Write tests
 - Find way to automate creation of temp SQL Server db for testing
 
