@@ -90,8 +90,8 @@ conda install -c conda-forge bcpandas
     - [Windows](https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility)
 
 ### Python
+- python >= 3.6
 - pandas
-- pyodbc
 
 ## Contributing
 Please, all contributions are very welcome! 

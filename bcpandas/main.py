@@ -147,11 +147,8 @@ def to_sql(
         elif if_exists == "replace":
             # TODO fix
             sqlcmd(
+                creds=creds,
                 command=_get_sql_create_statement(df=df, table_name=table_name, schema=schema),
-                server=creds.server,
-                database=creds.database,
-                username=creds.username,
-                password=creds.password,
             )
         elif if_exists == "append":
             pass  # don't need to do anything
@@ -196,15 +193,15 @@ def read_sql(
             "The SQL item cannot contain the ';' character, it interferes with getting the column names"
         )
 
-    # TODO not sure how to support Kerberos here
-    db_conn = pyodbc.connect(
-        f"DRIVER={{ODBC Driver {mssql_odbc_driver_version} for SQL Server}};SERVER={creds.server};"
-        f"DATABASE={creds.database};UID={creds.username};PWD={creds.password}"
-    )
-
     # read top 2 rows of query to get the columns
     _from_clause = table_name if sql_type in (TABLE, VIEW) else f"({table_name})"
-    cols = pd.read_sql_query(sql=f"SELECT TOP 2 * FROM {_from_clause} as qry", con=db_conn).columns
+    _existing_data = sqlcmd(creds=creds, command=f"SELECT TOP 2 * FROM {_from_clause} as qry")
+    if _existing_data is not None:
+        cols = _existing_data.columns
+    else:
+        raise ValueError(
+            f"No data returned from the SQL item named {table_name} with type of {sql_type}"
+        )
 
     file_path = get_temp_file()
     try:

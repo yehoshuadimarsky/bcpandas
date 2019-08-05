@@ -93,7 +93,6 @@ def bcp(
     # execute
     # TODO better logging and error handling the return stream
     bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
-
     logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log}")
     result = subprocess.run(
         bcp_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8"
@@ -103,6 +102,65 @@ def bcp(
         logger.error(result.stdout)
         msg = parse_subprocess_error(result)
         raise Exception(f"Bcp command failed. Details:\n{msg}")
+
+
+def sqlcmd(creds, command):
+    """
+    Runs the input command against the database and returns the output if it is a table.
+    
+    Parameters
+    ----------
+    creds : bcpandas.SqlCreds
+        Creds for the database
+    command : str
+        SQL command to be executed against the server
+    
+    Returns
+    --------------------
+    Pandas.DataFrame or None
+        Returns a table if the command has an output. Returns None if the output does not return anything.
+    """
+    if creds.with_krb_auth:
+        auth = ["-E"]
+    else:
+        auth = ["-U", creds.username, "-P", creds.password]
+    if '"' in command:
+        raise ValueError(
+            'Cannot have double quotes charachter (") in the command, '
+            "raises problems when combining the sqlcmd utility with Python"
+        )
+    command = f"set nocount on; {command} "
+    sqlcmd_command = (
+        ["sqlcmd", "-S", creds.server, "-d", creds.database, "-b"]
+        + auth
+        + ["-s,", "-W", "-Q", command]
+    )
+
+    # execute
+    # TODO better logging and error handling the return stream
+    sqlcmd_command_log = [c if c != creds.password else "[REDACTED]" for c in sqlcmd_command]
+    logger.info(f"Executing SqlCmd command now... \nSqlCmd command is: {sqlcmd_command_log}")
+    result = subprocess.run(
+        sqlcmd_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8"
+    )
+    logger.debug(result.stdout)
+    if result.returncode:
+        logger.error(result.stdout)
+        msg = parse_subprocess_error(result)
+        raise Exception(f"SqlCmd command failed. Details:\n{msg}")
+
+    output = StringIO(result.stdout)
+    first_line_output = output.readline().strip()
+    if first_line_output == "":
+        header = None
+    else:
+        header = "infer"
+    output.seek(0)
+    try:
+        result = pd.read_csv(filepath_or_buffer=output, skiprows=[1], header=header)
+    except pd.errors.EmptyDataError:
+        result = None
+    return result
 
 
 def get_temp_file():
@@ -191,55 +249,6 @@ def _get_sql_create_statement(df, table_name, schema="dbo"):
         f"create table [dbo].[{table_name}] ({sql_cols});"
     )
     return sql_command
-
-
-def sqlcmd(server, database, command, username=None, password=None):
-    """
-    Runs the input command against the database and returns the output if it is a table.
-    Leave username and password to None if you intend to use Kerberos integrated authentication.
-    
-    Parameters
-    -------------------    
-        server : str
-            SQL Server
-        database : str
-            Name of the default database for the script
-        command : str
-            SQL command to be executed against the server
-        username : str
-            Username to use for login
-        password : str
-            Password to use for login
-
-    Returns
-    --------------------
-    Pandas.DataFrame 
-        Returns a table if the command has an output. Returns None if the output does not return anything.
-    """
-    if not username or not password:
-        auth = ["-E"]
-    else:
-        auth = ["-U", username, "-P", password]
-    command = "set nocount on;" + command
-    sqlcmd_command = (
-        ["sqlcmd", "-S", server, "-d", database, "-b"] + auth + ["-s,", "-W", "-Q", command]
-    )
-    result = subprocess.run(sqlcmd_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if result.returncode:
-        msg = parse_subprocess_error(result)
-        raise Exception(f"Sqlcmd command failed. Details:\n{msg}")
-    output = StringIO(result.stdout.decode("ascii"))
-    first_line_output = output.readline().strip()
-    if first_line_output == "":
-        header = None
-    else:
-        header = "infer"
-    output.seek(0)
-    try:
-        result = pd.read_csv(filepath_or_buffer=output, skiprows=[1], header=header)
-    except pd.errors.EmptyDataError:
-        result = None
-    return result
 
 
 def parse_subprocess_error(result):
