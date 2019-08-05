@@ -1,5 +1,7 @@
 # bcpandas
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!
 
 :warning: :construction: This library is still under active development, should be considered in "alpha". Use at your own risk. :construction: :warning:
