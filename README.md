@@ -64,13 +64,15 @@ Finally, the SQL Server databases supported are both the on-prem and Azure versi
 #TODO
 
 ## How Can I Install It?
-You can download and install this package from PyPI
+Coming soon 
+
+~~You can download and install this package from PyPI~~
 
 ```
 pip install bcpandas
 ```
 
-or from conda
+~~or from conda~~
 ```
 conda install -c conda-forge bcpandas
 ```
