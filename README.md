@@ -1,5 +1,7 @@
 # bcpandas
 
+Easy wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!
+
 :warning: :construction: This library is still under active development, should be considered in "alpha". Use at your own risk. :construction: :warning:
 
 (That said, the source code is very small and easy to understand, so you should feel comfortable pretty quickly)
@@ -8,7 +10,7 @@
 ### Overview
 Reading and writing data from pandas DataFrames to/from a SQL database is very slow using the built-in `read_sql` and `to_sql` methods, even with the newly introduced `execute_many` option. For Microsoft SQL Server, a far far faster method is to use the BCP utility provided by Microsoft. This utility is a command line tool that transfers data to/from the database and flat text files.
 
-This package is a wrapper for seamlessly using the bcp utility from Python using a pandas DataFrame. Despite the IO hits, the fastest option by far is saving the data to a CSV file in the file system and using the bcp utility to transfer the CSV file to SQL Server.
+This package is a wrapper for seamlessly using the bcp utility from Python using a pandas DataFrame. Despite the IO hits, the fastest option by far is saving the data to a CSV file in the file system and using the bcp utility to transfer the CSV file to SQL Server. **Best of all, you don't need to know anything about using BCP at all!**
 
 ### Existing Solutions
 
