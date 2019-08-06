@@ -10,7 +10,6 @@ import logging
 import os
 
 import pandas as pd
-import pyodbc
 
 from .constants import (
     DELIMITER,
@@ -25,7 +24,6 @@ from .constants import (
 )
 from .utils import _get_sql_create_statement, bcp, build_format_file, get_temp_file, sqlcmd
 
-# TODO add logging
 logger = logging.getLogger(__name__)
 
 
@@ -93,7 +91,7 @@ def to_sql(
     ----------
     df : pandas.DataFrame
     table_name : str
-        Name of SQL table or view.
+        Name of SQL table or view, without the schema
     creds : bcpandas.SqlCreds
         The credentials used in the SQL database.
     sql_type : {'table', 'view'}, default 'table'
@@ -142,10 +140,20 @@ def to_sql(
 
     try:
         if if_exists == "fail":
-            # TODO check if db table/view exists, raise ValueError if exists
-            raise NotImplementedError()
+            _qry = """SELECT * 
+                 FROM INFORMATION_SCHEMA.{_typ}S 
+                 WHERE TABLE_SCHEMA = {_schema} 
+                 AND TABLE_NAME = {_tbl}"""
+            res = sqlcmd(
+                creds=creds,
+                command=_qry.format(_typ=sql_type.upper(), _schema=schema, _tbl=table_name),
+            )
+            if res is not None:
+                raise ValueError(
+                    f"The {sql_type} called {schema}.{table_name} already exists, "
+                    f"`if_exists` param was set to `fail`."
+                )
         elif if_exists == "replace":
-            # TODO fix
             sqlcmd(
                 creds=creds,
                 command=_get_sql_create_statement(df=df, table_name=table_name, schema=schema),
@@ -171,7 +179,8 @@ def to_sql(
             os.remove(fmt_file_path)
         else:
             logger.debug(
-                f"`to_sql` DEBUG mode, not deleting the files. CSV file is at {csv_file_path}, format file is at {fmt_file_path}"
+                f"`to_sql` DEBUG mode, not deleting the files. CSV file is at "
+                f"{csv_file_path}, format file is at {fmt_file_path}"
             )
 
 
@@ -181,8 +190,40 @@ def read_sql(
     sql_type="table",
     schema="dbo",
     mssql_odbc_driver_version=17,
-    batch_size=10000,
+    batch_size=None,
+    debug=False
 ):
+    """
+    Reads a SQL table, view, or query into a pandas DataFrame.
+
+    Parameters
+    ----------
+    table_name : str
+        Name of SQL table or view, without the schema, or a query string
+    creds : bcpandas.SqlCreds
+        The credentials used in the SQL database.
+    sql_type : {'table', 'view', 'query'}, default 'table'
+        The type of SQL object that the parameter `table_name` is.
+    schema : str, default 'dbo'
+        The SQL schema of the table or view. If a query, will be ignored.
+    mssql_odbc_driver_version : int, default 17
+        The installed version of the Microsoft ODBC Driver.
+    batch_size : int, optional
+        Rows will be read in batches of this size at a time. By default,
+        all rows will be read at once.
+    debug : bool, default False
+        If True, will not delete the temporary CSV file, and will output its location.
+
+    Returns
+    -------
+    `pandas.DataFrame`
+
+    Notes
+    -----
+    Will actually read the SQL table/view/query twice - first using the sqlcmd utility 
+    to get the names of the columns (will only read first few rows), then all the rows 
+    using BCP.
+    """
     # check params
     assert sql_type in SQL_TYPES
     assert mssql_odbc_driver_version in {13, 17}, "SQL Server ODBC Driver must be either 13 or 17"
@@ -194,10 +235,12 @@ def read_sql(
         )
 
     # read top 2 rows of query to get the columns
+    logger.debug("Starting to read first 2 rows using sqlcmd, to get the column names")
     _from_clause = table_name if sql_type in (TABLE, VIEW) else f"({table_name})"
     _existing_data = sqlcmd(creds=creds, command=f"SELECT TOP 2 * FROM {_from_clause} as qry")
     if _existing_data is not None:
         cols = _existing_data.columns
+        logger.debug("Successfully read the column names using sqlcmd")
     else:
         raise ValueError(
             f"No data returned from the SQL item named {table_name} with type of {sql_type}"
@@ -214,6 +257,13 @@ def read_sql(
             schema=schema,
             batch_size=batch_size,
         )
+        logger.debug(f"Saved dataframe to temp CSV file at {file_path}")
         return pd.read_csv(filepath_or_buffer=file_path, header=None, names=cols, index_col=False)
     finally:
-        os.remove(file_path)
+        if not debug:
+            logger.debug(f"Deleting temp CSV file")
+            os.remove(file_path)
+        else:
+            logger.debug(
+                f"`read_sql` DEBUG mode, not deleting the file. CSV file is at {file_path}."
+            )

@@ -28,18 +28,17 @@ from .constants import (
     sql_collation,
 )
 
-# TODO add logging
 logger = logging.getLogger(__name__)
 
 
 def bcp(
-    sql_item: str,
-    direction: str,
-    flat_file: str,
+    sql_item,
+    direction,
+    flat_file,
     creds,
-    sql_type: str = "table",
-    schema: str = "dbo",
-    format_file_path: str = None,
+    sql_type="table",
+    schema="dbo",
+    format_file_path=None,
     batch_size=None,
 ):
 
