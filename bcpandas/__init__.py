@@ -12,8 +12,8 @@ __version__ = "0.1.0"
 cmds = [['bcp','-v'], ['sqlcmd','-?']]
 for cmd in cmds:
     try:
-        res = subprocess.run(cmd)
+        subprocess.run(cmd)
     except FileNotFoundError:
         warnings.warn(f"{cmd[0].upper()} utility not installed or not found in PATH, bcpandas will not work!")
 
-del subprocess, warnings, cmd, res
+del subprocess, warnings, cmd
