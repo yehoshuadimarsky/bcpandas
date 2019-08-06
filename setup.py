@@ -16,9 +16,14 @@ setup(
     keywords="bcp mssql pandas",
     classifiers=[
         "Topic :: Database",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: SQL",
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Financial and Insurance Industry",
         "License :: OSI Approved :: MIT License",
-        # "Operating System :: OS Independent",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: SQL",
     ],
 )
