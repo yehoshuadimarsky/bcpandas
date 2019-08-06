@@ -8,6 +8,67 @@ High-level wrapper around BCP for high performance data transfers between pandas
 
 (That said, the source code is very small and easy to understand, so you should feel comfortable pretty quickly)
 
+## Quickstart
+
+```python
+In [1]: import pandas as pd
+   ...: import numpy as np
+   ...: 
+   ...: from bcpandas import SqlCreds, to_sql, read_sql
+
+In [2]: creds = SqlCreds(
+   ...:     'my_server',
+   ...:     'my_db',
+   ...:     'my_username',
+   ...:     'my_password'
+   ...: )
+
+In [3]: df = pd.DataFrame(
+   ...:         data=np.ndarray(shape=(10, 6), dtype=int), 
+   ...:         columns=[f"col_{x}" for x in range(6)]
+   ...:     )
+
+In [4]: df
+Out[4]: 
+     col_0    col_1    col_2    col_3    col_4    col_5
+0  4128860  6029375  3801155  5570652  6619251  7536754
+1  4849756  7536751  4456552  7143529  7471201  7012467
+2  6029433  6881357  6881390  7274595  6553710  3342433
+3  6619228  7733358  6029427  6488162  6357104  6553710
+4  7536737  7077980  6422633  7536732  7602281  2949221
+5  6357104  7012451  6750305  7536741  7340124  7274610
+6  7340141  6226036  7274612  7077999  6881387  6029428
+7  6619243  6226041  6881378  6553710  7209065  6029415
+8  6881378  6553710  7209065  7536743  7274588  6619248
+9  6226030  7209065  6619231  6881380  7274612  3014770
+
+In [5]: to_sql(df, 'my_test_table', creds, index=False, if_exists='replace')
+
+In [6]: df2 = read_sql('my_test_table', creds)
+
+In [7]: df2
+Out[7]: 
+     col_0    col_1    col_2    col_3    col_4    col_5
+0  4128860  6029375  3801155  5570652  6619251  7536754
+1  4849756  7536751  4456552  7143529  7471201  7012467
+2  6029433  6881357  6881390  7274595  6553710  3342433
+3  6619228  7733358  6029427  6488162  6357104  6553710
+4  7536737  7077980  6422633  7536732  7602281  2949221
+5  6357104  7012451  6750305  7536741  7340124  7274610
+6  7340141  6226036  7274612  7077999  6881387  6029428
+7  6619243  6226041  6881378  6553710  7209065  6029415
+8  6881378  6553710  7209065  7536743  7274588  6619248
+9  6226030  7209065  6619231  6881380  7274612  3014770
+```
+
+## Requirements
+- BCP Utility
+    - [Windows](https://docs.microsoft.com/en-us/sql/tools/bcp-utility)
+- SqlCmd Utility
+    - [Windows](https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility)
+- python >= 3.6
+- pandas
+
 ## Motivations and Design
 ### Overview
 Reading and writing data from pandas DataFrames to/from a SQL database is very slow using the built-in `read_sql` and `to_sql` methods, even with the newly introduced `execute_many` option. For Microsoft SQL Server, a far far faster method is to use the BCP utility provided by Microsoft. This utility is a command line tool that transfers data to/from the database and flat text files.
@@ -62,36 +123,20 @@ Currently, this is being built with only Windows in mind. Linux support is defin
 
 Finally, the SQL Server databases supported are both the on-prem and Azure versions.
 
-## Benchmarks/Comparisons
-#TODO
+## Benchmarks
+_# TODO_
 
-## How Can I Install It?
-Coming soon 
-
-~~You can download and install this package from PyPI~~
+## Installation
+You can download and install this package from PyPI
 
 ```
 pip install bcpandas
 ```
 
-~~or from conda~~
+~~or from conda~~ __coming soon__
 ```
 conda install -c conda-forge bcpandas
 ```
-
-## Examples
-#TODO
-
-## Requirements
-### General
-- The BCP Utility
-    - [Windows](https://docs.microsoft.com/en-us/sql/tools/bcp-utility)
-- SqlCmd Utility
-    - [Windows](https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility)
-
-### Python
-- python >= 3.6
-- pandas
 
 ## Contributing
 Please, all contributions are very welcome! 
