@@ -1,0 +1,50 @@
+{% set name = "hahaha" %}
+{% set version = "0.1.3" %}
+{% set creator = "yehoshuadimarsky" %}
+{% set sha256val = "f451bb7cc0b35f8266d3f09f73005271897313293b94132f003236e796d6ac9b" %}
+{% set dependencies = ["python >=3.6","pandas >=0.22"] %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/creator/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: {{ sha256val }}
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+    - setuptools
+  
+  run:
+  {% for dep in dependencies %}
+    - {{ dep }}
+  {% endfor %}
+  
+test:
+  imports:
+    - bcpandas
+
+about:
+  home: https://pypi.org/project/{{ name }}
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Wrapper around BCP to transfer data between pandas and SQL Server.
+  description: |
+    High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. 
+    No knowledge of BCP required!!
+  doc_url: https://github.com/{{ creator }}/{{ name }}
+  dev_url: https://github.com/{{ creator }}/{{ name }}
+
+extra:
+  recipe-maintainers:
+    - yehoshuadimarsky
