@@ -136,7 +136,7 @@ You can download and install this package from PyPI
 pip install bcpandas
 ```
 
-~~or from conda~~ __coming soon__
+or from conda
 ```
 conda install -c conda-forge bcpandas
 ```
@@ -144,4 +144,4 @@ conda install -c conda-forge bcpandas
 ## Contributing
 Please, all contributions are very welcome! 
 
-I will attempt to use the `pandas` code style as detailed [here](https://pandas.pydata.org/pandas-docs/stable/development/contributing_docstring.html)
+I will attempt to use the `pandas` code style as detailed [here](https://pandas.pydata.org/pandas-docs/stable/development/contributing_docstring.html).
