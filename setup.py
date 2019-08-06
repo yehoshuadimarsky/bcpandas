@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="bcpandas",
-    version="0.1",
+    version="0.1.0",
     author="Josh Dimarsky",
     description="High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!",
     long_description=long_description,

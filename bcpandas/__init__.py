@@ -5,7 +5,7 @@ import subprocess
 import warnings
 
 name = "bcpandas"
-__version__ = "0.1"
+__version__ = "0.1.0"
 
 
 # BCP check
