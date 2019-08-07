@@ -19,7 +19,12 @@ from bcpandas.utils import _get_sql_create_statement
 def sql_creds():
     with open("../creds.json") as jf:
         _creds = json.load(jf)
-    creds = SqlCreds(**_creds)
+    creds = SqlCreds(
+        server=_creds["server"],
+        database=_creds["database"],
+        username=_creds["username"],
+        password=_creds["password"],
+    )
     return creds
 
 
@@ -99,12 +104,6 @@ def test_readsql_basic(sql_creds):
     stmt = stmt[:-2] + ";"  # replace last \n and comma with semicolon
     sqlcmd(creds=sql_creds, command=stmt)
 
-    expected = read_sql(
-        "lotr_readsql",
-        creds=sql_creds,
-        sql_type="table",
-        schema="dbo",
-        mssql_odbc_driver_version=17,
-    )
+    expected = read_sql("lotr_readsql", creds=sql_creds, sql_type="table", schema="dbo")
 
     assert_frame_equal(df, expected)
