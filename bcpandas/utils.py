@@ -86,7 +86,7 @@ def bcp(
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
             "-c",  # marking as character data, not Unicode (maybe make as param?)
-            "-t,",  # marking the delimiter as a comma (maybe also make as param?)
+            f"-t{DELIMITER}",  # marking the delimiter as a comma (maybe also make as param?)
         ]
 
     # execute

@@ -72,6 +72,21 @@ Out[7]:
 - python >= 3.6
 - pandas
 
+## Benchmarks
+_# TODO_
+
+## Installation
+You can download and install this package from PyPI
+
+```
+pip install bcpandas
+```
+
+or from conda
+```
+conda install -c conda-forge bcpandas
+```
+
 ## Motivations and Design
 ### Overview
 Reading and writing data from pandas DataFrames to/from a SQL database is very slow using the built-in `read_sql` and `to_sql` methods, even with the newly introduced `execute_many` option. For Microsoft SQL Server, a far far faster method is to use the BCP utility provided by Microsoft. This utility is a command line tool that transfers data to/from the database and flat text files.
@@ -125,21 +140,6 @@ For now, we are using the non-XML BCP format file type. In the future, XML forma
 Currently, this is being built with only Windows in mind. Linux support is definitely easily added, it's just not in the immediate scope of the project yet. PRs are welcome.
 
 Finally, the SQL Server databases supported are both the on-prem and Azure versions.
-
-## Benchmarks
-_# TODO_
-
-## Installation
-You can download and install this package from PyPI
-
-```
-pip install bcpandas
-```
-
-or from conda
-```
-conda install -c conda-forge bcpandas
-```
 
 ## Contributing
 Please, all contributions are very welcome! 
