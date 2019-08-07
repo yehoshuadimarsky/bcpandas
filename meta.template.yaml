@@ -1,16 +1,9 @@
-{% set name = "hahaha" %}
-{% set version = "0.1.3" %}
-{% set creator = "yehoshuadimarsky" %}
-{% set sha256val = "f451bb7cc0b35f8266d3f09f73005271897313293b94132f003236e796d6ac9b" %}
-{% set dependencies = ["python >=3.6","pandas >=0.22"] %}
-
-
 package:
   name: {{ name|lower }}
-  version: {{ version }}
+  version: "{{ version }}"
 
 source:
-  url: https://github.com/creator/{{ name }}/archive/{{ version }}.tar.gz
+  url: https://github.com/{{ creator }}/{{ name }}/archive/{{ version }}.tar.gz
   sha256: {{ sha256val }}
 
 build:
@@ -24,10 +17,8 @@ requirements:
     - pip
     - setuptools
   
-  run:
-  {% for dep in dependencies %}
-    - {{ dep }}
-  {% endfor %}
+  run: {% for dep in dependencies %}
+    - {{ dep }} {% endfor %}
   
 test:
   imports:
@@ -47,4 +38,5 @@ about:
 
 extra:
   recipe-maintainers:
-    - yehoshuadimarsky
+    - {{ creator }}
+

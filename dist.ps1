@@ -11,13 +11,13 @@ $condaEnv = "dist-env"
 
 # Setup conda
 conda create -n $condaEnv python -y
-conda install -n $condaEnv -c conda-forge pygithub twine -y
+conda install -n $condaEnv -c conda-forge pygithub twine click jinja2 -y
 # get path to env python
 $envpath = ((conda info -e) -match $condaEnv ).Split(" ")[-1]
 
 
 # deploy to GitHub
-Start-Process "$envpath\python.exe" -ArgumentList ".\dist.py" -NoNewWindow -Wait 
+Start-Process "$envpath\python.exe" -ArgumentList ".\dist.py github-release" -NoNewWindow -Wait 
 
 
 # PyPI
@@ -37,9 +37,15 @@ if (!(Test-Path $dest)) {
 } else {
     Write-Host "$($config.name) downloaded successfully to $dest" -ForegroundColor Green
 }
-
 $hash = (certutil -hashfile $dest sha256 )[1]  # returns 3 rows, 2nd is hash
 
+# render meta.yaml
+Start-Process "$envpath\python.exe" -ArgumentList ".\dist.py render-conda --sha256 $hash" -NoNewWindow -Wait 
+
+
+# TODO upload meta.yaml to conda-forge feedstock, create PR
+
+# cleanup
 Remove-Item -Path $dest 
-
-
+conda remove -n $condaEnv --all -y
+Remove-Item -Path $envpath -Recurse
