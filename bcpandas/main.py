@@ -17,10 +17,12 @@ from .constants import (
     IN,
     NEWLINE,
     OUT,
+    QUERYOUT,
     QUOTECHAR,
     SQL_TYPES,
     TABLE,
     VIEW,
+    QUERY,
 )
 from .utils import _get_sql_create_statement, bcp, build_format_file, get_temp_file, sqlcmd
 
@@ -57,6 +59,41 @@ class SqlCreds:
         else:
             self.with_krb_auth = True
         logger.info(f"Created creds:\t{self}")
+
+    @classmethod
+    def from_quantity(cls, engine):
+        """
+        Alternate constructor from a `sqlalchemy.engine.base.Engine` object.
+
+        Alternate constructor, from a `sqlalchemy.engine.base.Engine` that uses `pyodbc` as the DBAPI 
+        (which is the SQLAlchemy default for MS SQL) and using an exact PyODBC connection string (not DSN or hostname).
+        See https://docs.sqlalchemy.org/en/13/dialects/mssql.html#connecting-to-pyodbc for more.
+        
+        Parameters
+        ----------
+        engine : `sqlalchemy.engine.base.Engine`
+            The SQLAlchemy engine object, configured as described above
+
+        Returns
+        -------
+        `bcpandas.SqlCreds`
+        """
+        try:
+            # get the odbc url part from the engine, split by ';' delimiter
+            conn_url = engine.url.query["odbc_connect"].split(";")
+            # convert into dict
+            conn_dict = {x.split("=")[0]: x.split("=")[1] for x in conn_url if "=" in x}
+
+            return cls(
+                server=conn_dict["Server"].replace("tcp:", "").replace(",1433", ""),
+                database=conn_dict["Database"],
+                username=conn_dict["UID"],
+                password=conn_dict["PWD"],
+            )
+        except (KeyError, AttributeError):
+            raise ValueError(
+                "The supplied 'engine' object could not be parsed correctly, try creating a SqlCreds object manually."
+            )
 
     def __repr__(self):
         # adopted from https://github.com/erdewit/ib_insync/blob/master/ib_insync/objects.py#L51
@@ -184,15 +221,7 @@ def to_sql(
             )
 
 
-def read_sql(
-    table_name,
-    creds,
-    sql_type="table",
-    schema="dbo",
-    mssql_odbc_driver_version=17,
-    batch_size=None,
-    debug=False,
-):
+def read_sql(table_name, creds, sql_type="table", schema="dbo", batch_size=None, debug=False):
     """
     Reads a SQL table, view, or query into a pandas DataFrame.
 
@@ -206,8 +235,6 @@ def read_sql(
         The type of SQL object that the parameter `table_name` is.
     schema : str, default 'dbo'
         The SQL schema of the table or view. If a query, will be ignored.
-    mssql_odbc_driver_version : int, default 17
-        The installed version of the Microsoft ODBC Driver.
     batch_size : int, optional
         Rows will be read in batches of this size at a time. By default,
         all rows will be read at once.
@@ -226,7 +253,6 @@ def read_sql(
     """
     # check params
     assert sql_type in SQL_TYPES
-    assert mssql_odbc_driver_version in {13, 17}, "SQL Server ODBC Driver must be either 13 or 17"
 
     # set up objects
     if ";" in table_name:
@@ -250,7 +276,7 @@ def read_sql(
     try:
         bcp(
             sql_item=table_name,
-            direction=OUT,
+            direction=QUERYOUT if sql_type == QUERY else OUT,
             flat_file=file_path,
             creds=creds,
             sql_type=sql_type,
@@ -258,7 +284,9 @@ def read_sql(
             batch_size=batch_size,
         )
         logger.debug(f"Saved dataframe to temp CSV file at {file_path}")
-        return pd.read_csv(filepath_or_buffer=file_path, header=None, names=cols, index_col=False)
+        return pd.read_csv(
+            filepath_or_buffer=file_path, sep=DELIMITER, header=None, names=cols, index_col=False
+        )
     finally:
         if not debug:
             logger.debug(f"Deleting temp CSV file")
