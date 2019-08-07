@@ -17,8 +17,7 @@ setup(
     long_description_content_type="text/markdown",
     url=f"https://github.com/{config['GH_user']}/{config['name']}",
     packages=find_packages(exclude=["tests.*", "tests"]),
-    python_requires=[x for x in config["dependencies"] if x.startswith("python ")],
-    install_requires=[x for x in config["dependencies"] if not x.startswith("python ")],
+    install_requires=config["dependencies"],
     keywords="bcp mssql pandas",
     classifiers=[
         "Topic :: Database",

@@ -1,4 +1,6 @@
 
+$ErrorActionPreference = 'Stop';
+
 # get configs and auth
 Write-Host "Getting Configs..."
 $config = Get-Content -Raw -Path "./dist.json" | ConvertFrom-Json
