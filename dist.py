@@ -46,26 +46,27 @@ def github_release():
 
 
 @cli.command()
-@click.option('--sha256', required=True, type=str)
+@click.option("--sha256", required=True, type=str)
 def render_conda(sha256):
-    print('jinja rendering conda template file called meta.template.yaml ...')
+    print("jinja rendering conda template file called meta.template.yaml ...")
     with open("./dist.json", "r") as file:
         config = json.load(file)
-        
-    env = Environment(loader=FileSystemLoader('.'))
-    t = env.get_template('meta.template.yaml')
+
+    env = Environment(loader=FileSystemLoader("."))
+    t = env.get_template("meta.template.yaml")
 
     rendered = t.render(
-        name=config['name'],
-        version=config['version'],
+        name=config["name"],
+        version=config["version"],
         sha256val=sha256,
-        creator=config['GH_user'],
-        dependencies=config['dependencies'],
-        PYTHON="{{ PYTHON }}"
+        creator=config["GH_user"],
+        dependencies=config["dependencies"],
+        PYTHON="{{ PYTHON }}",
     )
-    with open('./meta.yaml','wt') as yaml_file:
+    with open("./meta.yaml", "wt") as yaml_file:
         yaml_file.write(rendered)
-    print('all done - file rendered and saved as meta.yaml')
+    print("all done - file rendered and saved as meta.yaml")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     cli()

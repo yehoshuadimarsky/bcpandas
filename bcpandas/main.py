@@ -191,7 +191,7 @@ def read_sql(
     schema="dbo",
     mssql_odbc_driver_version=17,
     batch_size=None,
-    debug=False
+    debug=False,
 ):
     """
     Reads a SQL table, view, or query into a pandas DataFrame.
