@@ -1,9 +1,9 @@
 {
     "GH_user": "yehoshuadimarsky",
     "name": "bcpandas",
-    "version": "0.1.4",
-    "GH_release_name": "v0.1.4 Release",
-    "GH_release_message": "Working to automate releases to GitHub, PyPI, and Conda-Forge.\n Fixed bug in `read_sql` that didn't set QUERYOUT when reading from a query.\n Added constructor to SqlCreds to create from SQLAlchemy.",
+    "version": "0.1.5",
+    "GH_release_name": "v0.1.5 Release",
+    "GH_release_message": "`setup.py` bug fix",
     "short_description": "High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!",
     "author": "Josh Dimarsky",
     "dependencies": [
