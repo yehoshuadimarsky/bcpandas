@@ -64,7 +64,6 @@ def test_tosql_basic(sql_creds, if_exists):
     )
 
 
-@pytest.mark.skip("too big")
 def test_big(sql_creds):
     df = pd.DataFrame(
         data=np.ndarray(shape=(100000, 6), dtype=float), columns=[f"col_{x}" for x in range(6)]

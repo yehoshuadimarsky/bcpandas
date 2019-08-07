@@ -18,7 +18,8 @@ def cli():
 
 
 @cli.command()
-def github_release():
+@click.option("--draft", is_flag=True)
+def github_release(draft):
     print("getting auth and config")
     with open("./creds.json") as file:
         auth = json.load(file)
@@ -38,7 +39,7 @@ def github_release():
         tag=config["version"],
         name=config["GH_release_name"],
         message=config["GH_release_message"],
-        draft=False,
+        draft=draft,
         prerelease=False,
         target_commitish=master_branch,
     )
@@ -60,6 +61,7 @@ def render_conda(sha256):
         version=config["version"],
         sha256val=sha256,
         creator=config["GH_user"],
+        python_version=config["python_version"],
         dependencies=config["dependencies"],
         PYTHON="{{ PYTHON }}",
     )

@@ -13,11 +13,12 @@ build:
 
 requirements:
   host:
-    - python >=3.6
+    - python{{ python_version }}
     - pip
     - setuptools
   
-  run: {% for dep in dependencies %}
+  run: 
+    - python{{ python_version }} {% for dep in dependencies %}
     - {{ dep }} {% endfor %}
   
 test:

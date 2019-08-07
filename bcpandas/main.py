@@ -61,7 +61,7 @@ class SqlCreds:
         logger.info(f"Created creds:\t{self}")
 
     @classmethod
-    def from_quantity(cls, engine):
+    def from_engine(cls, engine):
         """
         Alternate constructor from a `sqlalchemy.engine.base.Engine` object.
 

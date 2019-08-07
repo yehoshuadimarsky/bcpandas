@@ -1,13 +1,13 @@
 {
     "GH_user": "yehoshuadimarsky",
     "name": "bcpandas",
-    "version": "0.1.5",
-    "GH_release_name": "v0.1.5 Release",
-    "GH_release_message": "`setup.py` bug fix",
+    "version": "0.1.6",
+    "GH_release_name": "v0.1.6 Release",
+    "GH_release_message": "Renamed SqlCreds method `from_quantity` to `from_engine`, deployment automation",
     "short_description": "High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!",
     "author": "Josh Dimarsky",
+    "python_version": ">=3.6",
     "dependencies": [
-        "python>=3.6",
         "pandas>=0.22"
     ]
 }

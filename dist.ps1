@@ -17,11 +17,6 @@ conda install -n $condaEnv -c conda-forge pygithub twine click jinja2 -y
 # get path to env python
 $envpath = ((conda info -e) -match $condaEnv ).Split(" ")[-1]
 
-
-# deploy to GitHub
-Start-Process "$envpath\python.exe" -ArgumentList ".\dist.py github-release" -NoNewWindow -Wait 
-
-
 # PyPI
 if (Test-Path "./dist") { Remove-Item "./dist" -Recurse; }
 python .\setup.py sdist bdist_wheel
@@ -29,6 +24,9 @@ python .\setup.py sdist bdist_wheel
 # add --repository-url https://test.pypi.org/legacy/  if to test.pypi.org
 Start-Process "$envpath\python.exe" -ArgumentList "-m twine upload --verbose -u $($auth.pypi_username) -p $($auth.pypi_password) dist/*" -NoNewWindow -Wait 
 
+
+# deploy to GitHub
+Start-Process "$envpath\python.exe" -ArgumentList ".\dist.py github-release" -NoNewWindow -Wait 
 
 # conda
 # get sha256 of GitHub tar.gz
