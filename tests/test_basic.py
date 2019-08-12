@@ -73,7 +73,7 @@ def setup_db_tables(docker_db):
         pytest.param("the one ring", marks=pytest.mark.xfail),
     ],
 )
-def test_tosql_basic(docker_db, sql_creds, setup_db_tables, if_exists):
+def test_tosql_basic(sql_creds, setup_db_tables, if_exists):
     df = pd.DataFrame(
         {
             "col1": ["Sam, and", "Frodo", "Merry"],  # comma in first item
@@ -100,7 +100,7 @@ def test_tosql_basic(docker_db, sql_creds, setup_db_tables, if_exists):
     )
 
 
-def test_big(docker_db, sql_creds, setup_db_tables):
+def test_big(sql_creds, setup_db_tables):
     _num_cols = 10
     df = pd.DataFrame(
         data=np.random.rand(1_000_000, _num_cols), columns=[f"col_{x}" for x in range(_num_cols)]
