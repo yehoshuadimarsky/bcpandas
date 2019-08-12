@@ -100,7 +100,7 @@ def test_tosql_basic(docker_db, sql_creds, setup_db_tables, if_exists):
     )
 
 
-def test_big(sql_creds):
+def test_big(docker_db, sql_creds, setup_db_tables):
     _num_cols = 10
     df = pd.DataFrame(
         data=np.random.rand(1_000_000, _num_cols), columns=[f"col_{x}" for x in range(_num_cols)]
