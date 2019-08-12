@@ -5,27 +5,63 @@ Created on Sat Aug  3 23:36:07 2019
 @author: ydima
 """
 
-import pytest
+import subprocess
+import time
 
-import pandas as pd
-from pandas.testing import assert_frame_equal
 import numpy as np
-import json
-from bcpandas import SqlCreds, to_sql, read_sql, bcp, sqlcmd
+import pandas as pd
+import pytest
+from pandas.testing import assert_frame_equal
+
+from bcpandas import SqlCreds, bcp, read_sql, sqlcmd, to_sql
 from bcpandas.utils import _get_sql_create_statement
+
+_pwd = "MyBigSQLPassword!!!"
+_db_name = "db_bcpandas"
+
+
+@pytest.fixture(scope="session")
+def docker_db():
+    _name = "bcpandas-container"
+    cmd_start_container = [
+        "docker",
+        "run",
+        "-d",
+        "-e",
+        "ACCEPT_EULA=Y",
+        "-e",
+        f"SA_PASSWORD={_pwd}",
+        "-e",
+        "MSSQL_PID=Express",
+        "-p",
+        "1433:1433",
+        "--name",
+        _name,
+        "mcr.microsoft.com/mssql/server:2017-latest",
+    ]
+    subprocess.run(cmd_start_container)
+    time.sleep(15)  # give the container time to start
+    print("successfully started DB in docker...")
+    yield
+    print("Stopping container")
+    subprocess.run(["docker", "stop", _name])
+    print("Deleting container")
+    subprocess.run(["docker", "rm", _name])
+    print("all done!")
 
 
 @pytest.fixture(scope="session")
 def sql_creds():
-    with open("../creds.json") as jf:
-        _creds = json.load(jf)
-    creds = SqlCreds(
-        server=_creds["server"],
-        database=_creds["database"],
-        username=_creds["username"],
-        password=_creds["password"],
-    )
+    creds = SqlCreds(server="127.0.0.1,1433", database=_db_name, username="sa", password=_pwd)
     return creds
+
+
+@pytest.fixture(scope="session")
+def setup_db_tables(docker_db):
+    creds_master = SqlCreds(
+        server="127.0.0.1,1433", database="master", username="sa", password=_pwd
+    )
+    sqlcmd(creds_master, f"CREATE DATABASE {_db_name}")
 
 
 @pytest.mark.parametrize(
@@ -37,7 +73,7 @@ def sql_creds():
         pytest.param("the one ring", marks=pytest.mark.xfail),
     ],
 )
-def test_tosql_basic(sql_creds, if_exists):
+def test_tosql_basic(docker_db, sql_creds, setup_db_tables, if_exists):
     df = pd.DataFrame(
         {
             "col1": ["Sam, and", "Frodo", "Merry"],  # comma in first item
@@ -65,8 +101,9 @@ def test_tosql_basic(sql_creds, if_exists):
 
 
 def test_big(sql_creds):
+    _num_cols = 10
     df = pd.DataFrame(
-        data=np.ndarray(shape=(100000, 6), dtype=float), columns=[f"col_{x}" for x in range(6)]
+        data=np.random.rand(1_000_000, _num_cols), columns=[f"col_{x}" for x in range(_num_cols)]
     )
     # to sql
     to_sql(
@@ -83,6 +120,7 @@ def test_big(sql_creds):
     assert_frame_equal(df, expected)
 
 
+@pytest.mark.skip("not with docker yet")
 def test_readsql_basic(sql_creds):
     df = pd.DataFrame(
         {
