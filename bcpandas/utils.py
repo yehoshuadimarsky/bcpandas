@@ -16,7 +16,9 @@ from io import StringIO
 import pandas as pd
 
 from .constants import (
-    DELIMITER,
+    BCPandasException,
+    BCPandasValueError,
+    _DELIMITER_OPTIONS,
     DIRECTIONS,
     IN,
     NEWLINE,
@@ -46,9 +48,11 @@ def bcp(
     direc = direction.lower()
     # validation
     if direc not in DIRECTIONS:
-        raise ValueError(f"Param 'direction' must be one of {DIRECTIONS}, you passed {direc}")
+        raise BCPandasValueError(
+            f"Param 'direction' must be one of {DIRECTIONS}, you passed {direc}"
+        )
     if direc not in combos[sql_type]:
-        raise ValueError(
+        raise BCPandasValueError(
             f"Wrong combo of direction and SQL object, you passed {sql_type} and {direc} ."
         )
 
@@ -86,7 +90,7 @@ def bcp(
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
             "-c",  # marking as character data, not Unicode (maybe make as param?)
-            f"-t{DELIMITER}",  # marking the delimiter as a comma (maybe also make as param?)
+            f"-t{_DELIMITER_OPTIONS[0]}",  # marking the delimiter as a comma (maybe also make as param?)
         ]
 
     # execute
@@ -100,7 +104,7 @@ def bcp(
     if result.returncode:
         logger.error(result.stdout)
         msg = parse_subprocess_error(result)
-        raise Exception(f"Bcp command failed. Details:\n{msg}")
+        raise BCPandasException(f"Bcp command failed. Details:\n{msg}")
 
 
 def sqlcmd(creds, command):
@@ -124,7 +128,7 @@ def sqlcmd(creds, command):
     else:
         auth = ["-U", creds.username, "-P", creds.password]
     if '"' in command:
-        raise ValueError(
+        raise BCPandasValueError(
             'Cannot have double quotes charachter (") in the command, '
             "raises problems when combining the sqlcmd utility with Python"
         )
@@ -146,7 +150,7 @@ def sqlcmd(creds, command):
     if result.returncode:
         logger.error(result.stdout)
         msg = parse_subprocess_error(result)
-        raise Exception(f"SqlCmd command failed. Details:\n{msg}")
+        raise BCPandasException(f"SqlCmd command failed. Details:\n{msg}")
 
     output = StringIO(result.stdout)
     first_line_output = output.readline().strip()
@@ -185,9 +189,9 @@ def _escape(input_string):
     )
 
 
-def build_format_file(df):
+def build_format_file(df, delimiter):
     """
-    Creates the non-xml SQL format file. Puts 2 spaces between each section.
+    Creates the non-xml SQL format file. Puts 4 spaces between each section.
     See https://docs.microsoft.com/en-us/sql/relational-databases/import-export/non-xml-format-files-sql-server
     for the specification of the file.
 
@@ -198,6 +202,7 @@ def build_format_file(df):
     Parameters
     ----------
     df : pandas DataFrame
+    delimiter : a valid delimiter character
 
     Returns
     -------
@@ -207,7 +212,7 @@ def build_format_file(df):
     format_file_str = f"9.0\n{len(df.columns)}\n"  # Version and Number of columns
     for col_num, col_name in enumerate(df.columns, start=1):
         # last col gets a newline sep
-        _delim = DELIMITER if col_num != len(df.columns) else NEWLINE
+        _delim = delimiter if col_num != len(df.columns) else NEWLINE
         _line = _space.join(
             [
                 str(col_num),  # Host file field order

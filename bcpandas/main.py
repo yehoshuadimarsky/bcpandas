@@ -12,7 +12,9 @@ import os
 import pandas as pd
 
 from .constants import (
-    DELIMITER,
+    BCPandasValueError,
+    get_delimiter,
+    _DELIMITER_OPTIONS,
     IF_EXISTS_OPTIONS,
     IN,
     NEWLINE,
@@ -49,7 +51,9 @@ class SqlCreds:
 
     def __init__(self, server, database, username=None, password=None):
         if not server or not database:
-            raise ValueError(f"Server and database can't be None, you passed {server}, {database}")
+            raise BCPandasValueError(
+                f"Server and database can't be None, you passed {server}, {database}"
+            )
         self.server = server
         self.database = database
         if username and password:
@@ -91,7 +95,7 @@ class SqlCreds:
                 password=conn_dict["PWD"],
             )
         except (KeyError, AttributeError):
-            raise ValueError(
+            raise BCPandasValueError(
                 "The supplied 'engine' object could not be parsed correctly, try creating a SqlCreds object manually."
             )
 
@@ -140,7 +144,7 @@ def to_sql(
         name in the table.
     if_exists : {'fail', 'replace', 'append'}, default 'fail'
         How to behave if the table already exists.
-        * fail: Raise a ValueError.
+        * fail: Raise a BCPandasValueError.
         * replace: Drop the table before inserting new values.
         * append: Insert new values to the existing table.
     batch_size : int, optional
@@ -153,11 +157,13 @@ def to_sql(
     assert sql_type in SQL_TYPES
     assert if_exists in IF_EXISTS_OPTIONS
 
+    delim = get_delimiter(df)
+
     # save to temp path
     csv_file_path = get_temp_file()
     df.to_csv(
         path_or_buf=csv_file_path,
-        sep=DELIMITER,
+        sep=delim,
         header=False,
         index=False,
         quoting=csv.QUOTE_MINIMAL,  # pandas default
@@ -170,7 +176,7 @@ def to_sql(
 
     # build format file
     fmt_file_path = get_temp_file()
-    fmt_file_txt = build_format_file(df=df)
+    fmt_file_txt = build_format_file(df=df, delimiter=delim)
     with open(fmt_file_path, "w") as ff:
         ff.write(fmt_file_txt)
     logger.debug(f"Created BCP format file at {fmt_file_path}")
@@ -179,14 +185,14 @@ def to_sql(
         if if_exists == "fail":
             _qry = """SELECT * 
                  FROM INFORMATION_SCHEMA.{_typ}S 
-                 WHERE TABLE_SCHEMA = {_schema} 
-                 AND TABLE_NAME = {_tbl}"""
+                 WHERE TABLE_SCHEMA = '{_schema}' 
+                 AND TABLE_NAME = '{_tbl}'"""
             res = sqlcmd(
                 creds=creds,
                 command=_qry.format(_typ=sql_type.upper(), _schema=schema, _tbl=table_name),
             )
             if res is not None:
-                raise ValueError(
+                raise BCPandasValueError(
                     f"The {sql_type} called {schema}.{table_name} already exists, "
                     f"`if_exists` param was set to `fail`."
                 )
@@ -256,7 +262,7 @@ def read_sql(table_name, creds, sql_type="table", schema="dbo", batch_size=None,
 
     # set up objects
     if ";" in table_name:
-        raise ValueError(
+        raise BCPandasValueError(
             "The SQL item cannot contain the ';' character, it interferes with getting the column names"
         )
 
@@ -268,7 +274,7 @@ def read_sql(table_name, creds, sql_type="table", schema="dbo", batch_size=None,
         cols = _existing_data.columns
         logger.debug("Successfully read the column names using sqlcmd")
     else:
-        raise ValueError(
+        raise BCPandasValueError(
             f"No data returned from the SQL item named {table_name} with type of {sql_type}"
         )
 
@@ -285,7 +291,11 @@ def read_sql(table_name, creds, sql_type="table", schema="dbo", batch_size=None,
         )
         logger.debug(f"Saved dataframe to temp CSV file at {file_path}")
         return pd.read_csv(
-            filepath_or_buffer=file_path, sep=DELIMITER, header=None, names=cols, index_col=False
+            filepath_or_buffer=file_path,
+            sep=_DELIMITER_OPTIONS[0],
+            header=None,
+            names=cols,
+            index_col=False,
         )
     finally:
         if not debug:

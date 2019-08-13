@@ -25,8 +25,8 @@ python .\setup.py sdist bdist_wheel
 Start-Process "$envpath\python.exe" -ArgumentList "-m twine upload --verbose -u $($auth.pypi_username) -p $($auth.pypi_password) dist/*" -NoNewWindow -Wait 
 
 
-# deploy to GitHub
-Start-Process "$envpath\python.exe" -ArgumentList ".\dist.py github-release" -NoNewWindow -Wait 
+# deploy to GitHub. Add --draft switch to make the release just a draft, not final or public yet
+Start-Process "$envpath\python.exe" -ArgumentList ".\dist.py github-release " -NoNewWindow -Wait 
 
 # conda
 # get sha256 of GitHub tar.gz
