@@ -87,6 +87,17 @@ or from conda
 conda install -c conda-forge bcpandas
 ```
 
+## Caveats and Limitations
+
+Here are some caveats and limitations of bcpandas. Hopefully they will be addressed in future releases
+* In the `to_sql` function:
+  * If `replace` is passed to the `if_exists` parameter, the new SQL table created will make the columns all of `NVARCHAR(MAX)` type.
+  * If there is a NaN/Null in the last column of the dataframe it will throw an error. This is due to a BCP issue. See my issue with Microsoft about this [here](https://github.com/MicrosoftDocs/sql-docs/issues/2689) .
+  * Bcpandas attempts to use a delimiter that is not present in the dataframe. This is because BCP does __not__ ignore delimiter characters when surrounded by quotes, unlike CSVs - see [here](https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-field-and-row-terminators-sql-server#characters-supported-as-terminators) in the Microsoft docs. Therefore, if all possible delimiter characters are present in the dataframe and bcpandas cannot find a delimiter to use, it will throw an error.
+    * Possible delimiters are specified in `constants.py` .
+* Currently the STDOUT stream from BCP and SqlCmd is not asynchronous.
+* Currently this is being built with Windows in mind. Linux support is definitely easily added, it's just not in the immediate scope of the project yet. PRs are welcome.
+
 ## Motivations and Design
 ### Overview
 Reading and writing data from pandas DataFrames to/from a SQL database is very slow using the built-in `read_sql` and `to_sql` methods, even with the newly introduced `execute_many` option. For Microsoft SQL Server, a far far faster method is to use the BCP utility provided by Microsoft. This utility is a command line tool that transfers data to/from the database and flat text files.
@@ -121,14 +132,12 @@ This package is a wrapper for seamlessly using the bcp utility from Python using
 
 This repository aims to fix and improve on `bcpy` and the above issues by making the design choices described below.
 
-> Note, much credit is due to `bcpy` for the original idea and for some of the code that was adopted and changed.
+> Much credit is due to `bcpy` for the original idea and for some of the code that was adopted and changed.
 
 #### magical-sqlserver
 `magical-sqlserver` is a library to make working with Python and SQL Server very easy. But it doesn't fit what I'm trying to do:
 * No built in support for pandas DataFrame
 * Larger codebase, I'm not fully comfortable with the dependency on the very heavy pymssql
-
-
 
 ### Design and Scope
 The _**only**_ scope of `bcpandas` is to read and write between a pandas DataFrame and a Microsoft SQL Server database. That's it. We do _**not**_ concern ourselves with reading existing flat files to/from SQL - that introduces _way_ to much complexity in trying to parse and decode the various parts of the file, like delimiters, quote characters, and line endings. Instead, to read/write an exiting flat file, just import it via pandas into a DataFrame, and then use `bcpandas`.
@@ -137,11 +146,12 @@ The big benefit of this is that we get to precicely control all the finicky part
 
 For now, we are using the non-XML BCP format file type. In the future, XML format files may be added.
 
-Currently, this is being built with only Windows in mind. Linux support is definitely easily added, it's just not in the immediate scope of the project yet. PRs are welcome.
+Both on-prem and cloud (Azure, AWS, etc.) versions of SQL Server are supported.
 
-Finally, the SQL Server databases supported are both the on-prem and Azure versions.
+## Testing
+Testing uses `pytest`. A local SQL Server is spun up using Docker.
 
 ## Contributing
 Please, all contributions are very welcome! 
 
-I will attempt to use the `pandas` code style as detailed [here](https://pandas.pydata.org/pandas-docs/stable/development/contributing_docstring.html).
+I will attempt to use the `pandas` docstring style as detailed [here](https://pandas.pydata.org/pandas-docs/stable/development/contributing_docstring.html).
