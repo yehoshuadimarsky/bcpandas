@@ -1,9 +1,9 @@
 {
     "GH_user": "yehoshuadimarsky",
     "name": "bcpandas",
-    "version": "0.1.6",
-    "GH_release_name": "v0.1.6 Release",
-    "GH_release_message": "Renamed SqlCreds method `from_quantity` to `from_engine`, deployment automation",
+    "version": "0.1.7",
+    "GH_release_name": "v0.1.7 Release",
+    "GH_release_message": "* `to_sql` attempts to use several possible delimiters, to fix BCP not escaping delimiters with quotes\n * Bug fix in `to_sql` for `if_exists` param if `fail` is passed\n * Added Caveats and Limitations section in README\n * Insulated exceptions with custom exception class, for easier testing and debugging\n * Updated tests to use Docker for local SQL Server instance\n * Fixed bugs in tests",
     "short_description": "High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!",
     "author": "Josh Dimarsky",
     "python_version": ">=3.6",

@@ -7,7 +7,7 @@
 - [x] Upload to conda-forge
 - [ ] Set up CI/CD
 - [ ] Write more tests
-- [ ] Find way to automate creation of temp SQL Server db for testing
+- [x] Find way to automate creation of temp SQL Server db for testing
 
 
 ... and of course, anything marked `# TODO` in the code.
