@@ -9,5 +9,10 @@
     "python_version": ">=3.6",
     "dependencies": [
         "pandas>=0.22"
+    ],
+    "dependencies_test": [
+        "pytest",
+        "pyodbc",
+        "sqlalchemy"
     ]
 }

@@ -63,6 +63,7 @@ def render_conda(sha256):
         creator=config["GH_user"],
         python_version=config["python_version"],
         dependencies=config["dependencies"],
+        dependencies_test=config["dependencies_test"],
         PYTHON="{{ PYTHON }}",
     )
     with open("./meta.yaml", "wt") as yaml_file:

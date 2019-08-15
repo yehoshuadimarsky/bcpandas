@@ -22,8 +22,16 @@ requirements:
     - {{ dep }} {% endfor %}
   
 test:
-  imports:
-    - bcpandas
+  requires: {% for dep_t in dependencies_test %}
+    - {{ dep_t }} {% endfor %}
+  source_files:
+    - ./tests/*
+  commands:
+    - cd %SRC_DIR%/tests & pytest -vv .  # [win]
+    - |  
+      if [ -x "$(command -v docker)" ]
+      then
+          cd $SRC_DIR/tests & pytest -vv .  # [not win]
 
 about:
   home: https://pypi.org/project/{{ name }}
