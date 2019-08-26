@@ -27,6 +27,7 @@ from .constants import (
     QUERYOUT,
     SQLCHAR,
     TABLE,
+    TYPES_MAP,
     sql_collation,
 )
 
@@ -246,7 +247,14 @@ def _get_sql_create_statement(df, table_name, schema="dbo"):
     -------------
     SQL code to create the table
     """
-    sql_cols = ",".join(map(lambda x: f"[{x}] nvarchar(max)", df.columns))
+    _sql_cols = []
+    for col, dtype in zip(df.columns, df.dtypes):
+        sql_type = None
+        for typ in TYPES_MAP:
+            if not sql_type:
+                sql_type = typ.get(dtype)  # TODO fix, this is buggy
+            _sql_cols.append(f"[{col}] {sql_type} NULL")
+    sql_cols = ",".join(_sql_cols)
     sql_command = (
         f"if object_id('[dbo].[{table_name}]', 'U') "
         f"is not null drop table [dbo].[{table_name}];"

@@ -7,6 +7,9 @@ Created on Sat Aug  3 23:20:19 2019
 
 import os
 
+import pandas as pd
+import numpy as np
+
 
 class BCPandasException(Exception):
     pass
@@ -37,6 +40,16 @@ NEWLINE = os.linesep
 # BCP Format File terms
 SQLCHAR = "SQLCHAR"
 sql_collation = "SQL_Latin1_General_CP1_CI_AS"
+
+# Type mapping between Pandas and MS SQL Server
+# Per https://docs.microsoft.com/en-us/sql/advanced-analytics/python/python-libraries-and-data-types#python-and-sql-data-types
+TYPES_MAP = [
+    {pd.Timestamp: "DATETIME2"},
+    {int: "BIGINT"},
+    {float: "FLOAT"},
+    {bool: "BIT"},
+    {str: "NVARCHAR(MAX)"},
+]
 
 
 def get_delimiter(df):
