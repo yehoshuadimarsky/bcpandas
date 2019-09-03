@@ -79,6 +79,7 @@ def bcp(
         creds.server,
         "-d",
         creds.database,
+        "-q",  # Executes the SET QUOTED_IDENTIFIERS ON statement, needed for Azure SQL DW
     ] + auth
 
     if batch_size:
@@ -136,6 +137,9 @@ def sqlcmd(creds, command):
     sqlcmd_command = (
         ["sqlcmd", "-S", creds.server, "-d", creds.database, "-b"]
         + auth
+        # set quoted identifiers ON, needed for Azure SQL Data Warehouse
+        # see https://docs.microsoft.com/en-us/azure/sql-data-warehouse/sql-data-warehouse-get-started-connect-sqlcmd
+        + ["-I"]
         + ["-s,", "-W", "-Q", command]
     )
 
