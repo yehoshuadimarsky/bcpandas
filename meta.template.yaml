@@ -28,10 +28,6 @@ test:
     - ./tests/*
   commands:
     - cd %SRC_DIR%/tests & pytest -vv .  # [win]
-    - |  
-      if [ -x "$(command -v docker)" ]
-      then
-          cd $SRC_DIR/tests & pytest -vv .  # [not win]
 
 about:
   home: https://pypi.org/project/{{ name }}
