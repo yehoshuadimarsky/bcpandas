@@ -8,8 +8,11 @@ Created on Sat Aug  3 23:07:15 2019
 import csv
 import logging
 import os
+import urllib
 
 import pandas as pd
+import pyodbc
+import sqlalchemy as sa
 
 from .constants import (
     BCPandasValueError,
@@ -43,13 +46,20 @@ class SqlCreds:
     database : str
     username : str, optional
     password : str, optional
+    odbc_driver_kwargs_dict : dict, optional
+        Dict of extra key-value pairs to add on to the ODBC connection string.
+        Must add extra quotes around strings that need to remain quoted.
+        Example: {'Encrypt': '"yes"', "TrustServerCertificate": '"no"', "Connection Timeout": 30}
 
     Returns
     -------
     `bcpandas.SqlCreds`
     """
 
-    def __init__(self, server, database, username=None, password=None):
+    # TODO fix docstring
+    def __init__(
+        self, server, database, username=None, password=None, odbc_driver_kwargs_dict=None
+    ):
         if not server or not database:
             raise BCPandasValueError(
                 f"Server and database can't be None, you passed {server}, {database}"
@@ -62,6 +72,8 @@ class SqlCreds:
             self.with_krb_auth = False
         else:
             self.with_krb_auth = True
+        if odbc_driver_kwargs_dict and isinstance(odbc_driver_kwargs_dict, dict):
+            self.odbc_params = odbc_driver_kwargs_dict
         logger.info(f"Created creds:\t{self}")
 
     @classmethod
@@ -108,6 +120,31 @@ class SqlCreds:
         return f"{clsName}({kwargs})"
 
     __str__ = __repr__
+
+    def to_SQLAlchemy_engine(self, driver_version=17):
+        """
+        Convert to a SQLAlchemy connectable engine. Relies on pyodbc and sqlalchemy
+
+        Parameters
+        ----------
+        driver_version : int, default 17
+            The version of the Microsoft ODBC Driver for SQL Server to use
+
+        Returns
+        -------
+        `sqlalchemy.engine`
+        """
+        driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
+
+        db_url = (
+            f"Driver={driver};Server=tcp:{self.server},1433;Database={self.database};"
+            f"UID={self.username};PWD={self.password}"
+        )
+        if hasattr(self, "odbc_params"):
+            db_url += ";".join(f"{k}={v}" for k, v in self.odbc_params.items())
+        conn_string = f"mssql+pyodbc:///?odbc_connect={urllib.parse.quote_plus(db_url)}"
+        engine = sa.engine.create_engine(conn_string)
+        return engine
 
 
 def to_sql(
@@ -197,10 +234,25 @@ def to_sql(
                     f"`if_exists` param was set to `fail`."
                 )
         elif if_exists == "replace":
-            sqlcmd(
-                creds=creds,
-                command=_get_sql_create_statement(df=df, table_name=table_name, schema=schema),
+            # sqlcmd(
+            #     creds=creds,
+            #     command=_get_sql_create_statement(df=df, table_name=table_name, schema=schema),
+            # )
+            from pandas.io.sql import SQLDatabase, SQLTable
+
+            sql_db = SQLDatabase(engine=creds.to_SQLAlchemy_engine(), schema=schema)
+            table = SQLTable(
+                table_name,
+                sql_db,
+                frame=df,
+                index=index,
+                if_exists=if_exists,
+                index_label=None,
+                schema=schema,
+                dtype=None,
             )
+            table.create()
+
         elif if_exists == "append":
             pass  # don't need to do anything
 

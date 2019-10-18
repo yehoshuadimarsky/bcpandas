@@ -57,7 +57,17 @@ def docker_db():
 
 @pytest.fixture(scope="session")
 def sql_creds():
-    creds = SqlCreds(server="127.0.0.1,1433", database=_db_name, username="sa", password=_pwd)
+    creds = SqlCreds(
+        server="127.0.0.1,1433",
+        database=_db_name,
+        username="sa",
+        password=_pwd,
+        # odbc_driver_kwargs_dict={
+        #     "Encrypt": '"yes"',
+        #     "TrustServerCertificate": '"yes"',
+        #     "Connection Timeout": 30
+        # }
+    )
     return creds
 
 

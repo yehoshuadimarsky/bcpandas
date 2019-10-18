@@ -225,7 +225,7 @@ def build_format_file(df, delimiter):
                 str(0),  # Host file data length
                 f'"{_escape(_delim)}"',  # Terminator (see note below)
                 str(col_num),  # Server column order
-                col_name,  # Server column name, optional as long as not blank
+                str(col_name),  # Server column name, optional as long as not blank
                 sql_collation,  # Column collation
                 "\n",
             ]

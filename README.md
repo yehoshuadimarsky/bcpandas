@@ -65,27 +65,31 @@ Out[7]:
 ```
 
 ## Requirements
-- BCP Utility
-    - [Windows](https://docs.microsoft.com/en-us/sql/tools/bcp-utility)
-- SqlCmd Utility
-    - [Windows](https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility)
+- [BCP](https://docs.microsoft.com/en-us/sql/tools/bcp-utility) Utility
+- [SqlCmd](https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility) Utility
+- Microsoft ODBC Driver for SQL Server (included automatically with the BCP utility)
 - python >= 3.6
-- pandas
+- pandas >= 0.22
+- pyodbc
+- sqlalchemy
 
 ## Benchmarks
 _# TODO_
 
 ## Installation
-You can download and install this package from PyPI
+PyPI:
 
 ```
 pip install bcpandas
 ```
 
-or from conda
+Conda:
 ```
 conda install -c conda-forge bcpandas
 ```
+
+## Recommended Usage
+When to use bcpandas vs. regular pandas. #TODO
 
 ## Caveats and Limitations
 
