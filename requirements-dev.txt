@@ -1,6 +1,0 @@
-pytest
-pyodbc
-sqlalchemy
-black
-pre-commit
-spyder-kernels=0.*

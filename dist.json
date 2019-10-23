@@ -8,11 +8,17 @@
     "author": "Josh Dimarsky",
     "python_version": ">=3.6",
     "dependencies": [
-        "pandas>=0.22"
+        "pandas>=0.22",
+        "pyodbc",
+        "sqlalchemy"
     ],
     "dependencies_test": [
         "pytest",
-        "pyodbc",
-        "sqlalchemy"
+        "pytest-benchmark"
+    ],
+    "dependencies_dev": [
+        "black",
+        "pre-commit",
+        "spyder-kernels=0.*"
     ]
 }
