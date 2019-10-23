@@ -46,20 +46,16 @@ class SqlCreds:
     database : str
     username : str, optional
     password : str, optional
-    odbc_driver_kwargs_dict : dict, optional
-        Dict of extra key-value pairs to add on to the ODBC connection string.
-        Must add extra quotes around strings that need to remain quoted.
-        Example: {'Encrypt': '"yes"', "TrustServerCertificate": '"no"', "Connection Timeout": 30}
-
+    driver_version : int, default 17
+        The version of the Microsoft ODBC Driver for SQL Server to use 
+    
     Returns
     -------
     `bcpandas.SqlCreds`
     """
 
     # TODO fix docstring
-    def __init__(
-        self, server, database, username=None, password=None, odbc_driver_kwargs_dict=None
-    ):
+    def __init__(self, server, database, username=None, password=None, driver_version=17, **kwargs):
         if not server or not database:
             raise BCPandasValueError(
                 f"Server and database can't be None, you passed {server}, {database}"
@@ -72,9 +68,20 @@ class SqlCreds:
             self.with_krb_auth = False
         else:
             self.with_krb_auth = True
-        if odbc_driver_kwargs_dict and isinstance(odbc_driver_kwargs_dict, dict):
-            self.odbc_params = odbc_driver_kwargs_dict
         logger.info(f"Created creds:\t{self}")
+
+        # construct the engine for sqlalchemy
+        driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
+        db_url = (
+            f"Driver={driver};Server=tcp:{self.server},1433;Database={self.database};"
+            f"UID={self.username};PWD={self.password}"
+        )
+        if kwargs:
+            db_url += ";".join(f"{k}={v}" for k, v in kwargs.items())
+        conn_string = f"mssql+pyodbc:///?odbc_connect={urllib.parse.quote_plus(db_url)}"
+        self.engine = sa.engine.create_engine(conn_string)
+
+        logger.info(f"Created engine for sqlalchemy:\t{self.engine}")
 
     @classmethod
     def from_engine(cls, engine):
@@ -100,15 +107,19 @@ class SqlCreds:
             # convert into dict
             conn_dict = {x.split("=")[0]: x.split("=")[1] for x in conn_url if "=" in x}
 
-            return cls(
+            sql_creds = cls(
                 server=conn_dict["Server"].replace("tcp:", "").replace(",1433", ""),
                 database=conn_dict["Database"],
                 username=conn_dict["UID"],
                 password=conn_dict["PWD"],
             )
-        except (KeyError, AttributeError):
+            # add Engine object as attribute
+            sql_creds.engine = engine
+            return sql_creds
+        except (KeyError, AttributeError) as ex:
             raise BCPandasValueError(
-                "The supplied 'engine' object could not be parsed correctly, try creating a SqlCreds object manually."
+                f"The supplied 'engine' object could not be parsed correctly, try creating a SqlCreds object manually."
+                f"\nOriginal Error: \n {ex}"
             )
 
     def __repr__(self):
@@ -120,31 +131,6 @@ class SqlCreds:
         return f"{clsName}({kwargs})"
 
     __str__ = __repr__
-
-    def to_SQLAlchemy_engine(self, driver_version=17):
-        """
-        Convert to a SQLAlchemy connectable engine. Relies on pyodbc and sqlalchemy
-
-        Parameters
-        ----------
-        driver_version : int, default 17
-            The version of the Microsoft ODBC Driver for SQL Server to use
-
-        Returns
-        -------
-        `sqlalchemy.engine`
-        """
-        driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
-
-        db_url = (
-            f"Driver={driver};Server=tcp:{self.server},1433;Database={self.database};"
-            f"UID={self.username};PWD={self.password}"
-        )
-        if hasattr(self, "odbc_params"):
-            db_url += ";".join(f"{k}={v}" for k, v in self.odbc_params.items())
-        conn_string = f"mssql+pyodbc:///?odbc_connect={urllib.parse.quote_plus(db_url)}"
-        engine = sa.engine.create_engine(conn_string)
-        return engine
 
 
 def to_sql(
@@ -240,7 +226,7 @@ def to_sql(
             # )
             from pandas.io.sql import SQLDatabase, SQLTable
 
-            sql_db = SQLDatabase(engine=creds.to_SQLAlchemy_engine(), schema=schema)
+            sql_db = SQLDatabase(engine=creds.engine, schema=schema)
             table = SQLTable(
                 table_name,
                 sql_db,

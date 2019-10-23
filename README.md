@@ -70,8 +70,8 @@ Out[7]:
 - Microsoft ODBC Driver for SQL Server (included automatically with the BCP utility)
 - python >= 3.6
 - pandas >= 0.22
-- pyodbc
-- sqlalchemy
+- pyodbc (see section below on creds)
+- sqlalchemy (Pandas requires this for any SQL flavor besides `sqlite`)
 
 ## Benchmarks
 _# TODO_
@@ -87,6 +87,18 @@ Conda:
 ```
 conda install -c conda-forge bcpandas
 ```
+
+## Instructions
+
+### Credential/Connection object
+Bcpandas uses a simple username/password authentication for the BCP and SqlCmd utilities, but it may also require a full `Connection` object like the regular pandas API expects, for:
+1. Creating the SQL table in `to_sql` and `if_exists='replace`, because bcpandas uses some of the internal pandas code to do this
+2. If the bcpandas operation fails, the user can specify that the operation should be retried using the regular pandas methods, which require a full `Connection` object.
+
+Therefore, the user has 2 choices. 
+1. Pass a full `Connection` object to the bcpandas `SqlCreds` object. Bcpandas will attempt to parse out the server, database, username, and password to pass to the command line utilities. If a DSN is used, this will fail.
+2. Create the bcpandas `SqlCreds` object with just the minimum attributes needed (server, database, username, password), and have bcpandas create a full `Connection` object from this. In this case, bcpandas will use `pyodbc` and `sqlalchemy`, and rely on the Microsoft ODBC Driver for SQL Server.
+
 
 ## Recommended Usage
 When to use bcpandas vs. regular pandas. #TODO
