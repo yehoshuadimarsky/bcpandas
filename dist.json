@@ -8,9 +8,9 @@
     "author": "Josh Dimarsky",
     "python_version": ">=3.6",
     "dependencies": [
-        "pandas>=0.22",
+        "pandas>=0.19",
         "pyodbc",
-        "sqlalchemy"
+        "sqlalchemy>=1.1.4"
     ],
     "dependencies_test": [
         "pytest",
