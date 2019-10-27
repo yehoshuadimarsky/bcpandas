@@ -2,7 +2,7 @@
 
 - [x] **COME UP WITH A GOOD NAME!** (`pandasql` is already taken in PyPI)
 - [x] Fix up `setup.py`
-- [ ] Stream BCP stdout to logs in real time asynchronously
+- [x] Stream BCP stdout to logs in real time asynchronously
 - [x] Upload to PyPI
 - [x] Upload to conda-forge
 - [ ] Set up CI/CD
