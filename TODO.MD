@@ -10,9 +10,7 @@
 - [ ] Benchmarks vs. regular pandas methods
 - [x] Find way to automate creation of temp SQL Server db for testing
 - [ ] Build in auto-retry with native pandas methods if BCP method fails
-- [ ] Use pandas internal code to build new SQL tables, instead of just all NVARCHAR
-- [ ] Decide if to assume the user provides their own `conn` connection object for native pandas methods,
-        Or just use the bcpandas SqlCreds
-
+- [x] Use pandas internal code to build new SQL tables, instead of just all NVARCHAR
+- [ ] Better docs
 
 ... and of course, anything marked `# TODO` in the code.

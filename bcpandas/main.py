@@ -29,14 +29,15 @@ from .constants import (
     VIEW,
     QUERY,
 )
-from .utils import _get_sql_create_statement, bcp, build_format_file, get_temp_file, sqlcmd
+from .utils import bcp, build_format_file, get_temp_file, sqlcmd
 
 logger = logging.getLogger(__name__)
 
 
 class SqlCreds:
     """
-    Credential object for all SQL operations.
+    Credential object for all SQL operations. Will automatically also create a SQLAlchemy 
+    engine that uses `pyodbc` as the DBAPI, and store it in the `self.engine` attribute.
 
     If `username` and `password` are not provided, `with_krb_auth` will be `True`.
 
@@ -48,13 +49,14 @@ class SqlCreds:
     password : str, optional
     driver_version : int, default 17
         The version of the Microsoft ODBC Driver for SQL Server to use 
+    **kwargs : additional keyword arguments, to pass into ODBC connection string, 
+        such as Encrypted='yes'
     
     Returns
     -------
     `bcpandas.SqlCreds`
     """
 
-    # TODO fix docstring
     def __init__(self, server, database, username=None, password=None, driver_version=17, **kwargs):
         if not server or not database:
             raise BCPandasValueError(
@@ -220,10 +222,7 @@ def to_sql(
                     f"`if_exists` param was set to `fail`."
                 )
         elif if_exists == "replace":
-            # sqlcmd(
-            #     creds=creds,
-            #     command=_get_sql_create_statement(df=df, table_name=table_name, schema=schema),
-            # )
+            # use pandas' own code to create the table and schema
             from pandas.io.sql import SQLDatabase, SQLTable
 
             sql_db = SQLDatabase(engine=creds.engine, schema=schema)

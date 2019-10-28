@@ -9,10 +9,8 @@ import logging
 import os
 import random
 import string
-import subprocess
 from subprocess import Popen, PIPE
 import tempfile
-from io import StringIO
 
 import pandas as pd
 
