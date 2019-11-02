@@ -63,31 +63,66 @@ Out[7]:
 8  6881378  6553710  7209065  7536743  7274588  6619248
 9  6226030  7209065  6619231  6881380  7274612  3014770
 ```
-
-## Requirements
-- BCP Utility
-    - [Windows](https://docs.microsoft.com/en-us/sql/tools/bcp-utility)
-- SqlCmd Utility
-    - [Windows](https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility)
-- python >= 3.6
-- pandas
-
 ## Benchmarks
 _# TODO_
 
+## Requirements
+### Database
+Any version of Microsoft SQL Server. Can be installed on-prem, in the cloud, on a VM, or the Azure SQL Database/Data Warehouse versions.
+### Python User
+- [BCP](https://docs.microsoft.com/en-us/sql/tools/bcp-utility) Utility
+- [SqlCmd](https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility) Utility
+- Microsoft ODBC Driver **11, 13, 13.1, or 17** for SQL Server. See the [pyodbc docs](https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Windows) for details.
+- Python >= 3.6
+- `pandas` >= 0.19
+- `sqlalchemy` >= 1.1.4
+- `pyodbc` as the [supported DBAPI](https://docs.sqlalchemy.org/en/lastest/dialects/mssql.html#dialect-mssql)
+- Windows as the client OS
+  - Linux and MacOS are theoretically compatible, but never tested
+
 ## Installation
-You can download and install this package from PyPI
+Source | Command
+:---: | :---:
+PyPI | ```pip install bcpandas``` 
+Conda| ```conda install -c conda-forge bcpandas```
 
-```
-pip install bcpandas
-```
+## Usage
 
-or from conda
-```
-conda install -c conda-forge bcpandas
-```
+1. Create creds (see next section)
+2. Replace any `df.to_sql(...)` in your code with `bcpandas.to_sql(df, ...)`
+3. Replace any `pd.read_sql(...)` with `bcpandas.read_sql(...)`
 
-## Caveats and Limitations
+That's it!
+
+### Credential/Connection object
+Bcpandas requires a `bcpandas.SqlCreds` object in order to use it, and also a `sqlalchemy.Engine`. The user has 2 options when constructing it.
+1. Create the bcpandas `SqlCreds` object with just the minimum attributes needed (server, database, username, password), and bcpandas will create a full `Engine` object from this. It will use `pyodbc`, `sqlalchemy`, and the Microsoft ODBC Driver for SQL Server, and will store it in the `.engine` attribute.
+    ```python
+    In [1]: from bcpandas import SqlCreds
+
+    In [2]: creds = SqlCreds('my_server', 'my_db', 'my_username', 'my_password')
+
+    In [3]: creds.engine
+    Out[3]: Engine(mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 17 for SQL Server};Server=tcp:my_server,1433;Database=my_db;UID=my_username;PWD=my_password)
+
+    ```
+2. Pass a full `Engine` object to the bcpandas `SqlCreds` object, and bcpandas will attempt to parse out the server, database, username, and password to pass to the command line utilities. If a DSN is used, this will fail.
+    
+    (continuing example above)
+    ```python
+    In [4]: creds2 = SqlCreds.from_engine(creds.engine)
+
+    In [5]: creds2.engine
+    Out[5]: Engine(mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 17 for SQL Server};Server=tcp:my_server,1433;Database=my_db;UID=my_username;PWD=my_password)
+
+    In [6]: creds2
+    Out[6]: SqlCreds(server='my_server', database='my_db', username='my_username', with_krb_auth=False, engine=Engine(mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 17 for SQL Server};Server=tcp:my_server,1433;Database=my_db;UID=my_username;PWD=my_password), password=[REDACTED])
+    ```
+
+### Recommended Usage
+_# TODO_ When to use bcpandas vs. regular pandas.
+
+## Limitations
 
 Here are some caveats and limitations of bcpandas. Hopefully they will be addressed in future releases
 * In the `to_sql` function:
@@ -96,49 +131,33 @@ Here are some caveats and limitations of bcpandas. Hopefully they will be addres
   * If there is a NaN/Null in the last column of the dataframe it will throw an error. This is due to a BCP issue. See my issue with Microsoft about this [here](https://github.com/MicrosoftDocs/sql-docs/issues/2689) .
   * Bcpandas attempts to use a delimiter that is not present in the dataframe. This is because BCP does __not__ ignore delimiter characters when surrounded by quotes, unlike CSVs - see [here](https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-field-and-row-terminators-sql-server#characters-supported-as-terminators) in the Microsoft docs. Therefore, if all possible delimiter characters are present in the dataframe and bcpandas cannot find a delimiter to use, it will throw an error.
     * Possible delimiters are specified in `constants.py` .
-* Currently the STDOUT stream from BCP and SqlCmd is not asynchronous.
-* Currently this is being built with Windows in mind. Linux support is definitely easily added, it's just not in the immediate scope of the project yet. PRs are welcome.
 
-## Motivations and Design
-### Overview
-Reading and writing data from pandas DataFrames to/from a SQL database is very slow using the built-in `read_sql` and `to_sql` methods, even with the newly introduced `execute_many` option. For Microsoft SQL Server, a far far faster method is to use the BCP utility provided by Microsoft. This utility is a command line tool that transfers data to/from the database and flat text files.
+## Background
+Reading and writing data from pandas DataFrames to/from a SQL database is very slow using the built-in `read_sql` and `to_sql` methods, even with the newly introduced [`execute_many`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-sql-method) option. For Microsoft SQL Server, a far far faster method is to use the BCP utility provided by Microsoft. This utility is a command line tool that transfers data to/from the database and flat text files.
 
 This package is a wrapper for seamlessly using the bcp utility from Python using a pandas DataFrame. Despite the IO hits, the fastest option by far is saving the data to a CSV file in the file system and using the bcp utility to transfer the CSV file to SQL Server. **Best of all, you don't need to know anything about using BCP at all!**
 
 ### Existing Solutions
-
-<table>
-<tr>
-  <td><b>Name</b></td>
-  <td><b>GitHub</b></td>
-  <td><b>PyPI</b></td>
-</tr>
-<tr>
-  <td>bcpy</td>
-  <td>https://github.com/titan550/bcpy</td>
-  <td>https://pypi.org/project/bcpy</td>
-</tr>
-<tr>
-  <td>magical-sqlserver</td>
-  <td>https://github.com/brennoflavio/magical-sqlserver</td>
-  <td>https://pypi.org/project/magical-sqlserver/</td>
-</tr>
-</table>
-
-#### bcpy
-`bcpy` has several flaws:
-* No support for reading from SQL, only writing to SQL
-* A convoluted, overly class-based internal design
-* Scope a bit too broad - deals with pandas as well as flat files
-
-This repository aims to fix and improve on `bcpy` and the above issues by making the design choices described below.
-
 > Much credit is due to `bcpy` for the original idea and for some of the code that was adopted and changed.
+<details>
+  <summary>bcpy</summary>
 
-#### magical-sqlserver
-`magical-sqlserver` is a library to make working with Python and SQL Server very easy. But it doesn't fit what I'm trying to do:
-* No built in support for pandas DataFrame
-* Larger codebase, I'm not fully comfortable with the dependency on the very heavy pymssql
+  [bcpy](https://github.com/titan550/bcpy) has several flaws:
+  * No support for reading from SQL, only writing to SQL
+  * A convoluted, overly class-based internal design
+  * Scope a bit too broad - deals with pandas as well as flat files
+  This repository aims to fix and improve on `bcpy` and the above issues by making the design choices described earlier.
+</details>
+
+
+<details>
+  <summary>magical-sqlserver</summary>
+  
+  [magical-sqlserver](https://github.com/brennoflavio/magical-sqlserver) is a library to make working with Python and SQL Server very easy. But it doesn't fit what I'm trying to do:
+  * No built in support for pandas DataFrame
+  * Larger codebase, I'm not fully comfortable with the dependency on the very heavy pymssql
+
+</details>
 
 ### Design and Scope
 The _**only**_ scope of `bcpandas` is to read and write between a pandas DataFrame and a Microsoft SQL Server database. That's it. We do _**not**_ concern ourselves with reading existing flat files to/from SQL - that introduces _way_ to much complexity in trying to parse and decode the various parts of the file, like delimiters, quote characters, and line endings. Instead, to read/write an exiting flat file, just import it via pandas into a DataFrame, and then use `bcpandas`.
@@ -147,7 +166,6 @@ The big benefit of this is that we get to precicely control all the finicky part
 
 For now, we are using the non-XML BCP format file type. In the future, XML format files may be added.
 
-Both on-prem and cloud (Azure, AWS, etc.) versions of SQL Server are supported.
 
 ## Testing
 Testing uses `pytest`. A local SQL Server is spun up using Docker.

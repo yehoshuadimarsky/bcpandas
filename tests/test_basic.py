@@ -22,10 +22,10 @@ from bcpandas.utils import _get_sql_create_statement
 
 _pwd = "MyBigSQLPassword!!!"
 _db_name = "db_bcpandas"
-_docker_startup = 10  # seconds to wait to give the container time to start
+_docker_startup = 15  # seconds to wait to give the container time to start
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def docker_db():
     _name = "bcpandas-container"
     cmd_start_container = [
@@ -55,13 +55,20 @@ def docker_db():
     print("all done!")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def sql_creds():
-    creds = SqlCreds(server="127.0.0.1,1433", database=_db_name, username="sa", password=_pwd)
+    creds = SqlCreds(
+        server="127.0.0.1,1433",
+        database=_db_name,
+        username="sa",
+        password=_pwd,
+        # Encrypt= "yes",
+        # TrustServerCertificate="yes",
+    )
     return creds
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def setup_db_tables(docker_db):
     creds_master = SqlCreds(
         server="127.0.0.1,1433", database="master", username="sa", password=_pwd
@@ -69,7 +76,7 @@ def setup_db_tables(docker_db):
     sqlcmd(creds_master, f"CREATE DATABASE {_db_name}")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def pyodbc_creds(docker_db):
 
     db_url = (

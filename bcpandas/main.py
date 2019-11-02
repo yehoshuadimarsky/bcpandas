@@ -8,8 +8,11 @@ Created on Sat Aug  3 23:07:15 2019
 import csv
 import logging
 import os
+import urllib
 
 import pandas as pd
+import pyodbc
+import sqlalchemy as sa
 
 from .constants import (
     BCPandasValueError,
@@ -26,14 +29,15 @@ from .constants import (
     VIEW,
     QUERY,
 )
-from .utils import _get_sql_create_statement, bcp, build_format_file, get_temp_file, sqlcmd
+from .utils import bcp, build_format_file, get_temp_file, sqlcmd
 
 logger = logging.getLogger(__name__)
 
 
 class SqlCreds:
     """
-    Credential object for all SQL operations.
+    Credential object for all SQL operations. Will automatically also create a SQLAlchemy 
+    engine that uses `pyodbc` as the DBAPI, and store it in the `self.engine` attribute.
 
     If `username` and `password` are not provided, `with_krb_auth` will be `True`.
 
@@ -43,13 +47,17 @@ class SqlCreds:
     database : str
     username : str, optional
     password : str, optional
-
+    driver_version : int, default 17
+        The version of the Microsoft ODBC Driver for SQL Server to use 
+    **kwargs : additional keyword arguments, to pass into ODBC connection string, 
+        such as Encrypted='yes'
+    
     Returns
     -------
     `bcpandas.SqlCreds`
     """
 
-    def __init__(self, server, database, username=None, password=None):
+    def __init__(self, server, database, username=None, password=None, driver_version=17, **kwargs):
         if not server or not database:
             raise BCPandasValueError(
                 f"Server and database can't be None, you passed {server}, {database}"
@@ -63,6 +71,19 @@ class SqlCreds:
         else:
             self.with_krb_auth = True
         logger.info(f"Created creds:\t{self}")
+
+        # construct the engine for sqlalchemy
+        driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
+        db_url = (
+            f"Driver={driver};Server=tcp:{self.server},1433;Database={self.database};"
+            f"UID={self.username};PWD={self.password}"
+        )
+        if kwargs:
+            db_url += ";".join(f"{k}={v}" for k, v in kwargs.items())
+        conn_string = f"mssql+pyodbc:///?odbc_connect={urllib.parse.quote_plus(db_url)}"
+        self.engine = sa.engine.create_engine(conn_string)
+
+        logger.info(f"Created engine for sqlalchemy:\t{self.engine}")
 
     @classmethod
     def from_engine(cls, engine):
@@ -88,15 +109,19 @@ class SqlCreds:
             # convert into dict
             conn_dict = {x.split("=")[0]: x.split("=")[1] for x in conn_url if "=" in x}
 
-            return cls(
+            sql_creds = cls(
                 server=conn_dict["Server"].replace("tcp:", "").replace(",1433", ""),
                 database=conn_dict["Database"],
                 username=conn_dict["UID"],
                 password=conn_dict["PWD"],
             )
-        except (KeyError, AttributeError):
+            # add Engine object as attribute
+            sql_creds.engine = engine
+            return sql_creds
+        except (KeyError, AttributeError) as ex:
             raise BCPandasValueError(
-                "The supplied 'engine' object could not be parsed correctly, try creating a SqlCreds object manually."
+                f"The supplied 'engine' object could not be parsed correctly, try creating a SqlCreds object manually."
+                f"\nOriginal Error: \n {ex}"
             )
 
     def __repr__(self):
@@ -197,10 +222,22 @@ def to_sql(
                     f"`if_exists` param was set to `fail`."
                 )
         elif if_exists == "replace":
-            sqlcmd(
-                creds=creds,
-                command=_get_sql_create_statement(df=df, table_name=table_name, schema=schema),
+            # use pandas' own code to create the table and schema
+            from pandas.io.sql import SQLDatabase, SQLTable
+
+            sql_db = SQLDatabase(engine=creds.engine, schema=schema)
+            table = SQLTable(
+                table_name,
+                sql_db,
+                frame=df,
+                index=index,
+                if_exists=if_exists,
+                index_label=None,
+                schema=schema,
+                dtype=None,
             )
+            table.create()
+
         elif if_exists == "append":
             pass  # don't need to do anything
 

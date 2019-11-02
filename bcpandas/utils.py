@@ -9,9 +9,8 @@ import logging
 import os
 import random
 import string
-import subprocess
+from subprocess import Popen, PIPE
 import tempfile
-from io import StringIO
 
 import pandas as pd
 
@@ -95,17 +94,11 @@ def bcp(
         ]
 
     # execute
-    # TODO better logging and error handling the return stream
     bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
     logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log}")
-    result = subprocess.run(
-        bcp_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8"
-    )
-    logger.debug(result.stdout)
-    if result.returncode:
-        logger.error(result.stdout)
-        msg = parse_subprocess_error(result)
-        raise BCPandasException(f"Bcp command failed. Details:\n{msg}")
+    ret_code = run_cmd(bcp_command)
+    if ret_code:
+        raise BCPandasException(f"Bcp command failed with exit code {ret_code}")
 
 
 def sqlcmd(creds, command):
@@ -144,27 +137,13 @@ def sqlcmd(creds, command):
     )
 
     # execute
-    # TODO better logging and error handling the return stream
     sqlcmd_command_log = [c if c != creds.password else "[REDACTED]" for c in sqlcmd_command]
     logger.info(f"Executing SqlCmd command now... \nSqlCmd command is: {sqlcmd_command_log}")
-    result = subprocess.run(
-        sqlcmd_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8"
-    )
-    logger.debug(result.stdout)
-    if result.returncode:
-        logger.error(result.stdout)
-        msg = parse_subprocess_error(result)
-        raise BCPandasException(f"SqlCmd command failed. Details:\n{msg}")
-
-    output = StringIO(result.stdout)
-    first_line_output = output.readline().strip()
-    if first_line_output == "":
-        header = None
-    else:
-        header = "infer"
-    output.seek(0)
+    ret_code, output = run_cmd(sqlcmd_command, live_mode=False)
+    if ret_code:
+        raise BCPandasException(f"SqlCmd command failed with exit code {ret_code}")
     try:
-        result = pd.read_csv(filepath_or_buffer=output, skiprows=[1], header=header)
+        result = pd.read_csv(filepath_or_buffer=output, skiprows=[1], header="infer")
     except pd.errors.EmptyDataError:
         result = None
     return result
@@ -201,7 +180,6 @@ def build_format_file(df, delimiter):
 
     # TODO add params/options to control:
     #   - the char type (not just SQLCHAR),
-    #   - the ability to skip destination columns
 
     Parameters
     ----------
@@ -225,7 +203,7 @@ def build_format_file(df, delimiter):
                 str(0),  # Host file data length
                 f'"{_escape(_delim)}"',  # Terminator (see note below)
                 str(col_num),  # Server column order
-                col_name,  # Server column name, optional as long as not blank
+                str(col_name),  # Server column name, optional as long as not blank
                 sql_collation,  # Column collation
                 "\n",
             ]
@@ -236,32 +214,40 @@ def build_format_file(df, delimiter):
     return format_file_str
 
 
-def _get_sql_create_statement(df, table_name, schema="dbo"):
+def run_cmd(cmd, live_mode=True):
     """
-    Creates a SQL drop and re-create statement corresponding to the columns list of the object.
+    Runs the given command. 
     
-    Parameters
-    -------------
-    df : pandas DataFrame
-    table_name : str
-        name of the new table
-    
+    If live_mode is enabled, prints STDOUT in real time, 
+    prints STDERR when command is complete, and logs both STDOUT and STDERR.
+    Otherwise, just runs the command, prints STDERR, and returns both the exit code and STDOUT
+
+    Paramters
+    ---------
+    cmd : list of str
+        The command to run, to be submitted to `subprocess.Popen()`
+    live_mode : bool, default True
+        If to enable live_mode
+
     Returns
-    -------------
-    SQL code to create the table
+    -------
+    The exit code of the command, and STDOUT if live_mode is enabled
     """
-    sql_cols = ",".join(map(lambda x: f"[{x}] nvarchar(max)", df.columns))
-    sql_command = (
-        f"if object_id('[dbo].[{table_name}]', 'U') "
-        f"is not null drop table [dbo].[{table_name}];"
-        f"create table [dbo].[{table_name}] ({sql_cols});"
-    )
-    return sql_command
-
-
-def parse_subprocess_error(result):
-    msg = {}
-    for item in ["args", "returncode", "stdout", "stderr"]:
-        _i = getattr(result, item)
-        msg[item] = _i.decode() if isinstance(_i, bytes) else _i
-    return msg
+    proc = Popen(cmd, stdout=PIPE, stderr=PIPE, encoding="utf-8", errors="utf-8")
+    if live_mode:
+        # live stream STDOUT
+        while True:
+            outs = proc.stdout.readline()
+            if outs:
+                print(outs, end="")
+                logger.info(outs)
+            if proc.poll() is not None and outs == "":
+                break
+    errs = proc.stderr.readlines()
+    if errs:
+        print(errs, end="")
+        logger.error(errs)
+    if live_mode:
+        return proc.returncode
+    else:
+        return proc.returncode, proc.stdout

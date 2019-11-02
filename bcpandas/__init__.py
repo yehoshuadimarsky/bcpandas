@@ -1,7 +1,7 @@
 from .main import to_sql, read_sql, SqlCreds
 from .utils import bcp, sqlcmd
 
-import subprocess
+from subprocess import run, DEVNULL
 import warnings
 
 name = "bcpandas"
@@ -12,10 +12,10 @@ __version__ = "0.1.0"
 cmds = [["bcp", "-v"], ["sqlcmd", "-?"]]
 for cmd in cmds:
     try:
-        subprocess.run(cmd)
+        run(cmd, stdout=DEVNULL, stderr=DEVNULL)
     except FileNotFoundError:
         warnings.warn(
             f"{cmd[0].upper()} utility not installed or not found in PATH, bcpandas will not work!"
         )
 
-del subprocess, warnings, cmd
+del run, DEVNULL, warnings, cmd
