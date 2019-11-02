@@ -88,19 +88,39 @@ Conda| ```conda install -c conda-forge bcpandas```
 
 ## Usage
 
-### Recommended Usage
-_# TODO_ When to use bcpandas vs. regular pandas.
+1. Create creds (see next section)
+2. Replace any `df.to_sql(...)` in your code with `bcpandas.to_sql(df, ...)`
+3. Replace any `pd.read_sql(...)` with `bcpandas.read_sql(...)`
+
+That's it!
 
 ### Credential/Connection object
-Bcpandas uses a simple username/password authentication for the BCP and SqlCmd utilities, but it may also require a full `sqlalchemy.Engine` object like the regular pandas API expects, for:
-1. Creating the SQL table in `to_sql` and `if_exists='replace`, because bcpandas uses some of the internal pandas code to do this
-2. If the bcpandas operation fails, the user can specify that the operation should be retried using the regular pandas methods, which require a full `Engine` object.
-_(Planned for in later versions)_
+Bcpandas requires a `bcpandas.SqlCreds` object in order to use it, and also a `sqlalchemy.Engine`. The user has 2 options when constructing it.
+1. Create the bcpandas `SqlCreds` object with just the minimum attributes needed (server, database, username, password), and bcpandas will create a full `Engine` object from this. It will use `pyodbc`, `sqlalchemy`, and the Microsoft ODBC Driver for SQL Server, and will store it in the `.engine` attribute.
+    ```python
+    In [1]: from bcpandas import SqlCreds
 
-Therefore, the user has 2 choices. 
-1. Pass a full `Engine` object to the bcpandas `SqlCreds` object. Bcpandas will attempt to parse out the server, database, username, and password to pass to the command line utilities. If a DSN is used, this will fail.
-2. Create the bcpandas `SqlCreds` object with just the minimum attributes needed (server, database, username, password), and have bcpandas create a full `Engine` object from this. In this case, bcpandas will use `pyodbc` and `sqlalchemy`, and rely on the Microsoft ODBC Driver for SQL Server.
+    In [2]: creds = SqlCreds('my_server', 'my_db', 'my_username', 'my_password')
 
+    In [3]: creds.engine
+    Out[3]: Engine(mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 17 for SQL Server};Server=tcp:my_server,1433;Database=my_db;UID=my_username;PWD=my_password)
+
+    ```
+2. Pass a full `Engine` object to the bcpandas `SqlCreds` object, and bcpandas will attempt to parse out the server, database, username, and password to pass to the command line utilities. If a DSN is used, this will fail.
+    
+    (continuing example above)
+    ```python
+    In [4]: creds2 = SqlCreds.from_engine(creds.engine)
+
+    In [5]: creds2.engine
+    Out[5]: Engine(mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 17 for SQL Server};Server=tcp:my_server,1433;Database=my_db;UID=my_username;PWD=my_password)
+
+    In [6]: creds2
+    Out[6]: SqlCreds(server='my_server', database='my_db', username='my_username', with_krb_auth=False, engine=Engine(mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 17 for SQL Server};Server=tcp:my_server,1433;Database=my_db;UID=my_username;PWD=my_password), password=[REDACTED])
+    ```
+
+### Recommended Usage
+_# TODO_ When to use bcpandas vs. regular pandas.
 
 ## Limitations
 
@@ -111,7 +131,6 @@ Here are some caveats and limitations of bcpandas. Hopefully they will be addres
   * If there is a NaN/Null in the last column of the dataframe it will throw an error. This is due to a BCP issue. See my issue with Microsoft about this [here](https://github.com/MicrosoftDocs/sql-docs/issues/2689) .
   * Bcpandas attempts to use a delimiter that is not present in the dataframe. This is because BCP does __not__ ignore delimiter characters when surrounded by quotes, unlike CSVs - see [here](https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-field-and-row-terminators-sql-server#characters-supported-as-terminators) in the Microsoft docs. Therefore, if all possible delimiter characters are present in the dataframe and bcpandas cannot find a delimiter to use, it will throw an error.
     * Possible delimiters are specified in `constants.py` .
-* Currently the STDOUT stream from BCP and SqlCmd is not asynchronous.
 
 ## Background
 Reading and writing data from pandas DataFrames to/from a SQL database is very slow using the built-in `read_sql` and `to_sql` methods, even with the newly introduced [`execute_many`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-sql-method) option. For Microsoft SQL Server, a far far faster method is to use the BCP utility provided by Microsoft. This utility is a command line tool that transfers data to/from the database and flat text files.

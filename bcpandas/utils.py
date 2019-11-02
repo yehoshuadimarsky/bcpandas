@@ -180,7 +180,6 @@ def build_format_file(df, delimiter):
 
     # TODO add params/options to control:
     #   - the char type (not just SQLCHAR),
-    #   - the ability to skip destination columns
 
     Parameters
     ----------
@@ -213,37 +212,6 @@ def build_format_file(df, delimiter):
     # FYI very important to surround the Terminator with quotes, otherwise BCP fails with:
     # "Unexpected EOF encountered in BCP data-file". Hugely frustrating bug.
     return format_file_str
-
-
-def _get_sql_create_statement(df, table_name, schema="dbo"):
-    """
-    Creates a SQL drop and re-create statement corresponding to the columns list of the object.
-    
-    Parameters
-    -------------
-    df : pandas DataFrame
-    table_name : str
-        name of the new table
-    
-    Returns
-    -------------
-    SQL code to create the table
-    """
-    sql_cols = ",".join(map(lambda x: f"[{x}] nvarchar(max)", df.columns))
-    sql_command = (
-        f"if object_id('[dbo].[{table_name}]', 'U') "
-        f"is not null drop table [dbo].[{table_name}];"
-        f"create table [dbo].[{table_name}] ({sql_cols});"
-    )
-    return sql_command
-
-
-def parse_subprocess_error(result):
-    msg = {}
-    for item in ["args", "returncode", "stdout", "stderr"]:
-        _i = getattr(result, item)
-        msg[item] = _i.decode() if isinstance(_i, bytes) else _i
-    return msg
 
 
 def run_cmd(cmd, live_mode=True):
