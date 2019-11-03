@@ -126,7 +126,6 @@ _# TODO_ When to use bcpandas vs. regular pandas.
 
 Here are some caveats and limitations of bcpandas. Hopefully they will be addressed in future releases
 * In the `to_sql` function:
-  * If `replace` is passed to the `if_exists` parameter, the new SQL table created will make the columns all of `NVARCHAR(MAX)` type.
   * If `append` is passed to the `if_exists` parameter, if the dataframe columns don't match the SQL table columns exactly by both name and order, it will fail.
   * If there is a NaN/Null in the last column of the dataframe it will throw an error. This is due to a BCP issue. See my issue with Microsoft about this [here](https://github.com/MicrosoftDocs/sql-docs/issues/2689) .
   * Bcpandas attempts to use a delimiter that is not present in the dataframe. This is because BCP does __not__ ignore delimiter characters when surrounded by quotes, unlike CSVs - see [here](https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-field-and-row-terminators-sql-server#characters-supported-as-terminators) in the Microsoft docs. Therefore, if all possible delimiter characters are present in the dataframe and bcpandas cannot find a delimiter to use, it will throw an error.
