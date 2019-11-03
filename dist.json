@@ -1,9 +1,9 @@
 {
     "GH_user": "yehoshuadimarsky",
     "name": "bcpandas",
-    "version": "0.1.9",
-    "GH_release_name": "v0.1.9 Release",
-    "GH_release_message": "- Better docs\n - Suppressed output from command line tools in `__init__.py`\n - In `to_sql` with `if_exists='replace'`, now uses `pandas`'s own internal code to create the new SQL table from the dataframe, including preserving the column types and other schema information. Big improvement over the default NVARCHAR columns that was until now.\n - `SqlCreds` now creates a `sqlalchemy.Engine`, and can also be created from one.\n - `bcp` now outputs STDOUT in real time, instead of waiting until the process is complete\n - Bug fix in creating BCP format file if the column name was not a string\n - Started working on benchmark tests, using `pytest-benchmark`\n - Added dependencies to support the `sqlalchemy.Engine` object",
+    "version": "0.2.0",
+    "GH_release_name": "v0.2.0 Release",
+    "GH_release_message": "Major Changes:\n - Better docs\n - Suppressed output from command line tools in `__init__.py`\n - In `to_sql` with `if_exists='replace'`, now uses `pandas`'s own internal code to create the new SQL table from the dataframe, including preserving the column types and other schema information. Big improvement over the default NVARCHAR columns that was until now.\n - `SqlCreds` now creates a `sqlalchemy.Engine`, and can also be created from one.\n - `bcp` now outputs STDOUT in real time, instead of waiting until the process is complete\n - Bug fix in creating BCP format file if the column name was not a string\n - Started working on benchmark tests, using `pytest-benchmark`\n - Added dependencies to support the `sqlalchemy.Engine` object",
     "short_description": "High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!",
     "author": "Josh Dimarsky",
     "python_version": ">=3.6",

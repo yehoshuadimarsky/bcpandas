@@ -12,7 +12,7 @@ $condaEnv = "dist-env"
 
 
 # Setup conda
-conda create -n $condaEnv python -y
+conda create -n $condaEnv python=3.6 -y
 conda install -n $condaEnv -c conda-forge pygithub twine click jinja2 -y
 # get path to env python
 $envpath = ((conda info -e) -match $condaEnv ).Split(" ")[-1]
