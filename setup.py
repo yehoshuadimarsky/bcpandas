@@ -1,24 +1,21 @@
 import json
 from setuptools import setup, find_packages
 
-with open("./dist.json", "r") as file:
-    config = json.load(file)
-
 with open("./README.md", "r") as file:
     long_description = file.read()
 
 
 setup(
-    name=config["name"],
-    version=config["version"],
-    author=config["author"],
-    description=config["short_description"],
+    name="bcpandas",
+    version="0.2.3",
+    author="yehoshuadimarsky",
+    description="High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url=f"https://github.com/{config['GH_user']}/{config['name']}",
+    url="https://github.com/yehoshuadimarsky/bcpandas",
     packages=find_packages(exclude=["tests.*", "tests"]),
-    install_requires=config["dependencies"],
-    python_requires=config["python_version"],
+    install_requires=["pandas>=0.19", "pyodbc", "sqlalchemy>=1.1.4"],
+    python_requires=">=3.6, <3.8",
     keywords="bcp mssql pandas",
     classifiers=[
         "Topic :: Database",

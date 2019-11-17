@@ -124,6 +124,3 @@ dmypy.json
 
 # VS Code
 .vscode/
-
-creds.json
-meta.yaml
