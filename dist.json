@@ -1,9 +1,9 @@
 {
     "GH_user": "yehoshuadimarsky",
     "name": "bcpandas",
-    "version": "0.2.1",
-    "GH_release_name": "v0.2.1 Release",
-    "GH_release_message": "Tweaked docs, added GitHub Actions",
+    "version": "0.2.2",
+    "GH_release_name": "v0.2.2 Release",
+    "GH_release_message": "Bug fix with GitHub Actions",
     "short_description": "High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!",
     "author": "Josh Dimarsky",
     "python_version": ">=3.6",
