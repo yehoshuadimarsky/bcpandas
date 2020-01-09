@@ -11,23 +11,23 @@ import os
 import urllib
 
 import pandas as pd
-import pyodbc
 import sqlalchemy as sa
+import pyodbc
 
 from .constants import (
-    BCPandasValueError,
-    get_delimiter,
     _DELIMITER_OPTIONS,
     IF_EXISTS_OPTIONS,
     IN,
     NEWLINE,
     OUT,
+    QUERY,
     QUERYOUT,
-    QUOTECHAR,
     SQL_TYPES,
     TABLE,
     VIEW,
-    QUERY,
+    BCPandasValueError,
+    get_delimiter,
+    get_quotechar,
 )
 from .utils import bcp, build_format_file, get_temp_file, sqlcmd
 
@@ -160,7 +160,7 @@ def to_sql(
         Name of SQL table or view, without the schema
     creds : bcpandas.SqlCreds
         The credentials used in the SQL database.
-    sql_type : {'table', 'view'}, default 'table'
+    sql_type : {'table'}, can only be 'table'
         The type of SQL object of the destination.
     schema : str, default 'dbo'
         The SQL schema.
@@ -179,10 +179,11 @@ def to_sql(
         If True, will not delete the temporary CSV and format files, and will output their location.
     """
     # validation
-    assert sql_type in SQL_TYPES
+    assert sql_type == TABLE
     assert if_exists in IF_EXISTS_OPTIONS
 
     delim = get_delimiter(df)
+    quotechar = get_quotechar(df)
 
     # save to temp path
     csv_file_path = get_temp_file()
@@ -192,7 +193,7 @@ def to_sql(
         header=False,
         index=False,
         quoting=csv.QUOTE_MINIMAL,  # pandas default
-        quotechar=QUOTECHAR,
+        quotechar=quotechar,
         line_terminator=NEWLINE,
         doublequote=True,
         escapechar=None,  # not needed, as using doublequote
