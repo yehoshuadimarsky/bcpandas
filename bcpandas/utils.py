@@ -26,7 +26,9 @@ from .constants import (
     QUERYOUT,
     SQLCHAR,
     TABLE,
+    VIEW,
     sql_collation,
+    read_data_settings,
 )
 
 logger = logging.getLogger(__name__)
@@ -41,9 +43,13 @@ def bcp(
     schema="dbo",
     format_file_path=None,
     batch_size=None,
+    col_delimiter=None,
+    row_terminator=None,
 ):
-
-    combos = {TABLE: [IN, OUT], QUERY: [QUERYOUT]}
+    """
+    See https://docs.microsoft.com/en-us/sql/tools/bcp-utility
+    """
+    combos = {TABLE: [IN, OUT], QUERY: [QUERYOUT], VIEW: [IN, OUT]}
     direc = direction.lower()
     # validation
     if direc not in DIRECTIONS:
@@ -90,7 +96,8 @@ def bcp(
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
             "-c",  # marking as character data, not Unicode (maybe make as param?)
-            f"-t{_DELIMITER_OPTIONS[0]}",  # marking the delimiter as a comma (maybe also make as param?)
+            f"-t{read_data_settings['delimiter'] if col_delimiter is None else col_delimiter}",
+            f"-r{read_data_settings['newline'] if row_terminator is None else row_terminator}",
         ]
 
     # execute

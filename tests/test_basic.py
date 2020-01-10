@@ -17,11 +17,56 @@ import sqlalchemy as sa
 from pandas.testing import assert_frame_equal
 
 from bcpandas import read_sql, sqlcmd, to_sql
-from bcpandas.constants import BCPandasValueError
+from bcpandas.constants import BCPandasValueError, read_data_settings
+
+
+# datasets
+# can't use fixtures, as can't pass fixtures to @pytest.mark.parametrize()
+
+
+df_simple = pd.DataFrame(
+    {
+        "col1": ["Sam and", "Frodo", "Merry"],
+        "col2": ["the ring", "Mordor", "Smeagol"],
+        "col3": ["The Lord of the Rings", "Gandalf", "Bilbo"],
+        "col4": [2107, 2108, 2109],  # integers
+        "col5": [1.5, 2.5, 3.5],  # floats
+    }
+)
+
+
+df_tricky = pd.DataFrame(
+    {
+        "col1": ["Sam and,", "Frodo", "Merry"],
+        "col2": ["the, ring", 'this is "Mordor"', "Smeagol"],
+        "col3": ["The Lord 'of' the Rings", "Gandalf`", "Bilbo"],
+        "col4": [2107, 2108, 2109],  # integers
+        "col5": [1.5, 2.5, 3],  # floats
+    }
+)
+
+
+# TODO this causes failures with type mismatches in the empty string, to fix
+df_null_last_col = pd.DataFrame(
+    {
+        "col1": ["Sam", "Frodo", None],
+        "col2": ["the ring", "Morder", "Smeagol"],
+        "col3": ["The Lord of the Rings", "Gandalf", ""],
+        "col4": [2107, 2108, np.NaN],
+        "col5": [1.5, 2.5, np.NaN],
+    }
+)
+
+# pass as @pytest.mark.parametrize(*df_args, **df_kwargs)
+df_args = ["df", [df_simple, df_tricky, df_null_last_col]]
+df_kwargs = {"ids": ["df_simple", "df_tricky", "df_null_last_col"]}
 
 
 class TestToSqlBasic:
     """
+    For all tests, the 'actual' is retrieved using the built-in pandas methods, to compare to the 
+    'expected' which used bcpandas.
+
     Uses the same table over and over, relying on the validity of the to_sql method with 'replace',
     which is the first test.
 
@@ -31,288 +76,187 @@ class TestToSqlBasic:
     table_name = "lotr_tosql"
     sql_type = "table"
 
-    def test_tosql_replace(self, df_simple, df_tricky, sql_creds, database, pyodbc_creds):
-        for df in (df_simple, df_tricky):
+    @pytest.mark.parametrize(*df_args, **df_kwargs)
+    def test_tosql_replace(self, df, sql_creds, database, pyodbc_creds):
+        to_sql(
+            df=df,
+            table_name=self.table_name,
+            creds=sql_creds,
+            index=False,
+            sql_type=self.sql_type,
+            if_exists="replace",
+        )
+        actual = pd.read_sql_query(sql="SELECT * FROM dbo.lotr_tosql", con=pyodbc_creds)
+        assert_frame_equal(df, actual, check_column_type="equiv")
+
+    @pytest.mark.parametrize(*df_args, **df_kwargs)
+    def test_tosql_append(self, df, sql_creds, database, pyodbc_creds):
+        # first populate the data
+        to_sql(
+            df=df,
+            table_name=self.table_name,
+            creds=sql_creds,
+            index=False,
+            sql_type=self.sql_type,
+            if_exists="replace",
+        )
+
+        # then test to sql with option of 'append'
+        to_sql(
+            df=df,
+            table_name=self.table_name,
+            creds=sql_creds,
+            index=False,
+            sql_type=self.sql_type,
+            if_exists="append",
+        )
+        actual = pd.read_sql_query(sql="SELECT * FROM dbo.lotr_tosql", con=pyodbc_creds)
+        expected = pd.concat([df, df], axis=0, ignore_index=True)  # appended
+        assert_frame_equal(expected, actual, check_column_type="equiv")
+
+    @pytest.mark.parametrize(*df_args, **df_kwargs)
+    def test_tosql_fail(self, df, sql_creds, database, pyodbc_creds):
+        # first populate the data
+        to_sql(
+            df=df,
+            table_name=self.table_name,
+            creds=sql_creds,
+            index=False,
+            sql_type=self.sql_type,
+            if_exists="replace",
+        )
+
+        # then test to sql with option of 'fail'
+        with pytest.raises(BCPandasValueError):
             to_sql(
                 df=df,
                 table_name=self.table_name,
                 creds=sql_creds,
                 index=False,
                 sql_type=self.sql_type,
-                if_exists="replace",
+                if_exists="fail",
             )
-            actual = pd.read_sql_query(sql="SELECT * FROM dbo.lotr_tosql", con=pyodbc_creds)
-            assert_frame_equal(df, actual, check_column_type="equiv")
 
-    def test_tosql_append(self, df_simple, df_tricky, sql_creds, database, pyodbc_creds):
-        for df in (df_simple, df_tricky):
-            # first populate the data
+    @pytest.mark.parametrize(*df_args, **df_kwargs)
+    def test_tosql_other(self, df, sql_creds, database, pyodbc_creds):
+        with pytest.raises(AssertionError):
             to_sql(
                 df=df,
                 table_name=self.table_name,
                 creds=sql_creds,
                 index=False,
                 sql_type=self.sql_type,
-                if_exists="replace",
+                if_exists="bad_arg",
             )
 
-            # then test to sql with option of 'append'
-            to_sql(
-                df=df,
-                table_name=self.table_name,
-                creds=sql_creds,
-                index=False,
-                sql_type=self.sql_type,
-                if_exists="append",
+
+class TestReadSqlBasic:
+    """
+    For all tests, the 'actual' is retrieved using the built-in pandas methods, to compare to the 
+    'expected' which used bcpandas.
+
+    """
+
+    table_name = "lotr_readsql"
+    view_name = f"v_{table_name}"
+
+    @pytest.mark.parametrize(*df_args, **df_kwargs)
+    def test_readsql_table(self, df, sql_creds, database, pyodbc_creds):
+        # create table and insert rows
+        df.to_sql(
+            name=self.table_name, con=pyodbc_creds, if_exists="replace", index=False, schema="dbo"
+        )
+        # get expected
+        expected = read_sql(self.table_name, creds=sql_creds, sql_type="table", schema="dbo")
+        # check
+        assert_frame_equal(df, expected)
+
+    @pytest.mark.parametrize(*df_args, **df_kwargs)
+    def test_readsql_view(self, df, sql_creds, database, pyodbc_creds):
+        # create table and insert rows
+        df.to_sql(
+            name=self.table_name, con=pyodbc_creds, if_exists="replace", index=False, schema="dbo"
+        )
+        # create corresponding view
+        sqlcmd(
+            creds=sql_creds,
+            command="""DROP VIEW IF EXISTS dbo.{v}; 
+                GO 
+                CREATE VIEW dbo.{v} AS SELECT * FROM dbo.{t};
+                GO""".format(
+                v=self.view_name, t=self.table_name
+            ),
+        )
+
+        # get expected
+        expected = read_sql(self.view_name, creds=sql_creds, sql_type="view", schema="dbo")
+        # check
+        assert_frame_equal(df, expected)
+
+    @pytest.mark.parametrize(*df_args, **df_kwargs)
+    def test_readsql_query(self, df, sql_creds, database, pyodbc_creds):
+        # create table and insert rows
+        df.to_sql(
+            name=self.table_name, con=pyodbc_creds, if_exists="replace", index=False, schema="dbo"
+        )
+        # get expected
+        expected = read_sql(
+            f"SELECT * FROM {self.table_name}", creds=sql_creds, sql_type="query", schema="dbo"
+        )
+        # check
+        assert_frame_equal(df, expected)
+
+    def test_readsql_custom_delimiter(self, sql_creds, database, pyodbc_creds):
+        df = pd.DataFrame(
+            {
+                "col1": ["Sam and <", "Frodo", "Merry"],
+                "col4": [2107, 2108, 2109],  # integers
+                "col5": [1.5, 2.5, 3],  # floats
+            }
+        )
+        # create table and insert rows
+        df.to_sql(
+            name=self.table_name, con=pyodbc_creds, if_exists="replace", index=False, schema="dbo"
+        )
+        # get expected
+        expected = read_sql(
+            self.table_name, creds=sql_creds, sql_type="table", schema="dbo", delimiter="|"
+        )
+        # check
+        assert_frame_equal(df, expected)
+
+        # check that correctly finds the error if bad cust delim is passed
+        with pytest.raises(BCPandasValueError):
+            read_sql(
+                self.table_name, creds=sql_creds, sql_type="table", schema="dbo", delimiter="<"
             )
-            actual = pd.read_sql_query(sql="SELECT * FROM dbo.lotr_tosql", con=pyodbc_creds)
-            expected = pd.concat([df, df], axis=0, ignore_index=True)  # appended
-            assert_frame_equal(expected, actual, check_column_type="equiv")
 
-    def test_tosql_fail(self, df_simple, df_tricky, sql_creds, database, pyodbc_creds):
-        for df in (df_simple, df_tricky):
-            # first populate the data
-            to_sql(
-                df=df,
-                table_name=self.table_name,
-                creds=sql_creds,
-                index=False,
-                sql_type=self.sql_type,
-                if_exists="replace",
-            )
+    def test_readsql_bad_delimiter(self, sql_creds, database, pyodbc_creds):
+        # get default delimiter
+        delim_default = read_data_settings["delimiter"]
+        # has comma in data field, which is also the default delimiter
+        df = pd.DataFrame(
+            {
+                "col1": [f"Sam and {delim_default}", "Frodo", "Merry"],
+                "col4": [2107, 2108, 2109],  # integers
+            }
+        )
+        # create table and insert rows
+        df.to_sql(
+            name=self.table_name, con=pyodbc_creds, if_exists="replace", index=False, schema="dbo"
+        )
+        # check that correctly finds the error
+        with pytest.raises(BCPandasValueError):
+            read_sql(self.table_name, creds=sql_creds, sql_type="table", schema="dbo")
 
-            # then test to sql with option of 'fail'
-            with pytest.raises(BCPandasValueError):
-                to_sql(
-                    df=df,
-                    table_name=self.table_name,
-                    creds=sql_creds,
-                    index=False,
-                    sql_type=self.sql_type,
-                    if_exists="fail",
-                )
-
-    def test_tosql_other(self, df_simple, df_tricky, sql_creds, database, pyodbc_creds):
-        for df in (df_simple, df_tricky):
-            with pytest.raises(AssertionError):
-                to_sql(
-                    df=df,
-                    table_name=self.table_name,
-                    creds=sql_creds,
-                    index=False,
-                    sql_type=self.sql_type,
-                    if_exists="bad_arg",
-                )
+        # check other error occurs if don't check_delim
+        # TODO which error does it raise?
+        expected = read_sql(
+            self.table_name, creds=sql_creds, sql_type="table", schema="dbo", check_delim=False
+        )
+        assert_frame_equal(df, expected)
 
 
-@pytest.mark.skip(reason="old")
-@pytest.mark.parametrize(
-    "if_exists",
-    [
-        "replace",
-        "append",
-        pytest.param("fail", marks=pytest.mark.xfail(raises=BCPandasValueError)),
-        pytest.param("the one ring", marks=pytest.mark.xfail(raises=AssertionError)),
-    ],
-)
-def test_tosql_basic(sql_creds, setup_db_tables, pyodbc_creds, if_exists):
-    df = pd.DataFrame(
-        {
-            "col1": ["Sam and", "Frodo", "Merry"],
-            "col2": ["the ring", "Morder", "Smeagol"],
-            "col3": ["The Lord of the Rings", "Gandalf", "Bilbo"],
-            "col4": [2107, 2108, 2109],  # integers
-            "col5": [1.5, 2.5, 3.5],  # floats
-        }
-    )
-    # to sql
-    to_sql(
-        df=df,
-        table_name="lotr_tosql",
-        creds=sql_creds,
-        index=False,
-        sql_type="table",
-        if_exists=if_exists,
-    )
-    # get expected
-    expected = pd.read_sql_query(sql="SELECT * FROM dbo.lotr_tosql", con=pyodbc_creds).astype(
-        {"col4": pd.np.int64, "col5": pd.np.float64}
-    )
-
-    # check
-    assert_frame_equal(
-        df if if_exists != "append" else pd.concat([df, df], axis=0, ignore_index=True),
-        expected,
-        check_column_type="equiv",
-    )
-
-
-@pytest.mark.skip(reason="fails for now")
-@pytest.mark.parametrize(
-    "if_exists",
-    [
-        "replace",
-        "append",
-        pytest.param("fail", marks=pytest.mark.xfail(raises=BCPandasValueError)),
-        pytest.param("the one ring", marks=pytest.mark.xfail(raises=AssertionError)),
-    ],
-)
-def test_tosql_edgecases(sql_creds, setup_db_tables, pyodbc_creds, if_exists):
-    df = pd.DataFrame(
-        {
-            "col1": ["Sam, and", "Frodo", "Merry"],  # comma in first item
-            "col2": ["the ring", "Morder", "Smeagol"],
-            "col3": ['"The Lord of the Rings"', "Gandalf", "Bilbo"],  # double quote in first item
-            "col4": [2107, 2108, 2109],  # integers
-            "col5": [1.5, 2.5, 3.5],  # floats
-        }
-    )
-    # to sql
-    to_sql(
-        df=df,
-        table_name="lotr_tosql2",
-        creds=sql_creds,
-        index=False,
-        sql_type="table",
-        if_exists=if_exists,
-    )
-    # get expected
-    expected = pd.read_sql_query(sql="SELECT * FROM dbo.lotr_tosql2", con=pyodbc_creds)
-
-    # check
-    assert_frame_equal(
-        df if if_exists != "append" else pd.concat([df, df], axis=0, ignore_index=True), expected
-    )
-
-
-@pytest.mark.skip(reason="too big")
-def test_big(sql_creds, setup_db_tables):
-    _num_cols = 10
-    df = pd.DataFrame(
-        data=np.random.rand(100_000, _num_cols), columns=[f"col_{x}" for x in range(_num_cols)]
-    )
-    # to sql
-    to_sql(
-        df=df,
-        table_name="test_floats_lots",
-        creds=sql_creds,
-        index=False,
-        sql_type="table",
-        if_exists="replace",
-    )
-    # get expected
-    expected = sqlcmd(creds=sql_creds, command="SELECT * FROM dbo.test_floats_lots")
-    # check
-    assert_frame_equal(df, expected)
-
-
-@pytest.mark.skip()
-def test_readsql_basic(sql_creds, setup_db_tables, pyodbc_creds):
-    df = pd.DataFrame(
-        {
-            "col1": ["Sam and", "Frodo", "Merry"],
-            "col2": ["the ring", "Morder", "Smeagol"],
-            "col3": ["The Lord of the Rings", "Gandalf", "Bilbo"],
-            "col4": [2107, 2108, 2109],  # integers
-            "col5": [1.5, 2.5, 3.5],  # floats
-        }
-    )
-
-    # insert rows
-    df.to_sql(
-        name="lotr_readsql1", con=pyodbc_creds, if_exists="replace", index=False, schema="dbo"
-    )
-    # get expected
-    expected = read_sql("lotr_readsql1", creds=sql_creds, sql_type="table", schema="dbo")
-    # check
-    assert_frame_equal(df, expected)
-
-
-@pytest.mark.skip(reason="fails for now")
-def test_readsql_edgecases(sql_creds, setup_db_tables, pyodbc_creds):
-    df = pd.DataFrame(
-        {
-            "col1": ["Sam, and", "Frodo", "Merry"],  # comma in first item
-            "col2": ["the ring", "Morder", "Smeagol"],
-            "col3": ['"The Lord of the Rings"', "Gandalf", "Bilbo"],  # double quote in first item
-            "col4": [2107, 2108, 2109],  # integers
-            "col5": [1.5, 2.5, 3.5],  # floats
-        }
-    )
-
-    # insert rows
-    df.to_sql(
-        name="lotr_readsql2", con=pyodbc_creds, if_exists="replace", index=False, schema="dbo"
-    )
-    # get expected
-    expected = read_sql("lotr_readsql2", creds=sql_creds, sql_type="table", schema="dbo")
-    # check
-    assert_frame_equal(df, expected)
-
-
-@pytest.mark.skip()
-def test_readsql_null_last_col(sql_creds, setup_db_tables, pyodbc_creds):
-    df = pd.DataFrame(
-        {
-            "col1": ["Sam", "Frodo", None],  # NULL in last item
-            "col2": ["the ring", "Morder", "Smeagol"],
-            "col3": ["The Lord of the Rings", "Gandalf", "Bilbo"],
-            "col4": [2107, 2108, np.NaN],
-            "col5": [1.5, 2.5, np.NaN],
-        }
-    )
-
-    # insert rows
-    df.to_sql(
-        name="lotr_read_null_last_col",
-        con=pyodbc_creds,
-        if_exists="replace",
-        index=False,
-        schema="dbo",
-    )
-    # get expected
-    expected = read_sql("lotr_read_null_last_col", creds=sql_creds, sql_type="table", schema="dbo")
-    # check
-    assert_frame_equal(df, expected)
-
-
-@pytest.mark.skip()
-@pytest.mark.parametrize(
-    "if_exists",
-    [
-        "replace",
-        "append",
-        pytest.param("fail", marks=pytest.mark.xfail(raises=BCPandasValueError)),
-        pytest.param("the one ring", marks=pytest.mark.xfail(raises=AssertionError)),
-    ],
-)
-def test_tosql_null_last_col(sql_creds, setup_db_tables, pyodbc_creds, if_exists):
-    df = pd.DataFrame(
-        {
-            "col1": ["Sam and", "Frodo", None],
-            "col2": ["the ring", "Morder", "Smeagol"],
-            "col3": ["The Lord of the Rings", "Gandalf", "Bilbo"],
-            "col4": [2107, 2108, np.NaN],  # integers
-            "col5": [1.5, 2.5, np.NaN],  # floats
-        }
-    )
-    # to sql
-    to_sql(
-        df=df,
-        table_name="lotr_write_null_last_col",
-        creds=sql_creds,
-        index=False,
-        sql_type="table",
-        if_exists=if_exists,
-    )
-    # get expected
-    expected = pd.read_sql_query(
-        sql="SELECT * FROM dbo.lotr_write_null_last_col", con=pyodbc_creds
-    ).astype({"col4": pd.np.float64, "col5": pd.np.float64})
-
-    # check
-    assert_frame_equal(
-        df if if_exists != "append" else pd.concat([df, df], axis=0, ignore_index=True),
-        expected,
-        check_column_type="equiv",
-    )
+@pytest.mark.skip(reason="not implemented yet")
+class TestSqlCmd:
+    pass

@@ -9,6 +9,7 @@ import subprocess
 import time
 import urllib
 
+import numpy as np
 import pandas as pd
 import pytest
 import pyodbc
@@ -76,29 +77,3 @@ def pyodbc_creds(docker_db):
         f"mssql+pyodbc:///?odbc_connect={urllib.parse.quote_plus(db_url)}"
     )
     return engine
-
-
-@pytest.fixture(scope="session")
-def df_simple():
-    return pd.DataFrame(
-        {
-            "col1": ["Sam and", "Frodo", "Merry"],
-            "col2": ["the ring", "Mordor", "Smeagol"],
-            "col3": ["The Lord of the Rings", "Gandalf", "Bilbo"],
-            "col4": [2107, 2108, 2109],  # integers
-            "col5": [1.5, 2.5, 3.5],  # floats
-        }
-    )
-
-
-@pytest.fixture(scope="session")
-def df_tricky():
-    return pd.DataFrame(
-        {
-            "col1": ["Sam and,", "Frodo", "Merry"],
-            "col2": ["the, ring", 'this is "Mordor"', "Smeagol"],
-            "col3": ["The Lord 'of' the Rings", "Gandalf`", "Bilbo"],
-            "col4": [2107, 2108, 2109],  # integers
-            "col5": [1.5, 2.5, 3],  # floats
-        }
-    )

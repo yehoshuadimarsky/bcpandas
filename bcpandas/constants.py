@@ -31,9 +31,15 @@ IF_EXISTS_OPTIONS = ("append", "replace", "fail")
 
 # Text settings
 _DELIMITER_OPTIONS = (",", "|", "\t")
-QUOTECHAR = '"'
 _QUOTECHAR_OPTIONS = ('"', "'", "`", "~")
 NEWLINE = os.linesep
+
+# settings for both BCP and pandas.read_csv for reading from SQL
+# delimiter should be characters that NEVER appear in the source data in SQL, have to guess a good one
+# note that in pandas.read_csv a delimiter longer than a single character is interpreted as a regex
+# see https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-field-and-row-terminators-sql-server
+# and https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html
+read_data_settings = {"delimiter": "\t", "newline": NEWLINE}
 
 # BCP Format File terms
 SQLCHAR = "SQLCHAR"

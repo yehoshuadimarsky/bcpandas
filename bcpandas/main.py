@@ -28,6 +28,7 @@ from .constants import (
     BCPandasValueError,
     get_delimiter,
     get_quotechar,
+    read_data_settings,
 )
 from .utils import bcp, build_format_file, get_temp_file, sqlcmd
 
@@ -265,7 +266,16 @@ def to_sql(
             )
 
 
-def read_sql(table_name, creds, sql_type="table", schema="dbo", batch_size=None, debug=False):
+def read_sql(
+    table_name,
+    creds,
+    sql_type="table",
+    schema="dbo",
+    batch_size=None,
+    debug=False,
+    delimiter=None,
+    check_delim=True,
+):
     """
     Reads a SQL table, view, or query into a pandas DataFrame.
 
@@ -284,6 +294,13 @@ def read_sql(table_name, creds, sql_type="table", schema="dbo", batch_size=None,
         all rows will be read at once.
     debug : bool, default False
         If True, will not delete the temporary CSV file, and will output its location.
+    delimiter : str, optional
+        One or more characters to use as a column delimiter in the temporary CSV file.
+        If not supplied, the default used is specified in `constants.py` in the `read_data_settings` variable.
+        **IMPORTANT** - the delimiter must not appear in the actual data in SQL or else it will fail.
+    check_delim : bool, default True
+        If to check the temporary CSV file for the presence of the delimiter in the data.
+        See note below.
 
     Returns
     -------
@@ -294,6 +311,10 @@ def read_sql(table_name, creds, sql_type="table", schema="dbo", batch_size=None,
     Will actually read the SQL table/view/query twice - first using the sqlcmd utility 
     to get the names of the columns (will only read first few rows), then all the rows 
     using BCP.
+
+    Also, the temporary CSV file will be read into memory twice, to check for the presence of
+    the delimiter character in the data. This can cause it to take longer. If you are sure the
+    delimiter isn't in the data, you can skip this check by passing `check_delim=False`
     """
     # check params
     assert sql_type in SQL_TYPES
@@ -317,6 +338,9 @@ def read_sql(table_name, creds, sql_type="table", schema="dbo", batch_size=None,
         )
 
     file_path = get_temp_file()
+
+    # set delimiter
+    delim = delimiter if delimiter is not None else read_data_settings["delimiter"]
     try:
         bcp(
             sql_item=table_name,
@@ -326,14 +350,35 @@ def read_sql(table_name, creds, sql_type="table", schema="dbo", batch_size=None,
             sql_type=sql_type,
             schema=schema,
             batch_size=batch_size,
+            col_delimiter=delim,
         )
         logger.debug(f"Saved dataframe to temp CSV file at {file_path}")
+
+        # check if delimiter is in the data more than it should be
+        # there should be len(cols)-1 instances of the delimiter per row
+        if check_delim:
+            num_delims = len(cols) - 1
+            with open(file_path, "r") as file:
+                for line in file:
+                    if line.count(delim) > num_delims:
+                        raise BCPandasValueError(
+                            f"The delimiter ({delim}) was found in the source data, cannot"
+                            " import with the delimiter specified. Try specifiying a delimiter"
+                            " that does not appear in the data."
+                        )
+
+        csv_kwargs = {}
+        if len(delim) > 1:
+            # pandas csv C engine only supports 1 character as delim
+            csv_kwargs["engine"] = "python"
+
         return pd.read_csv(
             filepath_or_buffer=file_path,
-            sep=_DELIMITER_OPTIONS[0],
+            sep=delim,
             header=None,
             names=cols,
             index_col=False,
+            **csv_kwargs,
         )
     finally:
         if not debug:
