@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspaces:cached
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
+    
+  db:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    restart: unless-stopped
+    ports: 
+      - 1433:1433
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Express
+      - SA_PASSWORD=MyBigSQLPassword!!!
+      # need to start the db first, as it runs forever, otherwise vs code will hang forever on startup
+      depends_on: 
+      - app
