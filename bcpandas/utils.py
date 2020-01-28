@@ -128,7 +128,12 @@ def sqlcmd(creds, command):
     if creds.with_krb_auth:
         auth = ["-E"]
     else:
-        auth = ["-U", creds.username, "-P", creds.password]
+        auth = [
+            "-U",
+            creds.username,
+            "-P",
+            f"'{creds.password}'" if sys.platform != "win32" else f'"{creds.password}"',
+        ]
     if '"' in command:
         raise BCPandasValueError(
             'Cannot have double quotes charachter (") in the command, '
@@ -141,7 +146,7 @@ def sqlcmd(creds, command):
         # set quoted identifiers ON, needed for Azure SQL Data Warehouse
         # see https://docs.microsoft.com/en-us/azure/sql-data-warehouse/sql-data-warehouse-get-started-connect-sqlcmd
         + ["-I"]
-        + ["-s,", "-W", "-Q", command]
+        + ["-s,", "-W", "-Q", f'"{command}"']
     )
 
     # execute
@@ -241,7 +246,11 @@ def run_cmd(cmd, live_mode=True):
     -------
     The exit code of the command, and STDOUT if live_mode is enabled
     """
-    with_shell = True if sys.platform != "win32" else False
+    if sys.platform == "win32":
+        with_shell = False
+    else:
+        with_shell = True
+        cmd = " ".join(cmd)
     proc = Popen(cmd, stdout=PIPE, stderr=PIPE, encoding="utf-8", errors="utf-8", shell=with_shell)
     if live_mode:
         # live stream STDOUT
