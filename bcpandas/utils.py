@@ -7,6 +7,7 @@ Created on Sat Aug  3 23:07:15 2019
 
 import logging
 import os
+import sys
 import random
 import string
 from subprocess import Popen, PIPE
@@ -240,7 +241,8 @@ def run_cmd(cmd, live_mode=True):
     -------
     The exit code of the command, and STDOUT if live_mode is enabled
     """
-    proc = Popen(cmd, stdout=PIPE, stderr=PIPE, encoding="utf-8", errors="utf-8")
+    with_shell = True if sys.platform != "win32" else False
+    proc = Popen(cmd, stdout=PIPE, stderr=PIPE, encoding="utf-8", errors="utf-8", shell=with_shell)
     if live_mode:
         # live stream STDOUT
         while True:
