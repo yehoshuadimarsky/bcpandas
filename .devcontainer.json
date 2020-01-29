@@ -14,5 +14,6 @@
 	},
 	"postCreateCommand": "pip install -e /workspaces/",
 	"forwardPorts": [1433],
-	"extensions": ["ms-python.python"]
+	"extensions": ["ms-python.python"],
+	"shutdownAction": "stopCompose"
 }

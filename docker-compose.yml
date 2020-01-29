@@ -8,7 +8,7 @@ services:
     volumes:
       - .:/workspaces:cached
     # Overrides default command so things don't shut down after the process ends.
-    command: sleep infinity
+    command: sleep 60s
     
   db:
     image: mcr.microsoft.com/mssql/server:2017-latest
@@ -19,6 +19,6 @@ services:
       - ACCEPT_EULA=Y
       - MSSQL_PID=Express
       - SA_PASSWORD=MyBigSQLPassword!!!
-      # need to start the db first, as it runs forever, otherwise vs code will hang forever on startup
-      depends_on: 
-      - app
+    # need to start the db first, as it runs forever, otherwise vs code will hang forever on startup
+    depends_on: 
+    - app
