@@ -30,6 +30,7 @@ from .constants import (
     VIEW,
     sql_collation,
     read_data_settings,
+    IS_WIN32,
 )
 
 logger = logging.getLogger(__name__)
@@ -71,7 +72,7 @@ def bcp(
     # prepare SQL item string
     if sql_type == QUERY:
         # remove newlines for queries, otherwise messes up BCP
-        sql_item_string = "".join(sql_item.splitlines())
+        sql_item_string = quote_this("".join(sql_item.splitlines()))
     else:
         sql_item_string = f"{schema}.{sql_item}"
 
@@ -97,8 +98,12 @@ def bcp(
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
             "-c",  # marking as character data, not Unicode (maybe make as param?)
-            f"-t{read_data_settings['delimiter'] if col_delimiter is None else col_delimiter}",
-            f"-r{read_data_settings['newline'] if row_terminator is None else row_terminator}",
+            quote_this(
+                f"-t{read_data_settings['delimiter'] if col_delimiter is None else col_delimiter}"
+            ),
+            quote_this(
+                f"-r{read_data_settings['newline'] if row_terminator is None else row_terminator}"
+            ),
         ]
 
     # execute
@@ -128,17 +133,18 @@ def sqlcmd(creds, command):
     if creds.with_krb_auth:
         auth = ["-E"]
     else:
-        auth = [
-            "-U",
-            creds.username,
-            "-P",
-            f"'{creds.password}'" if sys.platform != "win32" else f'"{creds.password}"',
-        ]
-    if '"' in command:
+        auth = ["-U", creds.username, "-P", quote_this(creds.password)]
+    if '"' in command and IS_WIN32:
         raise BCPandasValueError(
             'Cannot have double quotes charachter (") in the command, '
             "raises problems when combining the sqlcmd utility with Python"
         )
+    if "'" in command and not IS_WIN32:
+        msg = (
+            "Single quote detected in the command, will have to pass to the "
+            "command line in Linux unquoted, could lead to problems."
+        )
+        logger.warning(msg)
     command = f"set nocount on; {command} "
     sqlcmd_command = (
         ["sqlcmd", "-S", creds.server, "-d", creds.database, "-b"]
@@ -146,7 +152,7 @@ def sqlcmd(creds, command):
         # set quoted identifiers ON, needed for Azure SQL Data Warehouse
         # see https://docs.microsoft.com/en-us/azure/sql-data-warehouse/sql-data-warehouse-get-started-connect-sqlcmd
         + ["-I"]
-        + ["-s,", "-W", "-Q", f'"{command}"']
+        + ["-s,", "-W", "-Q", quote_this(command)]
     )
 
     # execute
@@ -227,6 +233,26 @@ def build_format_file(df, delimiter):
     return format_file_str
 
 
+def quote_this(this, skip=False):
+    """
+    OS-safe way to quote a string.
+
+    Returns the string with quotes around it.
+    On Windows ~~it's double quotes~~ we skip quoting, 
+    on Linux it's single quotes.
+    """
+    if not this:
+        return this
+    if skip:
+        return this
+    else:
+        if IS_WIN32:
+            # return f'"{this}"'
+            return this
+        else:
+            return f"'{this}'"
+
+
 def run_cmd(cmd, live_mode=True):
     """
     Runs the given command. 
@@ -246,7 +272,7 @@ def run_cmd(cmd, live_mode=True):
     -------
     The exit code of the command, and STDOUT if live_mode is enabled
     """
-    if sys.platform == "win32":
+    if IS_WIN32:
         with_shell = False
     else:
         with_shell = True

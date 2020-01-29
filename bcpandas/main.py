@@ -29,6 +29,7 @@ from .constants import (
     get_delimiter,
     get_quotechar,
     read_data_settings,
+    IS_WIN32,
 )
 from .utils import bcp, build_format_file, get_temp_file, sqlcmd
 

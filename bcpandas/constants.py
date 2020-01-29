@@ -6,6 +6,7 @@ Created on Sat Aug  3 23:20:19 2019
 """
 
 import os
+import sys
 
 
 class BCPandasException(Exception):
@@ -15,6 +16,8 @@ class BCPandasException(Exception):
 class BCPandasValueError(BCPandasException):
     pass
 
+
+IS_WIN32 = sys.platform == "win32"
 
 # BCP terms
 IN = "in"
@@ -39,7 +42,7 @@ NEWLINE = os.linesep
 # note that in pandas.read_csv a delimiter longer than a single character is interpreted as a regex
 # see https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-field-and-row-terminators-sql-server
 # and https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html
-read_data_settings = {"delimiter": "\t", "newline": NEWLINE}
+read_data_settings = {"delimiter": "\\t", "newline": NEWLINE}
 
 # BCP Format File terms
 SQLCHAR = "SQLCHAR"

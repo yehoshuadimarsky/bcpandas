@@ -8,6 +8,7 @@ Created on Sat Aug  3 23:36:07 2019
 import subprocess
 import time
 import urllib
+import sys
 
 import numpy as np
 import pandas as pd
@@ -17,33 +18,25 @@ import sqlalchemy as sa
 
 from bcpandas import SqlCreds, sqlcmd
 
-# if running the tests from docker using docker compose
-USING_DOCKER = True
 
-if USING_DOCKER:
-    server = "db"  # the name in docker-compose
-else:
+IS_WIN = sys.platform == "win32"
+
+
+if IS_WIN:
     server = "127.0.0.1,1433"
+else:
+    server = "db"  # the name in docker-compose
 
 _pwd = "MyBigSQLPassword!!!"
 _db_name = "db_bcpandas"
 _docker_startup = 10  # seconds to wait to give the container time to start
 
 
-if USING_DOCKER:
-
-    @pytest.fixture(scope="session")
-    def docker_db():
-        """
-        Dummy func for when not inside docker
-        """
-        pass
-
-
-else:
-
-    @pytest.fixture(scope="session")
-    def docker_db():
+@pytest.fixture(scope="session")
+def docker_db():
+    if not IS_WIN:
+        yield
+    else:
         _name = "bcpandas-container"
         cmd_start_container = [
             "docker",
@@ -77,7 +70,10 @@ def database(docker_db):
     creds_master = SqlCreds(server=server, database="master", username="sa", password=_pwd)
     sqlcmd(creds_master, f"CREATE DATABASE {_db_name};")
     yield
-    sqlcmd(creds_master, f"DROP DATABASE {_db_name};")
+    if not IS_WIN:
+        sqlcmd(creds_master, f"DROP DATABASE {_db_name};")
+    else:
+        print("all done")
 
 
 @pytest.fixture(scope="session")
@@ -87,7 +83,7 @@ def sql_creds():
 
 
 @pytest.fixture(scope="session")
-def pyodbc_creds(docker_db):
+def pyodbc_creds(database):
     db_url = (
         "Driver={ODBC Driver 17 for SQL Server};"
         + f"Server={server};"
