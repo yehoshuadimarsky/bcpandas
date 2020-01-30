@@ -2,7 +2,9 @@
 	"name": "Bcpandas-Miniconda3-Debian",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
-	"runServices": ["db"],
+	"runServices": [
+		"db"
+	],
 	"workspaceFolder": "/workspaces",
 	"settings": {
 		"console": "integratedTerminal",
@@ -13,7 +15,11 @@
 		"python.linting.pylintPath": "/opt/conda/bin/pylint"
 	},
 	"postCreateCommand": "pip install -e /workspaces/",
-	"forwardPorts": [1433],
-	"extensions": ["ms-python.python"],
+	"forwardPorts": [
+		1433
+	],
+	"extensions": [
+		"ms-python.python"
+	],
 	"shutdownAction": "stopCompose"
 }
