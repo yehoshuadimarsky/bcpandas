@@ -1,5 +1,5 @@
 from .main import to_sql, read_sql, SqlCreds
-from .utils import bcp, sqlcmd
+from .utils import bcp
 
 from subprocess import run, DEVNULL
 import warnings

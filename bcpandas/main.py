@@ -31,7 +31,7 @@ from .constants import (
     read_data_settings,
     IS_WIN32,
 )
-from .utils import bcp, build_format_file, get_temp_file, sqlcmd
+from .utils import bcp, build_format_file, get_temp_file
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +42,8 @@ class SqlCreds:
     engine that uses `pyodbc` as the DBAPI, and store it in the `self.engine` attribute.
 
     If `username` and `password` are not provided, `with_krb_auth` will be `True`.
+
+    Only supports SQL based logins, not Active Directory or Azure AD.
 
     Parameters
     ----------
@@ -90,8 +92,6 @@ class SqlCreds:
     @classmethod
     def from_engine(cls, engine):
         """
-        Alternate constructor from a `sqlalchemy.engine.base.Engine` object.
-
         Alternate constructor, from a `sqlalchemy.engine.base.Engine` that uses `pyodbc` as the DBAPI 
         (which is the SQLAlchemy default for MS SQL) and using an exact PyODBC connection string (not DSN or hostname).
         See https://docs.sqlalchemy.org/en/13/dialects/mssql.html#connecting-to-pyodbc for more.
@@ -138,15 +138,15 @@ class SqlCreds:
 
 
 def to_sql(
-    df,
-    table_name,
-    creds,
-    sql_type="table",
-    schema="dbo",
-    index=True,
-    if_exists="fail",
-    batch_size=None,
-    debug=False,
+    df: pd.DataFrame,
+    table_name: str,
+    creds: SqlCreds,
+    sql_type: str = "table",
+    schema: str = "dbo",
+    index: bool = True,
+    if_exists: str = "fail",
+    batch_size: int = None,
+    debug: bool = False,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -211,15 +211,16 @@ def to_sql(
 
     try:
         if if_exists == "fail":
-            _qry = """SELECT * 
-                 FROM INFORMATION_SCHEMA.{_typ}S 
-                 WHERE TABLE_SCHEMA = '{_schema}' 
-                 AND TABLE_NAME = '{_tbl}'"""
-            res = sqlcmd(
-                creds=creds,
-                command=_qry.format(_typ=sql_type.upper(), _schema=schema, _tbl=table_name),
+            _qry = """
+                SELECT * 
+                FROM INFORMATION_SCHEMA.{_typ}S 
+                WHERE TABLE_SCHEMA = '{_schema}' 
+                AND TABLE_NAME = '{_tbl}'
+                """.format(
+                _typ=sql_type.upper(), _schema=schema, _tbl=table_name
             )
-            if res is not None:
+            res = pd.read_sql_query(sql=_qry, con=creds.engine)
+            if res.shape[0] > 0:
                 raise BCPandasValueError(
                     f"The {sql_type} called {schema}.{table_name} already exists, "
                     f"`if_exists` param was set to `fail`."
@@ -268,14 +269,14 @@ def to_sql(
 
 
 def read_sql(
-    table_name,
-    creds,
-    sql_type="table",
-    schema="dbo",
-    batch_size=None,
-    debug=False,
-    delimiter=None,
-    check_delim=True,
+    table_name: str,
+    creds: SqlCreds,
+    sql_type: str = "table",
+    schema: str = "dbo",
+    batch_size: int = None,
+    debug: bool = False,
+    delimiter: str = None,
+    check_delim: bool = True,
 ):
     """
     Reads a SQL table, view, or query into a pandas DataFrame.
@@ -309,9 +310,8 @@ def read_sql(
 
     Notes
     -----
-    Will actually read the SQL table/view/query twice - first using the sqlcmd utility 
-    to get the names of the columns (will only read first few rows), then all the rows 
-    using BCP.
+    Will actually read the SQL table/view/query twice - first to get the names of the columns 
+    (will only read first few rows), then all the rows using BCP.
 
     Also, the temporary CSV file will be read into memory twice, to check for the presence of
     the delimiter character in the data. This can cause it to take longer. If you are sure the
@@ -327,13 +327,18 @@ def read_sql(
         )
 
     # read top 2 rows of query to get the columns
-    logger.debug("Starting to read first 2 rows using sqlcmd, to get the column names")
+    logger.debug("Starting to read first 2 rows to get the column names")
     _from_clause = table_name if sql_type in (TABLE, VIEW) else f"({table_name})"
-    _existing_data = sqlcmd(creds=creds, command=f"SELECT TOP 2 * FROM {_from_clause} as qry")
-    if _existing_data is not None:
+
+    _existing_data = pd.read_sql_query(
+        sql=f"SELECT TOP 2 * FROM {_from_clause} as qry", con=creds.engine
+    )
+
+    if _existing_data.shape[0] > 0:
         cols = _existing_data.columns
-        logger.debug("Successfully read the column names using sqlcmd")
+        logger.debug("Successfully read the column names")
     else:
+        # TODO maybe just return None here instead?
         raise BCPandasValueError(
             f"No data returned from the SQL item named {table_name} with type of {sql_type}"
         )

@@ -16,7 +16,7 @@ import pytest
 import pyodbc
 import sqlalchemy as sa
 
-from bcpandas import SqlCreds, sqlcmd
+from bcpandas import SqlCreds
 
 
 IS_WIN = sys.platform == "win32"
@@ -68,12 +68,15 @@ def docker_db():
 @pytest.fixture(scope="session")
 def database(docker_db):
     creds_master = SqlCreds(server=server, database="master", username="sa", password=_pwd)
-    sqlcmd(creds_master, f"CREATE DATABASE {_db_name};")
+    # need to use pyodbc instead of sqlalchemy here, otherwise get error:
+    # [SQL Server]CREATE DATABASE statement not allowed within multi-statement transaction.
+    conn = pyodbc.connect(creds_master.engine.url.query["odbc_connect"], autocommit=True)
+    conn.execute(f"CREATE DATABASE {_db_name}")
     yield
     if not IS_WIN:
-        sqlcmd(creds_master, f"DROP DATABASE {_db_name};")
-    else:
-        print("all done")
+        conn.execute(f"DROP DATABASE {_db_name}")
+    conn.close()
+    print("all done")
 
 
 @pytest.fixture(scope="session")
@@ -93,3 +96,8 @@ def pyodbc_creds(database):
         f"mssql+pyodbc:///?odbc_connect={urllib.parse.quote_plus(db_url)}"
     )
     return engine
+
+
+def test_logins(sql_creds, pyodbc_creds):
+    sql_creds.engine.connect()
+    pyodbc_creds.connect()

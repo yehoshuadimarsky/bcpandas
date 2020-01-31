@@ -12,6 +12,7 @@ import random
 import string
 from subprocess import Popen, PIPE
 import tempfile
+import shlex
 
 import pandas as pd
 
@@ -114,60 +115,6 @@ def bcp(
         raise BCPandasException(f"Bcp command failed with exit code {ret_code}")
 
 
-def sqlcmd(creds, command):
-    """
-    Runs the input command against the database and returns the output if it is a table.
-    
-    Parameters
-    ----------
-    creds : bcpandas.SqlCreds
-        Creds for the database
-    command : str
-        SQL command to be executed against the server
-    
-    Returns
-    --------------------
-    Pandas.DataFrame or None
-        Returns a table if the command has an output. Returns None if the output does not return anything.
-    """
-    if creds.with_krb_auth:
-        auth = ["-E"]
-    else:
-        auth = ["-U", creds.username, "-P", quote_this(creds.password)]
-    if '"' in command and IS_WIN32:
-        raise BCPandasValueError(
-            'Cannot have double quotes charachter (") in the command, '
-            "raises problems when combining the sqlcmd utility with Python"
-        )
-    if "'" in command and not IS_WIN32:
-        msg = (
-            "Single quote detected in the command, will have to pass to the "
-            "command line in Linux unquoted, could lead to problems."
-        )
-        logger.warning(msg)
-    command = f"set nocount on; {command} "
-    sqlcmd_command = (
-        ["sqlcmd", "-S", creds.server, "-d", creds.database, "-b"]
-        + auth
-        # set quoted identifiers ON, needed for Azure SQL Data Warehouse
-        # see https://docs.microsoft.com/en-us/azure/sql-data-warehouse/sql-data-warehouse-get-started-connect-sqlcmd
-        + ["-I"]
-        + ["-s,", "-W", "-Q", quote_this(command)]
-    )
-
-    # execute
-    sqlcmd_command_log = [c if c != creds.password else "[REDACTED]" for c in sqlcmd_command]
-    logger.info(f"Executing SqlCmd command now... \nSqlCmd command is: {sqlcmd_command_log}")
-    ret_code, output = run_cmd(sqlcmd_command, live_mode=False)
-    if ret_code:
-        raise BCPandasException(f"SqlCmd command failed with exit code {ret_code}")
-    try:
-        result = pd.read_csv(filepath_or_buffer=output, skiprows=[1], header="infer")
-    except pd.errors.EmptyDataError:
-        result = None
-    return result
-
-
 def get_temp_file():
     """
     Returns full path to a temporary file without creating it.
@@ -241,16 +188,13 @@ def quote_this(this, skip=False):
     On Windows ~~it's double quotes~~ we skip quoting, 
     on Linux it's single quotes.
     """
-    if not this:
-        return this
-    if skip:
-        return this
-    else:
+    if isinstance(this, str):
         if IS_WIN32:
-            # return f'"{this}"'
-            return this
+            return this  # maybe change?
         else:
-            return f"'{this}'"
+            return shlex.quote(this)
+    else:
+        return this
 
 
 def run_cmd(cmd, live_mode=True):

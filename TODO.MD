@@ -12,5 +12,6 @@
 - [ ] Build in auto-retry with native pandas methods if BCP method fails
 - [x] Use pandas internal code to build new SQL tables, instead of just all NVARCHAR
 - [x] Better docs
+- [ ] Remove SqlCmd and all references to it
 
 ... and of course, anything marked `# TODO` in the code.

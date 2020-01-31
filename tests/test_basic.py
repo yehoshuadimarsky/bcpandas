@@ -16,7 +16,7 @@ import pyodbc
 import sqlalchemy as sa
 from pandas.testing import assert_frame_equal
 
-from bcpandas import read_sql, sqlcmd, to_sql
+from bcpandas import read_sql, to_sql
 from bcpandas.constants import BCPandasValueError, read_data_settings
 
 
