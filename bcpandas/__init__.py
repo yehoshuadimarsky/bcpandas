@@ -9,13 +9,9 @@ __version__ = "0.2.6"
 
 
 # BCP check
-cmds = [["bcp", "-v"], ["sqlcmd", "-?"]]
-for cmd in cmds:
-    try:
-        run(cmd, stdout=DEVNULL, stderr=DEVNULL)
-    except FileNotFoundError:
-        warnings.warn(
-            f"{cmd[0].upper()} utility not installed or not found in PATH, bcpandas will not work!"
-        )
+try:
+    run(["bcp", "-v"], stdout=DEVNULL, stderr=DEVNULL)
+except FileNotFoundError:
+    warnings.warn("BCP utility not installed or not found in PATH, bcpandas will not work!")
 
-del run, DEVNULL, warnings, cmd
+del run, DEVNULL, warnings

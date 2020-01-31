@@ -3,6 +3,12 @@
 Created on Sat Aug  3 23:36:07 2019
 
 @author: ydima
+
+
+There are 2 categories of tests we want to do:
+    - Test every code path, i.e. every combination of arguments for each function
+    - Test with different datasets that have different properties
+
 """
 
 import subprocess
@@ -257,6 +263,23 @@ class TestReadSqlBasic:
         assert_frame_equal(df, expected)
 
 
-@pytest.mark.skip(reason="not implemented yet")
-class TestSqlCmd:
-    pass
+# ------
+from hypothesis import given
+import hypothesis.strategies as st
+
+
+@given(index=st.booleans(), debug=st.booleans(), batch_size=st.integers(min_value=1, max_value=5))
+def test_tosql_switches(sql_creds, database, pyodbc_creds, index, debug, batch_size):
+    sql_type = "table"
+    to_sql(
+        df=df_simple,
+        table_name="lotr_tosql_switches",
+        creds=sql_creds,
+        index=index,
+        sql_type="table",
+        if_exists="replace",
+        debug=debug,
+        batch_size=batch_size,
+    )
+    actual = pd.read_sql_query(sql="SELECT * FROM dbo.lotr_tosql_switches", con=pyodbc_creds)
+    assert_frame_equal(df_simple, actual, check_column_type="equiv")

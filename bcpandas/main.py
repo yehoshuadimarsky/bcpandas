@@ -187,13 +187,20 @@ def to_sql(
     delim = get_delimiter(df)
     quotechar = get_quotechar(df)
 
+    if batch_size == 0:
+        raise BCPandasValueError("Param batch_size can't be 0")
+    if batch_size > df.shape[0]:
+        raise BCPandasValueError(
+            "Param batch_size can't be larger than the number of rows in the DataFrame"
+        )
+
     # save to temp path
     csv_file_path = get_temp_file()
     df.to_csv(
         path_or_buf=csv_file_path,
         sep=delim,
         header=False,
-        index=False,
+        index=index,
         quoting=csv.QUOTE_MINIMAL,  # pandas default
         quotechar=quotechar,
         line_terminator=NEWLINE,
@@ -277,7 +284,7 @@ def read_sql(
     debug: bool = False,
     delimiter: str = None,
     check_delim: bool = True,
-):
+) -> pd.DataFrame:
     """
     Reads a SQL table, view, or query into a pandas DataFrame.
 
@@ -301,7 +308,7 @@ def read_sql(
         If not supplied, the default used is specified in `constants.py` in the `read_data_settings` variable.
         **IMPORTANT** - the delimiter must not appear in the actual data in SQL or else it will fail.
     check_delim : bool, default True
-        If to check the temporary CSV file for the presence of the delimiter in the data.
+        Whether to check the temporary CSV file for the presence of the delimiter in the data.
         See note below.
 
     Returns
@@ -319,6 +326,8 @@ def read_sql(
     """
     # check params
     assert sql_type in SQL_TYPES
+    if batch_size == 0:
+        raise BCPandasValueError("Param batch_size can't be 0")
 
     # set up objects
     if ";" in table_name:

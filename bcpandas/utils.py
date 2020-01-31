@@ -197,24 +197,21 @@ def quote_this(this, skip=False):
         return this
 
 
-def run_cmd(cmd, live_mode=True):
+def run_cmd(cmd):
     """
     Runs the given command. 
     
-    If live_mode is enabled, prints STDOUT in real time, 
-    prints STDERR when command is complete, and logs both STDOUT and STDERR.
-    Otherwise, just runs the command, prints STDERR, and returns both the exit code and STDOUT
+    Prints STDOUT in real time,  prints STDERR when command is complete, 
+    and logs both STDOUT and STDERR.
 
     Paramters
     ---------
     cmd : list of str
         The command to run, to be submitted to `subprocess.Popen()`
-    live_mode : bool, default True
-        If to enable live_mode
 
     Returns
     -------
-    The exit code of the command, and STDOUT if live_mode is enabled
+    The exit code of the command
     """
     if IS_WIN32:
         with_shell = False
@@ -222,20 +219,16 @@ def run_cmd(cmd, live_mode=True):
         with_shell = True
         cmd = " ".join(cmd)
     proc = Popen(cmd, stdout=PIPE, stderr=PIPE, encoding="utf-8", errors="utf-8", shell=with_shell)
-    if live_mode:
-        # live stream STDOUT
-        while True:
-            outs = proc.stdout.readline()
-            if outs:
-                print(outs, end="")
-                logger.info(outs)
-            if proc.poll() is not None and outs == "":
-                break
+    # live stream STDOUT
+    while True:
+        outs = proc.stdout.readline()
+        if outs:
+            print(outs, end="")
+            logger.info(outs)
+        if proc.poll() is not None and outs == "":
+            break
     errs = proc.stderr.readlines()
     if errs:
         print(errs, end="")
         logger.error(errs)
-    if live_mode:
-        return proc.returncode
-    else:
-        return proc.returncode, proc.stdout
+    return proc.returncode
