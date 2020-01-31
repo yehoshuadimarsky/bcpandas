@@ -181,18 +181,21 @@ def to_sql(
         If True, will not delete the temporary CSV and format files, and will output their location.
     """
     # validation
+    if df.shape[0] == 0:
+        return
     assert sql_type == TABLE
     assert if_exists in IF_EXISTS_OPTIONS
 
     delim = get_delimiter(df)
     quotechar = get_quotechar(df)
 
-    if batch_size == 0:
-        raise BCPandasValueError("Param batch_size can't be 0")
-    if batch_size > df.shape[0]:
-        raise BCPandasValueError(
-            "Param batch_size can't be larger than the number of rows in the DataFrame"
-        )
+    if batch_size:
+        if batch_size == 0:
+            raise BCPandasValueError("Param batch_size can't be 0")
+        if batch_size > df.shape[0]:
+            raise BCPandasValueError(
+                "Param batch_size can't be larger than the number of rows in the DataFrame"
+            )
 
     # save to temp path
     csv_file_path = get_temp_file()
