@@ -12,10 +12,8 @@ import urllib
 
 import pandas as pd
 import sqlalchemy as sa
-import pyodbc
 
 from .constants import (
-    _DELIMITER_OPTIONS,
     IF_EXISTS_OPTIONS,
     IN,
     NEWLINE,
@@ -29,7 +27,6 @@ from .constants import (
     get_delimiter,
     get_quotechar,
     read_data_settings,
-    IS_WIN32,
 )
 from .utils import bcp, build_format_file, get_temp_file
 
@@ -186,6 +183,9 @@ def to_sql(
     assert sql_type == TABLE
     assert if_exists in IF_EXISTS_OPTIONS
 
+    if index:
+        df = df.copy(deep=True).reset_index()
+
     delim = get_delimiter(df)
     quotechar = get_quotechar(df)
 
@@ -203,7 +203,7 @@ def to_sql(
         path_or_buf=csv_file_path,
         sep=delim,
         header=False,
-        index=index,
+        index=False,  # already set as new col earlier if index=True
         quoting=csv.QUOTE_MINIMAL,  # pandas default
         quotechar=quotechar,
         line_terminator=NEWLINE,
@@ -244,7 +244,7 @@ def to_sql(
                 table_name,
                 sql_db,
                 frame=df,
-                index=index,
+                index=False,  # already set as new col earlier if index=True
                 if_exists=if_exists,
                 index_label=None,
                 schema=schema,
@@ -350,10 +350,7 @@ def read_sql(
         cols = _existing_data.columns
         logger.debug("Successfully read the column names")
     else:
-        # TODO maybe just return None here instead?
-        raise BCPandasValueError(
-            f"No data returned from the SQL item named {table_name} with type of {sql_type}"
-        )
+        return _existing_data
 
     file_path = get_temp_file()
 

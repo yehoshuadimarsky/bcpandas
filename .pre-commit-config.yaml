@@ -9,4 +9,5 @@ repos:
     hooks:
     - id: pylint
       args:
-        - --max-line-length=100
+        - --rcfile=./.pylintrc
+        - --disable=R,C,import-error,logging-format-interpolation
