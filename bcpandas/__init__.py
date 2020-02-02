@@ -1,8 +1,9 @@
-from .main import to_sql, read_sql, SqlCreds
-from .utils import bcp
-
-from subprocess import run, DEVNULL
+# flake8: noqa F401
 import warnings
+from subprocess import DEVNULL, run
+
+from .main import SqlCreds, read_sql, to_sql
+from .utils import bcp
 
 name = "bcpandas"
 __version__ = "0.2.6"

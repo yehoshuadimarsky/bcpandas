@@ -58,4 +58,4 @@ COPY env.yml /tmp/conda-tmp/
 # Local install BCPandas
 RUN conda env update -n base -f /tmp/conda-tmp/env.yml \
         && rm -rf /tmp/conda-tmp \
-        && pre-commit install
+        && pre-commit install --install-hooks

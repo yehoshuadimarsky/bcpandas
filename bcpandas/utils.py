@@ -7,21 +7,18 @@ Created on Sat Aug  3 23:07:15 2019
 
 import logging
 import os
-import sys
 import random
-import string
-from subprocess import Popen, PIPE
-import tempfile
 import shlex
+import string
+import tempfile
+from subprocess import PIPE, Popen
+from typing import List
 
 import pandas as pd
-
-from .constants import (
-    BCPandasException,
-    BCPandasValueError,
-    _DELIMITER_OPTIONS,
+from bcpandas.constants import (
     DIRECTIONS,
     IN,
+    IS_WIN32,
     NEWLINE,
     OUT,
     QUERY,
@@ -29,25 +26,27 @@ from .constants import (
     SQLCHAR,
     TABLE,
     VIEW,
-    sql_collation,
+    BCPandasException,
+    BCPandasValueError,
     read_data_settings,
-    IS_WIN32,
+    sql_collation,
 )
+from bcpandas.main import SqlCreds
 
 logger = logging.getLogger(__name__)
 
 
 def bcp(
-    sql_item,
-    direction,
-    flat_file,
-    creds,
-    sql_type="table",
-    schema="dbo",
-    format_file_path=None,
-    batch_size=None,
-    col_delimiter=None,
-    row_terminator=None,
+    sql_item: str,
+    direction: str,
+    flat_file: str,
+    creds: SqlCreds,
+    sql_type: str = "table",
+    schema: str = "dbo",
+    format_file_path: str = None,
+    batch_size: int = None,
+    col_delimiter: str = None,
+    row_terminator: str = None,
 ):
     """
     See https://docs.microsoft.com/en-us/sql/tools/bcp-utility
@@ -126,7 +125,7 @@ def get_temp_file():
     return file_path
 
 
-def _escape(input_string):
+def _escape(input_string: str):
     """
     Adopted from https://github.com/titan550/bcpy/blob/master/bcpy/format_file_builder.py#L25
     """
@@ -138,7 +137,7 @@ def _escape(input_string):
     )
 
 
-def build_format_file(df, delimiter):
+def build_format_file(df: pd.DataFrame, delimiter: str):
     """
     Creates the non-xml SQL format file. Puts 4 spaces between each section.
     See https://docs.microsoft.com/en-us/sql/relational-databases/import-export/non-xml-format-files-sql-server
@@ -180,7 +179,7 @@ def build_format_file(df, delimiter):
     return format_file_str
 
 
-def quote_this(this, skip=False):
+def quote_this(this: str, skip: bool = False):
     """
     OS-safe way to quote a string.
 
@@ -197,7 +196,7 @@ def quote_this(this, skip=False):
         return this
 
 
-def run_cmd(cmd):
+def run_cmd(cmd: List[str]):
     """
     Runs the given command. 
     
@@ -217,7 +216,7 @@ def run_cmd(cmd):
         with_shell = False
     else:
         with_shell = True
-        cmd = " ".join(cmd)
+        cmd = " ".join(cmd)  # type: ignore
     proc = Popen(cmd, stdout=PIPE, stderr=PIPE, encoding="utf-8", errors="utf-8", shell=with_shell)
     # live stream STDOUT
     while True:

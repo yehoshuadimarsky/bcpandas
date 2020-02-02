@@ -8,12 +8,11 @@ Created on Sat Aug  3 23:07:15 2019
 import csv
 import logging
 import os
-import urllib
+from urllib.parse import quote_plus
 
 import pandas as pd
 import sqlalchemy as sa
-
-from .constants import (
+from bcpandas.constants import (
     IF_EXISTS_OPTIONS,
     IN,
     NEWLINE,
@@ -28,7 +27,7 @@ from .constants import (
     get_quotechar,
     read_data_settings,
 )
-from .utils import bcp, build_format_file, get_temp_file
+from bcpandas.utils import bcp, build_format_file, get_temp_file
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +57,15 @@ class SqlCreds:
     `bcpandas.SqlCreds`
     """
 
-    def __init__(self, server, database, username=None, password=None, driver_version=17, **kwargs):
+    def __init__(
+        self,
+        server: str,
+        database: str,
+        username: str = None,
+        password: str = None,
+        driver_version: int = 17,
+        **kwargs,
+    ):
         if not server or not database:
             raise BCPandasValueError(
                 f"Server and database can't be None, you passed {server}, {database}"
@@ -81,13 +88,13 @@ class SqlCreds:
         )
         if kwargs:
             db_url += ";".join(f"{k}={v}" for k, v in kwargs.items())
-        conn_string = f"mssql+pyodbc:///?odbc_connect={urllib.parse.quote_plus(db_url)}"
+        conn_string = f"mssql+pyodbc:///?odbc_connect={quote_plus(db_url)}"
         self.engine = sa.engine.create_engine(conn_string)
 
         logger.info(f"Created engine for sqlalchemy:\t{self.engine}")
 
     @classmethod
-    def from_engine(cls, engine):
+    def from_engine(cls, engine: sa.engine.base.Engine):
         """
         Alternate constructor, from a `sqlalchemy.engine.base.Engine` that uses `pyodbc` as the DBAPI 
         (which is the SQLAlchemy default for MS SQL) and using an exact PyODBC connection string (not DSN or hostname).

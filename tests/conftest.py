@@ -6,18 +6,14 @@ Created on Sat Aug  3 23:36:07 2019
 """
 
 import subprocess
+import sys
 import time
 import urllib
-import sys
 
-import numpy as np
-import pandas as pd
-import pytest
 import pyodbc
+import pytest
 import sqlalchemy as sa
-
 from bcpandas import SqlCreds
-
 
 IS_WIN = sys.platform == "win32"
 
@@ -37,7 +33,7 @@ def docker_db():
     if not IS_WIN:
         yield
     else:
-        _name = "bcpandas-container"
+        _name = "bcpandas-mssql-container"
         cmd_start_container = [
             "docker",
             "run",

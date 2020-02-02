@@ -8,6 +8,8 @@ Created on Sat Aug  3 23:20:19 2019
 import os
 import sys
 
+import pandas as pd
+
 
 class BCPandasException(Exception):
     pass
@@ -59,14 +61,14 @@ https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-
 """
 
 
-def get_delimiter(df):
+def get_delimiter(df: pd.DataFrame):
     for delim in _DELIMITER_OPTIONS:
         if not df.applymap(lambda x: delim in x if isinstance(x, str) else False).any().any():
             return delim
     raise BCPandasValueError(error_msg.format(typ="delimiter", opts=_DELIMITER_OPTIONS))
 
 
-def get_quotechar(df):
+def get_quotechar(df: pd.DataFrame):
     for qc in _QUOTECHAR_OPTIONS:
         if not df.applymap(lambda x: qc in x if isinstance(x, str) else False).any().any():
             return qc
