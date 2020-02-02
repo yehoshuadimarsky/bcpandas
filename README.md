@@ -126,6 +126,7 @@ _# TODO_ When to use bcpandas vs. regular pandas.
 
 Here are some caveats and limitations of bcpandas. Hopefully they will be addressed in future releases
 * In the `to_sql` function:
+  * For now, an empty string (`""`) in the dataframe becomes `NULL` in the SQL database instead of remaining an empty string. We will hopefully fix this soon.
   * If `append` is passed to the `if_exists` parameter, if the dataframe columns don't match the SQL table columns exactly by both name and order, it will fail.
   * If there is a NaN/Null in the last column of the dataframe it will throw an error. This is due to a BCP issue. See my issue with Microsoft about this [here](https://github.com/MicrosoftDocs/sql-docs/issues/2689) .
   * Because bcpandas first outputs to CSV, it needs to use several specific characters to create the CSV, including a _delimiter_ and a _quote character_. Bcpandas attempts to use  characters that are not present in the dataframe for this, going through the possilbe delimiters and quote characters specified in `constants.py`. If all possible characters are present in the dataframe and bcpandas cannot find both a delimiter and quote character to use, it will throw an error. 
