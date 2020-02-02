@@ -11,8 +11,7 @@
 		"terminal.integrated.shell.linux": "/bin/bash",
 		"python.pythonPath": "/opt/conda/bin/python",
 		"python.linting.enabled": true,
-		"python.linting.pylintEnabled": true,
-		"python.linting.pylintPath": "/opt/conda/bin/pylint"
+		"python.linting.flake8Enabled": true
 	},
 	"postCreateCommand": "pip install -e /workspaces/",
 	"forwardPorts": [
