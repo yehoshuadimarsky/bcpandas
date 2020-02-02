@@ -12,7 +12,8 @@ from urllib.parse import quote_plus
 
 import pandas as pd
 import sqlalchemy as sa
-from bcpandas.constants import (
+
+from .constants import (
     IF_EXISTS_OPTIONS,
     IN,
     NEWLINE,
@@ -27,7 +28,7 @@ from bcpandas.constants import (
     get_quotechar,
     read_data_settings,
 )
-from bcpandas.utils import bcp, build_format_file, get_temp_file
+from .utils import bcp, build_format_file, get_temp_file
 
 logger = logging.getLogger(__name__)
 

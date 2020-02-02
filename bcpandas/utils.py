@@ -10,12 +10,13 @@ import os
 import random
 import shlex
 import string
-import tempfile
 from subprocess import PIPE, Popen
+import tempfile
 from typing import List
 
 import pandas as pd
-from bcpandas.constants import (
+
+from .constants import (
     DIRECTIONS,
     IN,
     IS_WIN32,
@@ -31,7 +32,6 @@ from bcpandas.constants import (
     read_data_settings,
     sql_collation,
 )
-from bcpandas.main import SqlCreds
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def bcp(
     sql_item: str,
     direction: str,
     flat_file: str,
-    creds: SqlCreds,
+    creds,
     sql_type: str = "table",
     schema: str = "dbo",
     format_file_path: str = None,
