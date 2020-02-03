@@ -8,6 +8,7 @@ Created on Sat Aug  3 23:07:15 2019
 import csv
 import logging
 import os
+from typing import Dict, Optional, Union
 from urllib.parse import quote_plus
 
 import pandas as pd
@@ -50,7 +51,8 @@ class SqlCreds:
     password : str, optional
     driver_version : int, default 17
         The version of the Microsoft ODBC Driver for SQL Server to use 
-    **kwargs : additional keyword arguments, to pass into ODBC connection string, 
+    odbc_kwargs : dict of {str, str or int}, optional
+        additional keyword arguments, to pass into ODBC connection string, 
         such as Encrypted='yes'
     
     Returns
@@ -65,7 +67,7 @@ class SqlCreds:
         username: str = None,
         password: str = None,
         driver_version: int = 17,
-        **kwargs,
+        odbc_kwargs: Optional[Dict[str, Union[str, int]]] = None,
     ):
         if not server or not database:
             raise BCPandasValueError(
@@ -87,8 +89,8 @@ class SqlCreds:
             f"Driver={driver};Server=tcp:{self.server},1433;Database={self.database};"
             f"UID={self.username};PWD={self.password}"
         )
-        if kwargs:
-            db_url += ";".join(f"{k}={v}" for k, v in kwargs.items())
+        if odbc_kwargs:
+            db_url += ";".join(f"{k}={v}" for k, v in odbc_kwargs.items())
         conn_string = f"mssql+pyodbc:///?odbc_connect={quote_plus(db_url)}"
         self.engine = sa.engine.create_engine(conn_string)
 
@@ -156,8 +158,8 @@ def to_sql(
     """
     Writes the pandas DataFrame to a SQL table or view.
 
-    Will write all columns to the table or view. 
-    Assumes the SQL table or view has the same number, name, and type of columns.
+    Will write all columns to the table or view. If the destination table/view doesn't exist, will create it.
+    Assumes the SQL table/view has the same number, name, and type of columns.
     To only write parts of the DataFrame, filter it beforehand and pass that to this function.
 
     Parameters
@@ -188,7 +190,7 @@ def to_sql(
     # validation
     if df.shape[0] == 0:
         return
-    assert sql_type == TABLE
+    assert sql_type == TABLE, "only supporting table, not view, for now"
     assert if_exists in IF_EXISTS_OPTIONS
 
     if index:
@@ -227,43 +229,51 @@ def to_sql(
         ff.write(fmt_file_txt)
     logger.debug(f"Created BCP format file at {fmt_file_path}")
 
+    def sql_item_exists():
+        _qry = """
+            SELECT * 
+            FROM INFORMATION_SCHEMA.{_typ}S 
+            WHERE TABLE_SCHEMA = '{_schema}' 
+            AND TABLE_NAME = '{_tbl}'
+            """.format(
+            _typ=sql_type.upper(), _schema=schema, _tbl=table_name
+        )
+        res = pd.read_sql_query(sql=_qry, con=creds.engine)
+        return res.shape[0] > 0
+
+    def create_table():
+        """use pandas' own code to create the table and schema"""
+        from pandas.io.sql import SQLDatabase, SQLTable
+
+        sql_db = SQLDatabase(engine=creds.engine, schema=schema)
+        table = SQLTable(
+            table_name,
+            sql_db,
+            frame=df,
+            index=False,  # already set as new col earlier if index=True
+            if_exists=if_exists,
+            index_label=None,
+            schema=schema,
+            dtype=None,
+        )
+        table.create()
+
     try:
         if if_exists == "fail":
-            _qry = """
-                SELECT * 
-                FROM INFORMATION_SCHEMA.{_typ}S 
-                WHERE TABLE_SCHEMA = '{_schema}' 
-                AND TABLE_NAME = '{_tbl}'
-                """.format(
-                _typ=sql_type.upper(), _schema=schema, _tbl=table_name
-            )
-            res = pd.read_sql_query(sql=_qry, con=creds.engine)
-            if res.shape[0] > 0:
+            if sql_item_exists():
                 raise BCPandasValueError(
                     f"The {sql_type} called {schema}.{table_name} already exists, "
                     f"`if_exists` param was set to `fail`."
                 )
+            else:
+                create_table()
         elif if_exists == "replace":
-            # use pandas' own code to create the table and schema
-            from pandas.io.sql import SQLDatabase, SQLTable
-
-            sql_db = SQLDatabase(engine=creds.engine, schema=schema)
-            table = SQLTable(
-                table_name,
-                sql_db,
-                frame=df,
-                index=False,  # already set as new col earlier if index=True
-                if_exists=if_exists,
-                index_label=None,
-                schema=schema,
-                dtype=None,
-            )
-            table.create()
-
+            create_table()
         elif if_exists == "append":
-            pass  # don't need to do anything
+            if not sql_item_exists():
+                create_table()
 
-        # either way, BCP data in
+        # BCP the data in
         bcp(
             sql_item=table_name,
             direction=IN,
