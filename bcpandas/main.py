@@ -161,6 +161,7 @@ def to_sql(
     Will write all columns to the table or view. If the destination table/view doesn't exist, will create it.
     Assumes the SQL table/view has the same number, name, and type of columns.
     To only write parts of the DataFrame, filter it beforehand and pass that to this function.
+    Unlike the pandas counterpart, if the DataFrame has no rows, nothing will happen.
 
     Parameters
     ----------
@@ -188,7 +189,7 @@ def to_sql(
         If True, will not delete the temporary CSV and format files, and will output their location.
     """
     # validation
-    if df.shape[0] == 0:
+    if df.shape[0] == 0 or df.shape[1] == 0:
         return
     assert sql_type == TABLE, "only supporting table, not view, for now"
     assert if_exists in IF_EXISTS_OPTIONS

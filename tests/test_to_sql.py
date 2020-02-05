@@ -11,7 +11,7 @@ There are 2 categories of tests we want to do:
 """
 
 from bcpandas import to_sql
-from bcpandas.constants import BCPandasValueError
+from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS, BCPandasValueError
 from hypothesis import HealthCheck, given, settings
 import hypothesis.strategies as st
 import pandas as pd
@@ -30,12 +30,22 @@ from .utils import (
 )
 
 
-def test_tosql_all_delims():
-    assert 1 == 2
+@pytest.mark.usefixtures("database")
+def test_tosql_all_delims(sql_creds):
+    df = pd.DataFrame(
+        {i: [v, "random", "string", 1, 2.0] for i, v in enumerate(_DELIMITER_OPTIONS)}
+    )
+    with pytest.raises(BCPandasValueError):
+        to_sql(df=df, table_name="tbl_all_delims", creds=sql_creds, if_exists="replace")
 
 
-def test_tosql_all_quotechars():
-    assert 1 == 2
+@pytest.mark.usefixtures("database")
+def test_tosql_all_quotechars(sql_creds):
+    df = pd.DataFrame(
+        {i: [v, "random", "string", 1, 2.0] for i, v in enumerate(_QUOTECHAR_OPTIONS)}
+    )
+    with pytest.raises(BCPandasValueError):
+        to_sql(df=df, table_name="tbl_all_delims", creds=sql_creds, if_exists="replace")
 
 
 def test_tosql_nan_inf():
@@ -58,8 +68,28 @@ def test_tosql_nan_null_last_col():
     assert 1 == 2
 
 
-def test_tosql_empty_df():
-    assert 1 == 2
+@pytest.mark.usefixtures("database")
+@pytest.mark.parametrize(
+    "df",
+    [pd.DataFrame({}), pd.DataFrame({"a": []}), pd.DataFrame(index=["a"])],
+    ids=["df_empty", "df_with_col", "df_with_idx"],
+)
+def test_tosql_empty_df(df, sql_creds):
+    tbl_name = "tbl_df_empty"
+    schema_name = "dbo"
+    execute_sql_statement(sql_creds.engine, f"DROP TABLE IF EXISTS {schema_name}.{tbl_name}")
+    to_sql(df=df, table_name=tbl_name, creds=sql_creds, schema=schema_name, if_exists="replace")
+    # make sure nothing happened in the database
+    qry = """
+        SELECT * 
+        FROM INFORMATION_SCHEMA.TABLES 
+        WHERE TABLE_SCHEMA = '{_schema}' 
+        AND TABLE_NAME = '{_tbl}'
+        """.format(
+        _tbl=tbl_name, _schema=schema_name
+    )
+    res = pd.read_sql_query(sql=qry, con=sql_creds.engine)
+    assert res.shape[0] == 0  # no rows
 
 
 @pytest.mark.usefixtures("database")
