@@ -1,10 +1,10 @@
-import pandas as pd
-import pyodbc
-import pytest
 from bcpandas import read_sql
 from bcpandas.constants import BCPandasValueError, read_data_settings
 from hypothesis import assume, given, settings
+import pandas as pd
 from pandas.testing import assert_frame_equal
+import pyodbc
+import pytest
 
 from .utils import hypo_df, not_has_all_delims, not_has_all_quotechars
 

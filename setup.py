@@ -12,7 +12,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yehoshuadimarsky/bcpandas",
-    packages=find_packages(exclude=["tests.*", "tests"]),
+    packages=find_packages(),
     install_requires=["pandas>=0.19", "pyodbc", "sqlalchemy>=1.1.4"],
     python_requires=">=3.6, <3.8",
     keywords="bcp mssql pandas",

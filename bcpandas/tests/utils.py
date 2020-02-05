@@ -101,6 +101,9 @@ def prep_df_for_comparison(df: pd.DataFrame, index: bool) -> pd.DataFrame:
 def execute_sql_statement(sql_alchemy_engine: sa.engine.Engine, statement: str):
     """
     Executes the SQL statement using the provided engine. Assumes uses pyodbc.
+
+    need to use pyodbc instead of sqlalchemy, otherwise get error:
+    [SQL Server]CREATE DATABASE statement not allowed within multi-statement transaction.
     """
     conn = pyodbc.connect(sql_alchemy_engine.url.query["odbc_connect"], autocommit=True)
     conn.execute(statement)
