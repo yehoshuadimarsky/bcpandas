@@ -137,7 +137,7 @@ def main(plot_file="benchmark.png"):
 
     docker_generator, creds = setup()
 
-    EXPONENT_LIMIT = 16  # set to 20
+    EXPONENT_LIMIT = 20  # set to 20
     num_cols = 6
     results = []
     for n in range(4, EXPONENT_LIMIT):
