@@ -71,7 +71,7 @@ This is very much a work in progress.
 
 > For now, I only am focusing on the `to_sql` method.
 
-![benchmark graph](https://github.com/yehoshuadimarsky/bcpandas/tree/master/benchmarks/benchmark.png "To-Sql Benchmark")
+![benchmark graph](benchmarks/benchmark.png)
 
 
 ## Requirements
