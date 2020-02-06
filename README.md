@@ -64,7 +64,15 @@ Out[7]:
 9  6226030  7209065  6619231  6881380  7274612  3014770
 ```
 ## Benchmarks
-_# TODO_
+
+See figure below. All code is in the `/benchmarks` directory. Running the `benchmark.py` file will output a PNG image of the graph as well as a JSON file with the environment used to generate it.
+
+This is very much a work in progress.
+
+> For now, I only am focusing on the `to_sql` method.
+
+![benchmark graph](https://github.com/yehoshuadimarsky/bcpandas/tree/master/benchmarks/benchmark.png "To-Sql Benchmark")
+
 
 ## Requirements
 ### Database

@@ -129,20 +129,32 @@ def run_benchmark(df: pd.DataFrame, creds: SqlCreds):
     return pd_time, bcp_time
 
 
-def main():
+def main(plot_file="benchmark.png"):
+    """
+
+    """
+    env_info = gather_env_info()
+
     docker_generator, creds = setup()
 
-    EXPONENT_LIMIT = 15  # set to 20
+    EXPONENT_LIMIT = 16  # set to 20
+    num_cols = 6
     results = []
     for n in range(4, EXPONENT_LIMIT):
         num_rows = 2 ** n
-        df = pd.DataFrame(data=np.ndarray(shape=(num_rows, 6), dtype=int))
+        df = pd.DataFrame(data=np.ndarray(shape=(num_rows, num_cols), dtype=int))
         pd_time, bcp_time = run_benchmark(df=df, creds=creds)
-        results.append({"num_rows": num_rows, "pd_time": pd_time, "bcp_time": bcp_time})
+        results.append({"num_rows": num_rows, "pandas_time": pd_time, "bcpandas_time": bcp_time})
 
     teardown(docker_generator)
-    return results
+    frame = pd.DataFrame(results).set_index("num_rows")
+    plot = frame.plot(kind="line", title=f"ToSql Comparison - Integers, {num_cols} columns")
+    plot.set_xlabel("number of rows")
+    plot.set_ylabel("time (in seconds)")
+    plot.get_figure().savefig(plot_file)
+    with open("benchmark_environment.json", "wt") as file:
+        json.dump(env_info, file, indent=2)
 
 
 if __name__ == "__main__":
-    pprint(gather_env_info())
+    pprint(main())
