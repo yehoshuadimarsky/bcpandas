@@ -9,7 +9,7 @@
 [![Awesome Badges](https://img.shields.io/badge/badges-awesome-green.svg)](https://github.com/Naereen/badges)
 
 
-High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!
+High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!! (pronounced _BEE-CEE-Pandas_)
 
 ## Quickstart
 
@@ -128,7 +128,26 @@ Bcpandas requires a `bcpandas.SqlCreds` object in order to use it, and also a `s
     ```
 
 ### Recommended Usage
-_# TODO_ When to use bcpandas vs. regular pandas.
+
+#### General
+| Feature                                           | Pandas native      | BCPandas           |
+|---------------------------------------------------|--------------------|--------------------|
+| Super speed                                       | :x:                | :white_check_mark: |
+| Handle edge cases                                 | :white_check_mark: | :x:                |
+| Handle messy string data                          | :white_check_mark: | :x:                |
+| Good for simple data types like numbers and dates | :x:                | :white_check_mark: |
+| Only write to some columns in the SQL table       | :white_check_mark: | :x:                |
+
+#### ToSql
+| Feature                                           | Pandas native      | BCPandas           |
+|---------------------------------------------------|--------------------|--------------------|
+| Super speed                                       | :x:                | :white_check_mark: |
+| Only write to some columns in the SQL table       | :white_check_mark: | :x:                |
+
+#### FromSql
+_#TODO_
+
+> built with the help of https://www.tablesgenerator.com/markdown_tables# and https://gist.github.com/rxaviers/7360908
 
 ## Limitations
 
