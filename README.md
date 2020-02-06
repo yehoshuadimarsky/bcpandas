@@ -138,7 +138,7 @@ Bcpandas requires a `bcpandas.SqlCreds` object in order to use it, and also a `s
 | Good for simple data types like numbers and dates |         :x:        | :white_check_mark: |
 
 #### ToSql
-| Feature                                           | Pandas native      | BCPandas           |
+| Feature                                           |    Pandas native   |      BCPandas      |
 |---------------------------------------------------|--------------------|--------------------|
 | Super speed                                       |         :x:        | :white_check_mark: |
 | Only write to some columns in the SQL table       | :white_check_mark: |         :x:        |
