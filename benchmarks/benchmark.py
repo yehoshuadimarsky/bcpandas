@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 import json
 import platform
-from pprint import pprint
 from subprocess import PIPE, run
 import sys
 from typing import List, Union
@@ -86,9 +85,6 @@ def gather_env_info():
     return config
 
 
-tbl_name = "tbl_benchmark"
-
-
 def setup():
     # create docker container
     gen_docker_db = cf.docker_db.__pytest_wrapped__.obj()
@@ -112,6 +108,8 @@ def teardown(gen_docker_db):
 
 
 def run_benchmark(df: pd.DataFrame, creds: SqlCreds):
+    tbl_name = "tbl_benchmark"
+
     # pandas
     print("starting pandas")
     t1 = Timer(name="pandas")
@@ -129,32 +127,42 @@ def run_benchmark(df: pd.DataFrame, creds: SqlCreds):
     return pd_time, bcp_time
 
 
-def main(plot_file="benchmark.png"):
+def main():
     """
 
     """
-    env_info = gather_env_info()
-
+    # run benchmarks
     docker_generator, creds = setup()
-
-    EXPONENT_LIMIT = 20  # set to 20
     num_cols = 6
     results = []
-    for n in range(4, EXPONENT_LIMIT):
-        num_rows = 2 ** n
+    for n in np.linspace(500, 50000, num=20):
+        num_rows = int(n)
         df = pd.DataFrame(data=np.ndarray(shape=(num_rows, num_cols), dtype=int))
         pd_time, bcp_time = run_benchmark(df=df, creds=creds)
         results.append({"num_rows": num_rows, "pandas_time": pd_time, "bcpandas_time": bcp_time})
-
     teardown(docker_generator)
+
+    # file names
+    data_file = "benchmark_data.json"
+    plot_file = "benchmark.png"
+    env_file = "benchmark_environment.json"
+
+    # process results
     frame = pd.DataFrame(results).set_index("num_rows")
-    plot = frame.plot(kind="line", title=f"ToSql Comparison - Integers, {num_cols} columns")
+    frame.to_json(data_file)
+    plot = frame.plot(
+        kind="line",
+        title=f"ToSql Comparison - Integers, {num_cols} columns",
+        linestyle="--",
+        marker="o",
+    )
     plot.set_xlabel("number of rows")
     plot.set_ylabel("time (in seconds)")
     plot.get_figure().savefig(plot_file)
-    with open("benchmark_environment.json", "wt") as file:
+    env_info = gather_env_info()
+    with open(env_file, "wt") as file:
         json.dump(env_info, file, indent=2)
 
 
 if __name__ == "__main__":
-    pprint(main())
+    main()

@@ -4,7 +4,7 @@
     "release": "10",
     "version": "10.0.18362",
     "machine": "AMD64",
-    "processor": "Intel64 Family 6 Model 45 Stepping 7, GenuineIntel",
+    "processor": "Intel64 Family 6 Model 142 Stepping 10, GenuineIntel",
     "python_compiler": "MSC v.1916 64 bit (AMD64)"
   },
   "python": {
@@ -28,10 +28,10 @@
         "OS": "Windows",
         "OS-release": "10",
         "machine": "AMD64",
-        "processor": "Intel64 Family 6 Model 45 Stepping 7, GenuineIntel",
+        "processor": "Intel64 Family 6 Model 142 Stepping 10, GenuineIntel",
         "byteorder": "little",
         "LC_ALL": "null",
-        "LANG": "en_US.UTF-8",
+        "LANG": "null",
         "LOCALE": "null.null"
       },
       "dependencies": {
@@ -81,7 +81,7 @@
     "MSSQL_PID": "Express"
   },
   "mssql_tools": {
-    "bcp-version": "BCP - Bulk Copy Program for Microsoft SQL Server.\r\nCopyright (C) Microsoft Corporation. All Rights Reserved.\r\nVersion: 15.0.1300.359"
+    "bcp-version": "BCP - Bulk Copy Program for Microsoft SQL Server.\r\nCopyright (C) Microsoft Corporation. All Rights Reserved.\r\nVersion: 15.0.1000.34"
   },
   "docker": {
     "docker-version-output": "Client: Docker Engine - Community\n Version:           19.03.5\n API version:       1.40\n Go version:        go1.12.12\n Git commit:        633a0ea\n Built:             Wed Nov 13 07:22:37 2019\n OS/Arch:           windows/amd64\n Experimental:      false\n\nServer: Docker Engine - Community\n Engine:\n  Version:          19.03.5\n  API version:      1.40 (minimum version 1.12)\n  Go version:       go1.12.12\n  Git commit:       633a0ea\n  Built:            Wed Nov 13 07:29:19 2019\n  OS/Arch:          linux/amd64\n  Experimental:     false\n containerd:\n  Version:          v1.2.10\n  GitCommit:        b34a5c8af56e510852c35414db4c1f4fa6172339\n runc:\n  Version:          1.0.0-rc8+dev\n  GitCommit:        3e425f80a8c931f88e6d94a8c831b9d5aa481657\n docker-init:\n  Version:          0.18.0\n  GitCommit:        fec3683\n"

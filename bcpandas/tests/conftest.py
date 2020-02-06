@@ -26,7 +26,7 @@ else:
 
 _pwd = "MyBigSQLPassword!!!"
 _db_name = "db_bcpandas"
-_docker_startup = 10  # seconds to wait to give the container time to start
+_docker_startup = 18  # seconds to wait to give the container time to start
 
 
 @pytest.fixture(scope="session")
