@@ -132,7 +132,7 @@ Bcpandas requires a `bcpandas.SqlCreds` object in order to use it, and also a `s
 #### General
 | Feature                                           |    Pandas native   |      BCPandas      |
 |---------------------------------------------------|:------------------:|:------------------:|
-| Super Speed                                       |         :x:        | :white_check_mark: |
+| Super speed                                       |         :x:        | :white_check_mark: |
 | Handle edge cases                                 | :white_check_mark: |         :x:        |
 | Handle messy string data                          | :white_check_mark: |         :x:        |
 | Good for simple data types like numbers and dates |         :x:        | :white_check_mark: |
@@ -140,8 +140,8 @@ Bcpandas requires a `bcpandas.SqlCreds` object in order to use it, and also a `s
 #### ToSql
 | Feature                                           | Pandas native      | BCPandas           |
 |---------------------------------------------------|--------------------|--------------------|
-| Super speed                                       | :x:                | :white_check_mark: |
-| Only write to some columns in the SQL table       | :white_check_mark: | :x:                |
+| Super speed                                       |         :x:        | :white_check_mark: |
+| Only write to some columns in the SQL table       | :white_check_mark: |         :x:        |
 
 #### FromSql
 _#TODO_
