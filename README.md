@@ -79,7 +79,6 @@ This is very much a work in progress.
 Any version of Microsoft SQL Server. Can be installed on-prem, in the cloud, on a VM, or the Azure SQL Database/Data Warehouse versions.
 ### Python User
 - [BCP](https://docs.microsoft.com/en-us/sql/tools/bcp-utility) Utility
-- [SqlCmd](https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility) Utility
 - Microsoft ODBC Driver **11, 13, 13.1, or 17** for SQL Server. See the [pyodbc docs](https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Windows) for details.
 - Python >= 3.6
 - `pandas` >= 0.19
