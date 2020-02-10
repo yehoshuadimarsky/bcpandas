@@ -97,7 +97,6 @@ PyPI | ```pip install bcpandas```
 Conda| ```conda install -c conda-forge bcpandas```
 
 ## Usage
-
 1. Create creds (see next section)
 2. Replace any `df.to_sql(...)` in your code with `bcpandas.to_sql(df, ...)`
 3. Replace any `pd.read_sql(...)` with `bcpandas.read_sql(...)`
@@ -131,29 +130,33 @@ Bcpandas requires a `bcpandas.SqlCreds` object in order to use it, and also a `s
 
 ### Recommended Usage
 
-#### General
+In General:
+
 | Feature                                           |    Pandas native   |      BCPandas      |
 |---------------------------------------------------|:------------------:|:------------------:|
 | Super speed                                       |         :x:        | :white_check_mark: |
+| Good for simple data types like numbers and dates |         :x:        | :white_check_mark: |
 | Handle edge cases                                 | :white_check_mark: |         :x:        |
 | Handle messy string data                          | :white_check_mark: |         :x:        |
-| Good for simple data types like numbers and dates |         :x:        | :white_check_mark: |
 
-#### ToSql
+`to_sql` specific:
+
 | Feature                                           |    Pandas native   |      BCPandas      |
-|---------------------------------------------------|--------------------|--------------------|
+|---------------------------------------------------|:------------------:|:------------------:|
 | Super speed                                       |         :x:        | :white_check_mark: |
 | Only write to some columns in the SQL table       | :white_check_mark: |         :x:        |
 
-#### FromSql
+`from_sql` specific:
+
 _#TODO_
 
 > built with the help of https://www.tablesgenerator.com/markdown_tables# and https://gist.github.com/rxaviers/7360908
 
-## Limitations
+## Known Issues
 
 Here are some caveats and limitations of bcpandas. Hopefully they will be addressed in future releases
 * In the `to_sql` function:
+  * Bcpandas has been tested with all ASCII characters 32-127. Unicode characters beyond that range have not been tested.
   * For now, an empty string (`""`) in the dataframe becomes `NULL` in the SQL database instead of remaining an empty string. We will hopefully fix this soon.
   * If `append` is passed to the `if_exists` parameter, if the dataframe columns don't match the SQL table columns exactly by both name and order, it will fail.
   * ~~If there is a NaN/Null in the last column of the dataframe it will throw an error. This is due to a BCP issue. See my issue with Microsoft about this [here](https://github.com/MicrosoftDocs/sql-docs/issues/2689).~~ This doesn't seem to be a problem based on the tests.
@@ -175,16 +178,6 @@ This package is a wrapper for seamlessly using the bcp utility from Python using
   * A convoluted, overly class-based internal design
   * Scope a bit too broad - deals with pandas as well as flat files
   This repository aims to fix and improve on `bcpy` and the above issues by making the design choices described earlier.
-</details>
-
-
-<details>
-  <summary>magical-sqlserver</summary>
-  
-  [magical-sqlserver](https://github.com/brennoflavio/magical-sqlserver) is a library to make working with Python and SQL Server very easy. But it doesn't fit what I'm trying to do:
-  * No built in support for pandas DataFrame
-  * Larger codebase, I'm not fully comfortable with the dependency on the very heavy pymssql
-
 </details>
 
 ### Design and Scope
