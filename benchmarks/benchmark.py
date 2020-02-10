@@ -3,7 +3,7 @@ import json
 import platform
 from subprocess import PIPE, run
 import sys
-from typing import List, Union
+from typing import Dict, List, Union
 
 from bcpandas import SqlCreds, to_sql
 from bcpandas.tests import conftest as cf
@@ -107,40 +107,60 @@ def teardown(gen_docker_db):
         pass
 
 
-def run_benchmark(df: pd.DataFrame, creds: SqlCreds):
-    tbl_name = "tbl_benchmark"
+def run_benchmark(df: pd.DataFrame, creds: SqlCreds) -> Dict[str, float]:
+    tbl_pd = "tbl_benchmark_pd"
+    tbl_bcp = "tbl_benchmark_bcp"
+    tbl_bcp2 = "tbl_benchmark_bcp2"
+    chunk_size = 100
 
     # pandas
     print("starting pandas")
     t1 = Timer(name="pandas")
     t1.start()
-    df.to_sql(name=tbl_name, con=creds.engine, if_exists="replace")
+    df.to_sql(
+        name=tbl_pd, con=creds.engine, if_exists="replace", method="multi", chunksize=chunk_size
+    )
     pd_time = t1.stop()
 
     # bcp
-    print("starting bcp")
+    print("starting bcp with batch size")
     t2 = Timer(name="bcp")
     t2.start()
-    to_sql(df=df, table_name=tbl_name, creds=creds, if_exists="replace")
+    to_sql(df=df, table_name=tbl_bcp, creds=creds, if_exists="replace", batch_size=chunk_size)
     bcp_time = t2.stop()
 
-    return pd_time, bcp_time
+    print("starting bcp no batch size")
+    t3 = Timer(name="bcp")
+    t3.start()
+    to_sql(df=df, table_name=tbl_bcp2, creds=creds, if_exists="replace")
+    bcp2_time = t3.stop()
+
+    return {
+        f"pandas_multi_insert_batchsize_{chunk_size}": pd_time,
+        f"bcpandas_batchsize_{chunk_size}": bcp_time,
+        "bcpandas_no_batches": bcp2_time,
+    }
 
 
 def main():
     """
 
     """
-    # run benchmarks
-    docker_generator, creds = setup()
-    num_cols = 6
-    results = []
-    for n in np.linspace(500, 50000, num=20):
-        num_rows = int(n)
-        df = pd.DataFrame(data=np.ndarray(shape=(num_rows, num_cols), dtype=int))
-        pd_time, bcp_time = run_benchmark(df=df, creds=creds)
-        results.append({"num_rows": num_rows, "pandas_time": pd_time, "bcpandas_time": bcp_time})
-    teardown(docker_generator)
+    try:
+        # run benchmarks
+        docker_generator, creds = setup()
+        num_cols = 6
+        results = []
+        for n in np.linspace(50_000, 1_000_000, num=6):
+            num_rows = int(n)
+            df = pd.DataFrame(
+                data=np.ndarray(shape=(num_rows, num_cols), dtype=int),
+                columns=[f"col-{x}" for x in range(num_cols)],
+            )
+            _results = run_benchmark(df=df, creds=creds)
+            results.append({"num_rows": num_rows, **_results})
+    finally:
+        teardown(docker_generator)
 
     # file names
     data_file = "benchmark_data.json"
@@ -158,6 +178,8 @@ def main():
     )
     plot.set_xlabel("number of rows")
     plot.set_ylabel("time (in seconds)")
+    # https://stackoverflow.com/a/44444489/6067848
+    plot.set_xticklabels([f"{x:,.0f}" for x in plot.get_xticks()])
     plot.get_figure().savefig(plot_file)
     env_info = gather_env_info()
     with open(env_file, "wt") as file:
