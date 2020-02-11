@@ -7,6 +7,7 @@ from typing import Dict, List, Union
 
 from bcpandas import SqlCreds, to_sql
 from bcpandas.tests import conftest as cf
+import click
 from codetiming import Timer
 import numpy as np
 import pandas as pd
@@ -74,13 +75,14 @@ def gather_env_info():
     cmd_bcp = ["bcp", "-v"]
     res = run(_parse_cmd(cmd_bcp), stdout=PIPE, stderr=PIPE, shell=with_shell)
     if res.returncode == 0:
-        config["mssql_tools"] = {"bcp-version": res.stdout.decode().strip()}
+        config["mssql_tools"] = {"bcp-version": res.stdout.decode().strip().split("\r\n")}
 
     # Docker
-    cmd_docker = ["docker", "version"]
+    cmd_docker = ["docker", "version", "--format", "'{{json .}}'"]
     res = run(_parse_cmd(cmd_docker), stdout=PIPE, stderr=PIPE, shell=with_shell)
     if res.returncode == 0:
-        config["docker"] = {"docker-version-output": res.stdout.decode()}
+        docker_out = res.stdout.decode().strip()[1:-1]  # strip outer single quotes
+        config["docker"] = {"docker-version-output": json.loads(docker_out)}
 
     return config
 
@@ -107,51 +109,98 @@ def teardown(gen_docker_db):
         pass
 
 
+def _run_single_func(title, func, **kwargs):
+    print(f"starting {title}...")
+    t = Timer(name=title)
+    t.start()
+    func(**kwargs)
+    elapsed = t.stop()
+    return elapsed
+
+
 def run_benchmark(df: pd.DataFrame, creds: SqlCreds) -> Dict[str, float]:
-    tbl_pd = "tbl_benchmark_pd"
-    tbl_bcp = "tbl_benchmark_bcp"
-    tbl_bcp2 = "tbl_benchmark_bcp2"
-    chunk_size = 100
 
-    # pandas
-    print("starting pandas")
-    t1 = Timer(name="pandas")
-    t1.start()
-    df.to_sql(
-        name=tbl_pd, con=creds.engine, if_exists="replace", method="multi", chunksize=chunk_size
-    )
-    pd_time = t1.stop()
+    # using multi-insert in MS SQL is limited by hard limit of 2100 params
+    # in SQL SPs. Using 2000 to be safe.
+    # https://stackoverflow.com/a/56583204/6067848
+    from math import floor
 
-    # bcp
-    print("starting bcp with batch size")
-    t2 = Timer(name="bcp")
-    t2.start()
-    to_sql(df=df, table_name=tbl_bcp, creds=creds, if_exists="replace", batch_size=chunk_size)
-    bcp_time = t2.stop()
+    chunk_size = floor(2000 / (len(df.columns) + 1))  # +1 in case index=True
 
-    print("starting bcp no batch size")
-    t3 = Timer(name="bcp")
-    t3.start()
-    to_sql(df=df, table_name=tbl_bcp2, creds=creds, if_exists="replace")
-    bcp2_time = t3.stop()
+    funcs = [
+        dict(
+            title=f"pandas_multiinsert_{chunk_size}",
+            func=df.to_sql,
+            name="tbl_pandas_1",
+            con=creds.engine,
+            if_exists="replace",
+            method="multi",
+            chunksize=chunk_size,
+        ),
+        dict(
+            title=f"bcpandas_batchsize_{chunk_size}",
+            func=to_sql,
+            df=df,
+            table_name="tbl_bcpandas_1",
+            creds=creds,
+            if_exists="replace",
+            batch_size=chunk_size,
+        ),
+        dict(
+            title="bcpandas_batchsize_10000",
+            func=to_sql,
+            df=df,
+            table_name="tbl_bcpandas_2",
+            creds=creds,
+            if_exists="replace",
+            batch_size=10000,
+        ),
+    ]
 
-    return {
-        f"pandas_multi_insert_batchsize_{chunk_size}": pd_time,
-        f"bcpandas_batchsize_{chunk_size}": bcp_time,
-        "bcpandas_no_batches": bcp2_time,
-    }
+    return {i["title"]: _run_single_func(**i) for i in funcs}
 
 
-def main():
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+@click.option(
+    "-f",
+    "--func",
+    type=click.Choice(["tosql", "readsql"], case_sensitive=False),
+    required=True,
+    help="The Bcpandas function to benchmark",
+)
+@click.option(
+    "--num-cols", type=int, required=True, default=6, help="Number of columns in the DataFrames"
+)
+@click.option(
+    "--min-rows",
+    type=click.IntRange(0,),
+    required=True,
+    default=50_000,
+    help="Min rows in the DataFrames",
+)
+@click.option(
+    "--max-rows", type=int, required=True, default=1_000_000, help="Max rows in the DataFrames"
+)
+@click.option(
+    "--num-examples", type=int, required=True, default=10, help="How many Dataframes to run"
+)
+def main(func, num_cols, min_rows, max_rows, num_examples):
     """
-
+    Will generate `num-examples` of DataFrames using numpy.linspace, going from `min-rows` rows to
+    `max-rows` rows.
     """
+    if func == "readsql":
+        return
     try:
         # run benchmarks
         docker_generator, creds = setup()
-        num_cols = 6
         results = []
-        for n in np.linspace(50_000, 1_000_000, num=6):
+        for n in np.linspace(min_rows, max_rows, num=num_examples):
             num_rows = int(n)
             df = pd.DataFrame(
                 data=np.ndarray(shape=(num_rows, num_cols), dtype=int),
@@ -187,4 +236,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    cli()

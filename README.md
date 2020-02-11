@@ -75,7 +75,7 @@ This is very much a work in progress.
 
 
 ### What about the new Pandas [`method='multi'`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-sql-method)?
-It has some drawbacks. First, because SQL Server can only accept up to 2100 parameters in a query, you are forced to set the `chunksize` parameter to a very small number for it to work. Also, it is still slower. See [here](https://stackoverflow.com/questions/50689082/to-sql-pyodbc-count-field-incorrect-or-syntax-error) and [here](https://stackoverflow.com/questions/50689082/to-sql-pyodbc-count-field-incorrect-or-syntax-error) for more discussion on this, and the recommendation to use a bulk insert tool such as BCP. SQL Server simply didn't design the regular `INSERT` statement to support huge amounts of data.
+It has some drawbacks. First, because SQL Server can only accept up to 2100 parameters in a query, you are forced to set the `chunksize` parameter to a very small number for it to work - generally a bi less then `2100/<number of columns>`. Also, it is still slower. See [here](https://stackoverflow.com/questions/50689082/to-sql-pyodbc-count-field-incorrect-or-syntax-error) and [here](https://github.com/mkleehammer/pyodbc/issues/217) for more discussion on this, and the recommendation to use a bulk insert tool such as BCP. SQL Server simply didn't design the regular `INSERT` statement to support huge amounts of data.
 
 ## Requirements
 ### Database

@@ -40,7 +40,7 @@
         "pytz": "2019.3",
         "dateutil": "2.8.1",
         "pip": "20.0.2",
-        "setuptools": "45.1.0.post20200119",
+        "setuptools": "45.2.0.post20200209",
         "Cython": null,
         "pytest": "5.3.4",
         "hypothesis": "4.54.2",
@@ -81,9 +81,80 @@
     "MSSQL_PID": "Express"
   },
   "mssql_tools": {
-    "bcp-version": "BCP - Bulk Copy Program for Microsoft SQL Server.\r\nCopyright (C) Microsoft Corporation. All Rights Reserved.\r\nVersion: 15.0.1300.359"
+    "bcp-version": [
+      "BCP - Bulk Copy Program for Microsoft SQL Server.",
+      "Copyright (C) Microsoft Corporation. All Rights Reserved.",
+      "Version: 15.0.1300.359"
+    ]
   },
   "docker": {
-    "docker-version-output": "Client: Docker Engine - Community\n Version:           19.03.5\n API version:       1.40\n Go version:        go1.12.12\n Git commit:        633a0ea\n Built:             Wed Nov 13 07:22:37 2019\n OS/Arch:           windows/amd64\n Experimental:      false\n\nServer: Docker Engine - Community\n Engine:\n  Version:          19.03.5\n  API version:      1.40 (minimum version 1.12)\n  Go version:       go1.12.12\n  Git commit:       633a0ea\n  Built:            Wed Nov 13 07:29:19 2019\n  OS/Arch:          linux/amd64\n  Experimental:     false\n containerd:\n  Version:          v1.2.10\n  GitCommit:        b34a5c8af56e510852c35414db4c1f4fa6172339\n runc:\n  Version:          1.0.0-rc8+dev\n  GitCommit:        3e425f80a8c931f88e6d94a8c831b9d5aa481657\n docker-init:\n  Version:          0.18.0\n  GitCommit:        fec3683\n"
+    "docker-version-output": {
+      "Client": {
+        "Platform": {
+          "Name": "Docker Engine - Community"
+        },
+        "Version": "19.03.5",
+        "ApiVersion": "1.40",
+        "DefaultAPIVersion": "1.40",
+        "GitCommit": "633a0ea",
+        "GoVersion": "go1.12.12",
+        "Os": "windows",
+        "Arch": "amd64",
+        "BuildTime": "Wed Nov 13 07:22:37 2019",
+        "Experimental": false
+      },
+      "Server": {
+        "Platform": {
+          "Name": "Docker Engine - Community"
+        },
+        "Components": [
+          {
+            "Name": "Engine",
+            "Version": "19.03.5",
+            "Details": {
+              "ApiVersion": "1.40",
+              "Arch": "amd64",
+              "BuildTime": "Wed Nov 13 07:29:19 2019",
+              "Experimental": "false",
+              "GitCommit": "633a0ea",
+              "GoVersion": "go1.12.12",
+              "KernelVersion": "4.19.76-linuxkit",
+              "MinAPIVersion": "1.12",
+              "Os": "linux"
+            }
+          },
+          {
+            "Name": "containerd",
+            "Version": "v1.2.10",
+            "Details": {
+              "GitCommit": "b34a5c8af56e510852c35414db4c1f4fa6172339"
+            }
+          },
+          {
+            "Name": "runc",
+            "Version": "1.0.0-rc8+dev",
+            "Details": {
+              "GitCommit": "3e425f80a8c931f88e6d94a8c831b9d5aa481657"
+            }
+          },
+          {
+            "Name": "docker-init",
+            "Version": "0.18.0",
+            "Details": {
+              "GitCommit": "fec3683"
+            }
+          }
+        ],
+        "Version": "19.03.5",
+        "ApiVersion": "1.40",
+        "MinAPIVersion": "1.12",
+        "GitCommit": "633a0ea",
+        "GoVersion": "go1.12.12",
+        "Os": "linux",
+        "Arch": "amd64",
+        "KernelVersion": "4.19.76-linuxkit",
+        "BuildTime": "2019-11-13T07:29:19.000000000+00:00"
+      }
+    }
   }
 }
