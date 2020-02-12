@@ -1,12 +1,12 @@
 # flake8: noqa F401
-import warnings
 from subprocess import DEVNULL, run
+import warnings
 
 from .main import SqlCreds, read_sql, to_sql
 from .utils import bcp
 
 name = "bcpandas"
-__version__ = "0.2.6"
+__version__ = "0.2.7"
 
 
 # BCP check
