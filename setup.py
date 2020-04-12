@@ -14,7 +14,7 @@ setup(
     url="https://github.com/yehoshuadimarsky/bcpandas",
     packages=find_packages(),
     install_requires=["pandas>=0.19", "pyodbc", "sqlalchemy>=1.1.4"],
-    python_requires=">=3.6, <3.8",
+    python_requires=">=3.6, <3.9",
     keywords="bcp mssql pandas",
     classifiers=[
         "Topic :: Database",
