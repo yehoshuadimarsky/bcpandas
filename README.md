@@ -69,9 +69,9 @@ The big speedup benefit of bcpandas is in the `to_sql` function, as the benchmar
 
 Also, `read_sql` is not fully tested for this reason, as it became apparant that it is not worth the effort to fix all of the edge cases.
 
-Q: So why do we even have a `read_sql` function?
+**Q**: So why do we even have a `read_sql` function?
 
-A: To complete the API, and in order to discover that there is no speedup for it in bcpandas. Now that this is determined, it will be removed in a future release.
+**A**: To complete the API, and in order to discover that there is no speedup for it in bcpandas. Now that this is determined, it will be removed in a future release.
 
 ## Benchmarks
 See figures below. All code is in the `/benchmarks` directory. To run the benchmarks, run `python benchmark.py main` and fill in the command line options that are presented. 
