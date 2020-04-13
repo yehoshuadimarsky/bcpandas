@@ -5,13 +5,14 @@
 - [x] Stream BCP stdout to logs in real time asynchronously
 - [x] Upload to PyPI
 - [x] Upload to conda-forge
-- [x] Set up CI/CD
-- [ ] Write more tests
-- [ ] Benchmarks vs. regular pandas methods
+- [ ] Set up CI/CD
+- [ ] Write more tests for 100% code coverage
+- [x] Benchmarks vs. regular pandas methods
 - [x] Find way to automate creation of temp SQL Server db for testing
 - [ ] Build in auto-retry with native pandas methods if BCP method fails
 - [x] Use pandas internal code to build new SQL tables, instead of just all NVARCHAR
 - [x] Better docs
-- [ ] Remove SqlCmd and all references to it
+- [x] Remove SqlCmd and all references to it
+- [ ] Remove the deprecated `read_sql` and all references to it
 
 ... and of course, anything marked `# TODO` in the code.

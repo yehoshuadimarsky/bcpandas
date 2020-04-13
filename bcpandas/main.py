@@ -10,6 +10,7 @@ import logging
 import os
 from typing import Dict, Optional, Union
 from urllib.parse import quote_plus
+import warnings
 
 import pandas as pd
 import sqlalchemy as sa
@@ -308,6 +309,8 @@ def read_sql(
     check_delim: bool = True,
 ) -> pd.DataFrame:
     """
+    ** It is HIGHLY recommended to not use this method, and instead use the native pandas `read_sql*` methods. See README for details. **
+    
     Reads a SQL table, view, or query into a pandas DataFrame.
 
     Parameters
@@ -346,6 +349,9 @@ def read_sql(
     the delimiter character in the data. This can cause it to take longer. If you are sure the
     delimiter isn't in the data, you can skip this check by passing `check_delim=False`
     """
+    warnings.warn(
+        "It is HIGHLY recommended to not use this method, and instead use the native pandas `read_sql*` methods. See README for details."
+    )
     # check params
     assert sql_type in SQL_TYPES
     if batch_size == 0:

@@ -63,19 +63,37 @@ Out[7]:
 8  6881378  6553710  7209065  7536743  7274588  6619248
 9  6226030  7209065  6619231  6881380  7274612  3014770
 ```
+
+## IMPORTANT - Read vs. Write
+The big speedup benefit of bcpandas is in the `to_sql` function, as the benchmarks below show. However, the `read_sql` function actually performs __slower__ than the pandas equivalent. So don't use it. Use bcpandas for the `to_sql` function only and to use native pandas in `read_sql`. 
+
+Also, `read_sql` is not fully tested for this reason, as it became apparant that it is not worth the effort to fix all of the edge cases.
+
+Q: So why do we even have a `read_sql` function?
+
+A: To complete the API, and in order to discover that there is no speedup for it in bcpandas. Now that this is determined, it will be removed in a future release.
+
 ## Benchmarks
+See figures below. All code is in the `/benchmarks` directory. To run the benchmarks, run `python benchmark.py main` and fill in the command line options that are presented. 
 
-See figure below. All code is in the `/benchmarks` directory. Running the `benchmark.py` file will output a PNG image of the graph as well as a JSON file with the environment used to generate it.
+Running this will output
+1. PNG image of the graph
+2. JSON file of the benchmark data
+3. JSON file with the environment details of the machine that was used to generate it
 
-This is very much a work in progress.
+### to_sql
+> I didn't bother including the pandas non-`multiinsert` version here because it just takes way too long
 
-> For now, I only am focusing on the `to_sql` method.
+![to_sql benchmark graph](benchmarks/tosql_benchmark.png)
 
-![benchmark graph](benchmarks/benchmark.png)
+#### Why not just use the new pandas [`method='multi'`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-sql-method)?
+1. Because it is still much slower 
+2. Because you are forced to set the `chunksize` parameter to a very small number for it to work - generally a bit less then `2100/<number of columns>`. This is because SQL Server can only accept up to 2100 parameters in a query. See [here](https://stackoverflow.com/questions/50689082/to-sql-pyodbc-count-field-incorrect-or-syntax-error) and [here](https://github.com/mkleehammer/pyodbc/issues/217) for more discussion on this, and the recommendation to use a bulk insert tool such as BCP. It seems that SQL Server simply didn't design the regular `INSERT` statement to support huge amounts of data.
 
+### read_sql
+As you can see, pandas native clearly wins here
 
-### What about the new Pandas [`method='multi'`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-sql-method)?
-It has some drawbacks. First, because SQL Server can only accept up to 2100 parameters in a query, you are forced to set the `chunksize` parameter to a very small number for it to work - generally a bi less then `2100/<number of columns>`. Also, it is still slower. See [here](https://stackoverflow.com/questions/50689082/to-sql-pyodbc-count-field-incorrect-or-syntax-error) and [here](https://github.com/mkleehammer/pyodbc/issues/217) for more discussion on this, and the recommendation to use a bulk insert tool such as BCP. SQL Server simply didn't design the regular `INSERT` statement to support huge amounts of data.
+![read_sql benchmark graph](benchmarks/readsql_benchmark.png)
 
 ## Requirements
 ### Database
@@ -99,7 +117,6 @@ Conda| ```conda install -c conda-forge bcpandas```
 ## Usage
 1. Create creds (see next section)
 2. Replace any `df.to_sql(...)` in your code with `bcpandas.to_sql(df, ...)`
-3. Replace any `pd.read_sql(...)` with `bcpandas.read_sql(...)`
 
 That's it!
 
@@ -130,8 +147,7 @@ Bcpandas requires a `bcpandas.SqlCreds` object in order to use it, and also a `s
 
 ### Recommended Usage
 
-In General:
-
+#### General
 | Feature                                           |    Pandas native   |      BCPandas      |
 |---------------------------------------------------|:------------------:|:------------------:|
 | Super speed                                       |         :x:        | :white_check_mark: |
@@ -139,16 +155,17 @@ In General:
 | Handle edge cases                                 | :white_check_mark: |         :x:        |
 | Handle messy string data                          | :white_check_mark: |         :x:        |
 
-`to_sql` specific:
-
+#### `to_sql` specific
 | Feature                                           |    Pandas native   |      BCPandas      |
 |---------------------------------------------------|:------------------:|:------------------:|
 | Super speed                                       |         :x:        | :white_check_mark: |
 | Only write to some columns in the SQL table       | :white_check_mark: |         :x:        |
 
-`from_sql` specific:
-
-_#TODO_
+#### `read_sql` specific
+Use pandas native! (See earlier section _IMPORTANT - Read vs. Write_)
+| Feature                                           |    Pandas native   |      BCPandas      |
+|---------------------------------------------------|:------------------:|:------------------:|
+| Speed and accuracy (basically, everything)        | :white_check_mark: |         :x:        |
 
 > built with the help of https://www.tablesgenerator.com/markdown_tables# and https://gist.github.com/rxaviers/7360908
 
@@ -164,7 +181,7 @@ Here are some caveats and limitations of bcpandas. Hopefully they will be addres
     * The BCP utility does __not__ ignore delimiter characters when surrounded by quotes, unlike CSVs - see [here](https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-field-and-row-terminators-sql-server#characters-supported-as-terminators) in the Microsoft docs.
 
 ## Background
-Reading and writing data from pandas DataFrames to/from a SQL database is very slow using the built-in `read_sql` and `to_sql` methods, even with the newly introduced [`execute_many`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-sql-method) option. For Microsoft SQL Server, a far far faster method is to use the BCP utility provided by Microsoft. This utility is a command line tool that transfers data to/from the database and flat text files.
+Writing data from pandas DataFrames to a SQL database is very slow using the built-in `to_sql` method, even with the newly introduced [`execute_many`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-sql-method) option. For Microsoft SQL Server, a far far faster method is to use the BCP utility provided by Microsoft. This utility is a command line tool that transfers data to/from the database and flat text files.
 
 This package is a wrapper for seamlessly using the bcp utility from Python using a pandas DataFrame. Despite the IO hits, the fastest option by far is saving the data to a CSV file in the file system and using the bcp utility to transfer the CSV file to SQL Server. **Best of all, you don't need to know anything about using BCP at all!**
 
