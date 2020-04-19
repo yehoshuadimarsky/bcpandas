@@ -24,4 +24,4 @@ jobs:
     - name: find dockercli.exe
       shell: cmd
       run: |
-        dir \*DockerCli.exe /s
+        dir C:\*DockerCli.exe /s
