@@ -4,8 +4,8 @@
 name: Docker testing
 
 on:
-  push:
-    branches: [ master ]
+  # push:
+  #  branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -22,6 +22,6 @@ jobs:
         docker version
         # & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
     - name: find dockercli.exe
-      shell: powershell
+      shell: cmd
       run: |
-        Get-Childitem –Path C:\ -Include *DockerCli.exe -Recurse -ErrorAction SilentlyContinue
+        dir \*DockerCli.exe /s
