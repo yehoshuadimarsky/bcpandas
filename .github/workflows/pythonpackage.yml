@@ -30,6 +30,7 @@ jobs:
        auto-activate-base: false
     - name: Lint with flake8
       run: |
+        conda info -e
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --statistics --select=E9,F63,F7,F82 --show-source 
         # regular flake8 check
