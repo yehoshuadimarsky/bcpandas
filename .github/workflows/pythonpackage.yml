@@ -14,10 +14,12 @@ jobs:
     env:
       CONDA_ENV_NAME: bcpandas-env
     runs-on: ${{ matrix.os }}
+    # continue-on-error: false
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        python-version: [3.6, 3.7, 3.8]
+        os: [windows-latest, ubuntu-latest]
+        python-version: [3.8]  # [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -28,18 +30,24 @@ jobs:
        environment-file: env.yml
        python-version: ${{ matrix.python-version }}
        auto-activate-base: false
-    - name: Lint with flake8
+    - name: Lint with flake8 and check with mypy (on Linux)
+      if: ${{ runner.os == 'Linux'}}
       # per https://github.com/yehoshuadimarsky/setup-miniconda#important
       shell: bash -l {0}
       run: |
-        conda info -e
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --statistics --select=E9,F63,F7,F82 --show-source 
         # regular flake8 check
         flake8 . --count --statistics
-    - name: Mypy check
-      shell: bash -l {0}
-      run: mypy .
+        mypy .
+    - name: Lint with flake8 and check with mypy (on Windows)
+      if: ${{ runner.os == 'Windows'}}
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --statistics --select=E9,F63,F7,F82 --show-source 
+        # regular flake8 check
+        flake8 . --count --statistics
+        mypy .
     - name: Install BCP Utility
       if: ${{ runner.os == 'Linux'}}
       run: |
@@ -52,9 +60,20 @@ jobs:
         source ~/.bashrc
     - name: Test BCP
       run: bcp -v
+    - name: Change Docker to Linux containers (on Windows)
+      if: ${{ runner.os == 'Windows'}}
+      shell: powershell
+      run: |
+        choco install docker-desktop
+        & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
     - name: Prepare Docker image for testing
       run: docker pull mcr.microsoft.com/mssql/server:2017-latest
-    - name: Test with pytest
+    - name: Test with pytest (on Linux)
+      if: ${{ runner.os == 'Linux'}}
       shell: bash -l {0}
       run: |
-        pytest bcpandas/tests
+        pytest bcpandas/tests/test_to_sql.py
+    - name: Test with pytest (on Windows)
+      if: ${{ runner.os == 'Windows'}}
+      run: |
+        pytest bcpandas/tests/test_to_sql.py
