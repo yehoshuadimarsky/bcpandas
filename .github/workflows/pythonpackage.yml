@@ -24,14 +24,14 @@ jobs:
       shell: pwsh
       run: conda create -n $ENV:CONDA_ENV_NAME python=${{ matrix.python-version }} -y -v
     - name: Set up Conda and packages
-      shell: pwsh
+      shell: powershell
       run: |
         conda info -a
         conda list
         conda update conda
         conda env update -n $ENV:CONDA_ENV_NAME -f env.yml
     - name: Show Conda env stuff
-      shell: pwsh
+      shell: powershell
       run: |
         conda info -a
         conda list
