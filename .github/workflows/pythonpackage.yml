@@ -29,6 +29,7 @@ jobs:
        python-version: ${{ matrix.python-version }}
        auto-activate-base: false
     - name: Lint with flake8
+      shell: bash -l {0}
       run: |
         conda info -e
         # stop the build if there are Python syntax errors or undefined names
@@ -36,6 +37,7 @@ jobs:
         # regular flake8 check
         flake8 . --count --statistics
     - name: Mypy check
+      shell: bash -l {0}
       run: mypy .
     - name: Install BCP Utility
       if: ${{ runner.os == 'Linux'}}
