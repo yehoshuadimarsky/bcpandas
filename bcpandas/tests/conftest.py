@@ -22,7 +22,7 @@ IS_WIN = sys.platform == "win32"
 if IS_WIN:
     server = "127.0.0.1,1433"
 else:
-    server = "db"  # the name in docker-compose
+    server = "127.0.0.1,1433"  # "db"  # the name in docker-compose
 
 _pwd = "MyBigSQLPassword!!!"
 _db_name = "db_bcpandas"
@@ -31,35 +31,35 @@ _docker_startup = 20  # seconds to wait to give the container time to start
 
 @pytest.fixture(scope="session")
 def docker_db():
-    if not IS_WIN:
-        yield
-    else:
-        _name = "bcpandas-mssql-container"
-        cmd_start_container = [
-            "docker",
-            "run",
-            "-d",
-            "-e",
-            "ACCEPT_EULA=Y",
-            "-e",
-            f"SA_PASSWORD={_pwd}",
-            "-e",
-            "MSSQL_PID=Express",
-            "-p",
-            "1433:1433",
-            "--name",
-            _name,
-            "mcr.microsoft.com/mssql/server:2017-latest",
-        ]
-        subprocess.run(cmd_start_container)
-        time.sleep(_docker_startup)
-        print("successfully started DB in docker...")
-        yield
-        print("Stopping container")
-        subprocess.run(["docker", "stop", _name])
-        print("Deleting container")
-        subprocess.run(["docker", "rm", _name])
-        print("all done!")
+    # if not IS_WIN:
+    #     yield
+    # else:
+    _name = "bcpandas-mssql-container"
+    cmd_start_container = [
+        "docker",
+        "run",
+        "-d",
+        "-e",
+        "ACCEPT_EULA=Y",
+        "-e",
+        f"SA_PASSWORD={_pwd}",
+        "-e",
+        "MSSQL_PID=Express",
+        "-p",
+        "1433:1433",
+        "--name",
+        _name,
+        "mcr.microsoft.com/mssql/server:2017-latest",
+    ]
+    subprocess.run(cmd_start_container)
+    time.sleep(_docker_startup)
+    print("successfully started DB in docker...")
+    yield
+    print("Stopping container")
+    subprocess.run(["docker", "stop", _name])
+    print("Deleting container")
+    subprocess.run(["docker", "rm", _name])
+    print("all done!")
 
 
 @pytest.fixture(scope="session")
