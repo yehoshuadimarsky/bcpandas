@@ -24,12 +24,16 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         miniconda-version: 'latest'
-    - name: Install packages into conda base environment
+        activate-environment: bcpandas-test-env
+        environment-file: env.yml
+        auto-activate-base: false
+        auto-update-conda: true
+    - name: Show Conda env stuff
       shell: pwsh
       run: |
-        conda info
+        conda info -a
         conda list
-        conda env update -n base -f env.yml
+        conda list -n bcpandas-test-env
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
