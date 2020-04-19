@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     env:
-      CONDA_ENV_NAME: bcpandas-test-env
+      CONDA_ENV_NAME: bcpandas-env
     runs-on: [windows-latest]
     strategy:
       matrix:
