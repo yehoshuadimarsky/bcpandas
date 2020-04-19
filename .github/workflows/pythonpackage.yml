@@ -21,7 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
-      shell: pwsh
+      shell: powershell
       run: conda create -n $ENV:CONDA_ENV_NAME python=${{ matrix.python-version }} -y -v
     - name: Set up Conda and packages
       shell: powershell
