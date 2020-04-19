@@ -6,7 +6,6 @@ Created on Sat Aug  3 23:36:07 2019
 """
 
 import subprocess
-import sys
 import time
 import urllib
 
@@ -16,14 +15,7 @@ import sqlalchemy as sa
 
 from .utils import execute_sql_statement
 
-IS_WIN = sys.platform == "win32"
-
-
-if IS_WIN:
-    server = "127.0.0.1,1433"
-else:
-    server = "127.0.0.1,1433"  # "db"  # the name in docker-compose
-
+server = "127.0.0.1,1433"
 _pwd = "MyBigSQLPassword!!!"
 _db_name = "db_bcpandas"
 _docker_startup = 20  # seconds to wait to give the container time to start
@@ -31,9 +23,6 @@ _docker_startup = 20  # seconds to wait to give the container time to start
 
 @pytest.fixture(scope="session")
 def docker_db():
-    # if not IS_WIN:
-    #     yield
-    # else:
     _name = "bcpandas-mssql-container"
     cmd_start_container = [
         "docker",
@@ -66,10 +55,6 @@ def docker_db():
 def database(docker_db):
     creds_master = SqlCreds(server=server, database="master", username="sa", password=_pwd)
     execute_sql_statement(creds_master.engine, f"CREATE DATABASE {_db_name}")
-    yield
-    if not IS_WIN:
-        execute_sql_statement(creds_master.engine, f"DROP DATABASE {_db_name}")
-    print("all done")
 
 
 @pytest.fixture(scope="session")

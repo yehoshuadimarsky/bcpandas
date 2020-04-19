@@ -60,11 +60,14 @@ jobs:
         source ~/.bashrc
     - name: Test BCP
       run: bcp -v
+    - name: Install Docker Desktop (on Windows)
+      if: ${{ runner.os == 'Windows'}}
+      run: |
+        choco install docker-desktop
     - name: Change Docker to Linux containers (on Windows)
       if: ${{ runner.os == 'Windows'}}
       shell: powershell
       run: |
-        choco install docker-desktop
         & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
     - name: Prepare Docker image for testing
       run: docker pull mcr.microsoft.com/mssql/server:2017-latest
