@@ -20,3 +20,4 @@ jobs:
       shell: powershell
       run: |
         docker version
+        & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
