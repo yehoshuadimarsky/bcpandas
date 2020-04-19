@@ -20,22 +20,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      shell: powershell
-      run: $ENV:CONDA create -n $ENV:CONDA_ENV_NAME python=${{ matrix.python-version }} -y -v
-    - name: Set up Conda and packages
-      shell: powershell
-      run: |
-        $ENV:CONDA info -a
-        $ENV:CONDA list
-        $ENV:CONDA update conda
-        $ENV:CONDA env update -n $ENV:CONDA_ENV_NAME -f env.yml
+    - uses: goanpeca/setup-miniconda@v1
+      with:
+       auto-update-conda: true
+       activate-environment: ${{ env.CONDA_ENV_NAME }}
+       environment-file: env.yml
+       python-version: ${{ matrix.python-version }}
+       auto-activate-base: false
     - name: Show Conda env stuff
       shell: powershell
       run: |
-        $ENV:CONDA info -a
-        $ENV:CONDA list
-        $ENV:CONDA list -n $ENV:CONDA_ENV_NAME
+        conda info -a
+        conda list
+        conda list -n $ENV:CONDA_ENV_NAME
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
