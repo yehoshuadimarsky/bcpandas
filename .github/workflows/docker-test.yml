@@ -24,4 +24,4 @@ jobs:
     - name: find dockercli.exe
       shell: powershell
       run: |
-        Get-Childitem –Path C:\ -Include *DockerCli.exe -File -Recurse -ErrorAction SilentlyContinue
+        Get-Childitem –Path C:\ -Include *DockerCli.exe -Recurse -ErrorAction SilentlyContinue
