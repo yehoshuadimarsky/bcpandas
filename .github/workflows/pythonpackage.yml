@@ -11,7 +11,8 @@ on:
 
 jobs:
   build:
-    
+    env:
+      CONDA_ENV_NAME: bcpandas-test-env
     runs-on: [windows-latest]
     strategy:
       matrix:
@@ -20,20 +21,21 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
-      uses: goanpeca/setup-miniconda@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-        miniconda-version: 'latest'
-        activate-environment: bcpandas-test-env
-        environment-file: env.yml
-        auto-activate-base: false
-        auto-update-conda: true
+      shell: pwsh
+      run: conda create -n $ENV.CONDA_ENV_NAME python=${{ matrix.python-version }} -y
+    - name: Set up Conda and packages
+      shell: pwsh
+      run: |
+        conda info -a
+        conda list
+        conda update conda
+        conda env update -n $ENV.CONDA_ENV_NAME -f env.yml
     - name: Show Conda env stuff
       shell: pwsh
       run: |
         conda info -a
         conda list
-        conda list -n bcpandas-test-env
+        conda list -n $ENV.CONDA_ENV_NAME
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
