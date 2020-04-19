@@ -48,7 +48,7 @@ jobs:
         # regular flake8 check
         flake8 . --count --statistics
         mypy .
-    - name: Install BCP Utility
+    - name: Install BCP Utility (on Linux)
       if: ${{ runner.os == 'Linux'}}
       run: |
         # https://docs.microsoft.com/en-us/sql/linux/sql-server-linux-setup-tools?view=sql-server-ver15#ubuntu
@@ -67,8 +67,7 @@ jobs:
     - name: Change Docker to Linux containers (on Windows)
       if: ${{ runner.os == 'Windows'}}
       shell: powershell
-      run: |
-        & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
+      run: Start-Process $Env:ProgramFiles\Docker\Docker\DockerCli.exe -ArgumentList "-SwitchLinuxEngine"
     - name: Prepare Docker image for testing
       run: docker pull mcr.microsoft.com/mssql/server:2017-latest
     - name: Test with pytest (on Linux)
