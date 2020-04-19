@@ -13,7 +13,6 @@ jobs:
   build:
     env:
       CONDA_ENV_NAME: bcpandas-env
-      SHELL_TO_USE: bash -l {0}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -31,7 +30,7 @@ jobs:
        auto-activate-base: false
     - name: Lint with flake8
       # per https://github.com/yehoshuadimarsky/setup-miniconda#important
-      shell: ${{ env.SHELL_TO_USE }}
+      shell: bash -l {0}
       run: |
         conda info -e
         # stop the build if there are Python syntax errors or undefined names
@@ -39,7 +38,7 @@ jobs:
         # regular flake8 check
         flake8 . --count --statistics
     - name: Mypy check
-      shell: ${{ env.SHELL_TO_USE }}
+      shell: bash -l {0}
       run: mypy .
     - name: Install BCP Utility
       if: ${{ runner.os == 'Linux'}}
@@ -56,6 +55,6 @@ jobs:
     - name: Prepare Docker image for testing
       run: docker pull mcr.microsoft.com/mssql/server:2017-latest
     - name: Test with pytest
-      shell: ${{ env.SHELL_TO_USE }}
+      shell: bash -l {0}
       run: |
         pytest bcpandas/tests
