@@ -20,4 +20,7 @@ jobs:
       shell: powershell
       run: |
         docker version
-        & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
+        # & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
+    - name: find dockercli.exe
+      shell: powershell
+      run: Get-Childitem –Path C:\ -Include *DockerCli.exe -File -Recurse -ErrorAction SilentlyContinue
