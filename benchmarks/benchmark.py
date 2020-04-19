@@ -1,4 +1,4 @@
-from contextlib import contextmanager
+from contextlib import contextmanager  # noqa: E999
 import json
 from math import floor
 import platform
