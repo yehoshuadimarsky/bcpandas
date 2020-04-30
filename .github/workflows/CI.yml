@@ -70,7 +70,7 @@ jobs:
       run: docker pull mcr.microsoft.com/mssql/server:2017-latest
     - name: Prepare Docker image for testing (Windows)
       if: ${{ runner.os == 'Windows'}}
-      run: docker pull microsoft/mssql-server-windows-express:2017-latest
+      run: docker pull microsoft/mssql-server-windows-express:2016
     - name: Test with pytest (on Linux)
       if: ${{ runner.os == 'Linux'}}
       shell: bash -l {0}
@@ -79,4 +79,4 @@ jobs:
     - name: Test with pytest (on Windows)
       if: ${{ runner.os == 'Windows'}}
       run: |
-        pytest --mssql-docker-image microsoft/mssql-server-windows-express:2017-latest bcpandas/tests/test_to_sql.py
+        pytest --mssql-docker-image microsoft/mssql-server-windows-express:2016 bcpandas/tests/test_to_sql.py
