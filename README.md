@@ -1,6 +1,6 @@
 # bcpandas
 
-![Test](https://github.com/yehoshuadimarsky/bcpandas/workflows/Lint%20and%20Test/badge.svg)
+[![Test](https://github.com/yehoshuadimarsky/bcpandas/workflows/Test/badge.svg)](https://github.com/yehoshuadimarsky/bcpandas/actions)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI version](https://img.shields.io/pypi/v/bcpandas.svg)](https://pypi.org/project/bcpandas/)
 [![Conda-Forge version](https://img.shields.io/conda/vn/conda-forge/bcpandas.svg)](https://anaconda.org/conda-forge/bcpandas)
