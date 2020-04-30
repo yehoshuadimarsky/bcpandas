@@ -12,7 +12,7 @@ from .utils import hypo_df, not_has_all_delims, not_has_all_quotechars
 class TestReadSqlBasic:
     """
     For all tests, the 'actual' is retrieved using the built-in pandas methods, to compare to the 
-    'expected' which used bcpandas.
+    'expected' which used bcpandas. 
 
     Because dtypes change when reading from text files, ignoring dtypes checks. TODO how to really fix this
     """
