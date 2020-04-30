@@ -20,9 +20,19 @@ _pwd = "MyBigSQLPassword!!!"
 _db_name = "db_bcpandas"
 _docker_startup = 20  # seconds to wait to give the container time to start
 
+docker_mssql_linux = "mcr.microsoft.com/mssql/server"
+
+
+def pytest_addoption(parser):
+    parser.addoption("--mssql-docker-image", action="store")
+
 
 @pytest.fixture(scope="session")
-def docker_db():
+def docker_db(pytestconfig):
+    docker_image = pytestconfig.getoption("--mssql-docker-image", default=None)
+    if docker_image is None:
+        # assume Linux containers
+        docker_image = f"{docker_mssql_linux}:2017-latest"
     _name = "bcpandas-mssql-container"
     cmd_start_container = [
         "docker",
@@ -32,14 +42,20 @@ def docker_db():
         "ACCEPT_EULA=Y",
         "-e",
         f"SA_PASSWORD={_pwd}",
-        "-e",
-        "MSSQL_PID=Express",
+    ]
+    if docker_image.startswith(docker_mssql_linux):
+        cmd_start_container += [
+            "-e",
+            "MSSQL_PID=Express",
+        ]
+    cmd_start_container += [
         "-p",
         "1433:1433",
         "--name",
         _name,
-        "mcr.microsoft.com/mssql/server:2017-latest",
+        docker_image,
     ]
+
     subprocess.run(cmd_start_container)
     time.sleep(_docker_startup)
     print("successfully started DB in docker...")

@@ -8,6 +8,7 @@ on:
     branches: [ master ]
     paths:
     - 'bcpandas/**'
+    - './github/workflows/CI.yml'
   pull_request:
     branches: [ master ]
     paths:
@@ -20,9 +21,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     # continue-on-error: false
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        os: [ubuntu-latest]  # [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest]
         python-version: [3.6, 3.7, 3.8]
 
     steps:
@@ -36,7 +37,7 @@ jobs:
        auto-activate-base: false
     - name: Lint with flake8 and check with mypy (on Linux)
       if: ${{ runner.os == 'Linux'}}
-      # per https://github.com/yehoshuadimarsky/setup-miniconda#important
+      # per https://github.com/goanpeca/setup-miniconda#important
       shell: bash -l {0}
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -64,22 +65,18 @@ jobs:
         source ~/.bashrc
     - name: Test BCP
       run: bcp -v
-    - name: Install Docker Desktop (on Windows)
-      if: ${{ runner.os == 'Windows'}}
-      run: |
-        choco install docker-desktop
-    - name: Change Docker to Linux containers (on Windows)
-      if: ${{ runner.os == 'Windows'}}
-      shell: powershell
-      run: Start-Process $Env:ProgramFiles\Docker\Docker\DockerCli.exe -ArgumentList "-SwitchLinuxEngine"
-    - name: Prepare Docker image for testing
+    - name: Prepare Docker image for testing (Linux)
+      if: ${{ runner.os == 'Linux'}}
       run: docker pull mcr.microsoft.com/mssql/server:2017-latest
+    - name: Prepare Docker image for testing (Windows)
+      if: ${{ runner.os == 'Windows'}}
+      run: docker pull microsoft/mssql-server-windows-express:2017-latest
     - name: Test with pytest (on Linux)
       if: ${{ runner.os == 'Linux'}}
       shell: bash -l {0}
       run: |
-        pytest bcpandas/tests/test_to_sql.py
+        pytest --mssql-docker-image mcr.microsoft.com/mssql/server:2017-latest bcpandas/tests/test_to_sql.py
     - name: Test with pytest (on Windows)
       if: ${{ runner.os == 'Windows'}}
       run: |
-        pytest bcpandas/tests/test_to_sql.py
+        pytest --mssql-docker-image microsoft/mssql-server-windows-express:2017-latest bcpandas/tests/test_to_sql.py
