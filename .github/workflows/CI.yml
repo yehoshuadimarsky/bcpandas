@@ -8,7 +8,7 @@ on:
     branches: [ master ]
     paths:
     - 'bcpandas/**'
-    - './github/workflows/CI.yml'
+    - ./github/workflows/CI.yml
   pull_request:
     branches: [ master ]
     paths:
