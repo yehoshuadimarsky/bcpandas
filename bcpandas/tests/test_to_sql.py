@@ -67,9 +67,22 @@ def test_tosql_append_only_some_cols():
     assert 1 == 2
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="Not on Linux")
 @pytest.mark.usefixtures("database")
-def test_tosql_custom_shell(df, sql_creds):
+@pytest.mark.parametrize(
+    "shell",
+    [
+        pytest.param("/bin/bash", id="/bin/bash"),
+        pytest.param(
+            "/bin/blahblah",
+            id="bad shell",
+            marks=[
+                pytest.mark.xfail,
+                pytest.mark.skipif(sys.platform == "win32", reason="Not on Linux"),
+            ],
+        ),
+    ],
+)
+def test_tosql_custom_shell(shell, sql_creds):
     df = pd.DataFrame({"col1": ["a", "b", "c", "d"], "col2": [1.5, 2.5, 3.5, 4.5]})
     tbl_name = "tbl_df_custom_shell"
     schema_name = "dbo"
@@ -81,7 +94,7 @@ def test_tosql_custom_shell(df, sql_creds):
         schema=schema_name,
         if_exists="replace",
         index=False,
-        executable="/bin/bash",
+        executable=shell,
     )
 
     # check result
