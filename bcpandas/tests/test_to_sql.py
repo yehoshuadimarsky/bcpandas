@@ -67,7 +67,7 @@ def test_tosql_append_only_some_cols():
     assert 1 == 2
 
 
-@pytest.mark.skipif(sys.platform == "win32")
+@pytest.mark.skipif(sys.platform == "win32", reason="Not on Linux")
 @pytest.mark.usefixtures("database")
 def test_tosql_custom_shell(df, sql_creds):
     df = pd.DataFrame({"col1": ["a", "b", "c", "d"], "col2": [1.5, 2.5, 3.5, 4.5]})
