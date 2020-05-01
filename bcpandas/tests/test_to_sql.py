@@ -10,6 +10,7 @@ There are 2 categories of tests we want to do:
     - Test with different datasets that have different properties
 """
 
+import sys
 from typing import no_type_check
 
 from bcpandas import to_sql
@@ -64,6 +65,29 @@ def test_tosql_batchsize():
 @pytest.mark.skip
 def test_tosql_append_only_some_cols():
     assert 1 == 2
+
+
+@pytest.mark.skipif(sys.platform == "win32")
+@pytest.mark.usefixtures("database")
+def test_tosql_custom_shell(df, sql_creds):
+    df = pd.DataFrame({"col1": ["a", "b", "c", "d"], "col2": [1.5, 2.5, 3.5, 4.5]})
+    tbl_name = "tbl_df_custom_shell"
+    schema_name = "dbo"
+    execute_sql_statement(sql_creds.engine, f"DROP TABLE IF EXISTS {schema_name}.{tbl_name}")
+    to_sql(
+        df=df,
+        table_name=tbl_name,
+        creds=sql_creds,
+        schema=schema_name,
+        if_exists="replace",
+        index=False,
+        executable="/bin/bash",
+    )
+
+    # check result
+    actual = pd.read_sql_query(sql=f"SELECT * FROM {schema_name}.{tbl_name}", con=sql_creds.engine)
+    expected = prep_df_for_comparison(df=df, index=False)
+    assert_frame_equal(expected, actual)
 
 
 @pytest.mark.usefixtures("database")

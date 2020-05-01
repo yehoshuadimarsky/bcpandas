@@ -155,6 +155,7 @@ def to_sql(
     if_exists: str = "fail",
     batch_size: int = None,
     debug: bool = False,
+    executable: str = None,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -188,6 +189,11 @@ def to_sql(
         all rows will be written at once.
     debug : bool, default False
         If True, will not delete the temporary CSV and format files, and will output their location.
+    executable : str, default None
+        The shell to use when invoking the BCP command instead of the default `/bin/sh`. 
+        This parameter is only processed when on Linux.
+        Per the Python docs: `If shell=True, on POSIX the executable argument specifies a replacement shell for the default /bin/sh.`
+        See https://docs.python.org/3/library/subprocess.html#subprocess.Popen for more details.
     """
     # validation
     if df.shape[0] == 0 or df.shape[1] == 0:
@@ -285,6 +291,7 @@ def to_sql(
             sql_type=sql_type,
             schema=schema,
             batch_size=batch_size,
+            executable=executable,
         )
     finally:
         if not debug:
@@ -307,6 +314,7 @@ def read_sql(
     debug: bool = False,
     delimiter: str = None,
     check_delim: bool = True,
+    executable: str = None,
 ) -> pd.DataFrame:
     """
     ** It is HIGHLY recommended to not use this method, and instead use the native pandas `read_sql*` methods. See README for details. **
@@ -335,6 +343,11 @@ def read_sql(
     check_delim : bool, default True
         Whether to check the temporary CSV file for the presence of the delimiter in the data.
         See note below.
+    executable : str, default None
+        The shell to use when invoking the BCP command instead of the default `/bin/sh`. 
+        This parameter is only processed when on Linux.
+        Per the Python docs: `If shell=True, on POSIX the executable argument specifies a replacement shell for the default /bin/sh.`
+        See https://docs.python.org/3/library/subprocess.html#subprocess.Popen for more details.
 
     Returns
     -------
@@ -391,6 +404,7 @@ def read_sql(
             schema=schema,
             batch_size=batch_size,
             col_delimiter=delim,
+            executable=executable,
         )
         logger.debug(f"Saved dataframe to temp CSV file at {file_path}")
 
