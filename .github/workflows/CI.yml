@@ -79,3 +79,7 @@ jobs:
       if: ${{ runner.os == 'Windows'}}
       run: |
         pytest -x --mssql-docker-image microsoft/mssql-server-windows-express:2016 bcpandas/tests/test_to_sql.py
+    - name: Upload Codecov.io report (Linux)
+      if: ${{ runner.os == 'Linux'}}
+      shell: bash -l {0}
+      run: bash <(curl -s https://codecov.io/bash) 
