@@ -13,6 +13,7 @@ from urllib.parse import quote_plus
 import warnings
 
 import pandas as pd
+from pandas.io.sql import SQLDatabase, SQLTable
 import sqlalchemy as sa
 
 from .constants import (
@@ -145,6 +146,36 @@ class SqlCreds:
     __str__ = __repr__
 
 
+def _sql_item_exists(sql_type: str, schema: str, table_name: str, creds: SqlCreds):
+    _qry = """
+        SELECT * 
+        FROM INFORMATION_SCHEMA.{_typ}S 
+        WHERE TABLE_SCHEMA = '{_schema}' 
+        AND TABLE_NAME = '{_tbl}'
+        """.format(
+        _typ=sql_type.upper(), _schema=schema, _tbl=table_name
+    )
+    res = pd.read_sql_query(sql=_qry, con=creds.engine)
+    return res.shape[0] > 0
+
+
+def _create_table(schema: str, table_name: str, creds: SqlCreds, df: pd.DataFrame, if_exists: str):
+    """use pandas' own code to create the table and schema"""
+
+    sql_db = SQLDatabase(engine=creds.engine, schema=schema)
+    table = SQLTable(
+        table_name,
+        sql_db,
+        frame=df,
+        index=False,  # already set as new col earlier if index=True
+        if_exists=if_exists,
+        index_label=None,
+        schema=schema,
+        dtype=None,
+    )
+    table.create()
+
+
 def to_sql(
     df: pd.DataFrame,
     table_name: str,
@@ -183,17 +214,18 @@ def to_sql(
         How to behave if the table already exists.
         * fail: Raise a BCPandasValueError.
         * replace: Drop the table before inserting new values.
-        * append: Insert new values to the existing table. Note, in this case some database columns can be missing
-            from the dataframe, but the dataframe cannot have column names that aren't present in the database.
+        * append: Insert new values to the existing table. Matches the dataframe columns to the database columns by name.
+            If the database table exists then the dataframe cannot have new columns that aren't in the table, 
+            but conversely table columns can be missing from the dataframe.
     batch_size : int, optional
-        Rows will be written in batches of this size at a time. By default,
-        all rows will be written at once.
+        Rows will be written in batches of this size at a time. By default, BCP sets this to 1000.
     debug : bool, default False
         If True, will not delete the temporary CSV and format files, and will output their location.
     executable : str, default None
         The shell to use when invoking the BCP command instead of the default `/bin/sh`. 
         This parameter is only processed when on Linux.
-        Per the Python docs: `If shell=True, on POSIX the executable argument specifies a replacement shell for the default /bin/sh.`
+        Per the Python docs: 
+            `If shell=True, on POSIX the executable argument specifies a replacement shell for the default /bin/sh.`
         See https://docs.python.org/3/library/subprocess.html#subprocess.Popen for more details.
     """
     # validation
@@ -202,6 +234,7 @@ def to_sql(
     assert sql_type == TABLE, "only supporting table, not view, for now"
     assert if_exists in IF_EXISTS_OPTIONS
 
+    # TODO diff way to implement? could be big performance hit with big dataframe
     if index:
         df = df.copy(deep=True).reset_index()
 
@@ -234,7 +267,10 @@ def to_sql(
     # build format file
     fmt_file_path = get_temp_file()
 
-    cols_dict = None
+    sql_item_exists = _sql_item_exists(
+        sql_type=sql_type, schema=schema, table_name=table_name, creds=creds
+    )
+    cols_dict = None  # for mypy
     if if_exists == "append":
         # get dict of column names -> order of column
         cols_dict = dict(
@@ -252,61 +288,41 @@ def to_sql(
         )
 
         # check that column names match in db and dataframe exactly
-        extra_cols = [x for x in df.columns if x not in cols_dict.keys()]
-        if extra_cols:
-            raise BCPandasValueError(
-                f"Column(s) detected in the dataframe that are not in the database, "
-                f"cannot have new columns if `if_exists=='append'`. The extra column(s): {extra_cols}"
-            )
+        if sql_item_exists:
+            # the db cols are always strings, unlike df cols
+            extra_cols = [str(x) for x in df.columns if str(x) not in cols_dict.keys()]
+            if extra_cols:
+                raise BCPandasValueError(
+                    f"Column(s) detected in the dataframe that are not in the database, "
+                    f"cannot have new columns if `if_exists=='append'`, "
+                    f"the extra column(s): {extra_cols}"
+                )
 
     fmt_file_txt = build_format_file(df=df, delimiter=delim, db_cols_order=cols_dict)
     with open(fmt_file_path, "w") as ff:
         ff.write(fmt_file_txt)
     logger.debug(f"Created BCP format file at {fmt_file_path}")
 
-    def sql_item_exists():
-        _qry = """
-            SELECT * 
-            FROM INFORMATION_SCHEMA.{_typ}S 
-            WHERE TABLE_SCHEMA = '{_schema}' 
-            AND TABLE_NAME = '{_tbl}'
-            """.format(
-            _typ=sql_type.upper(), _schema=schema, _tbl=table_name
-        )
-        res = pd.read_sql_query(sql=_qry, con=creds.engine)
-        return res.shape[0] > 0
-
-    def create_table():
-        """use pandas' own code to create the table and schema"""
-        from pandas.io.sql import SQLDatabase, SQLTable
-
-        sql_db = SQLDatabase(engine=creds.engine, schema=schema)
-        table = SQLTable(
-            table_name,
-            sql_db,
-            frame=df,
-            index=False,  # already set as new col earlier if index=True
-            if_exists=if_exists,
-            index_label=None,
-            schema=schema,
-            dtype=None,
-        )
-        table.create()
-
     try:
         if if_exists == "fail":
-            if sql_item_exists():
+            if sql_item_exists:
                 raise BCPandasValueError(
                     f"The {sql_type} called {schema}.{table_name} already exists, "
                     f"`if_exists` param was set to `fail`."
                 )
             else:
-                create_table()
+                _create_table(
+                    schema=schema, table_name=table_name, creds=creds, df=df, if_exists=if_exists
+                )
         elif if_exists == "replace":
-            create_table()
+            _create_table(
+                schema=schema, table_name=table_name, creds=creds, df=df, if_exists=if_exists
+            )
         elif if_exists == "append":
-            if not sql_item_exists():
-                create_table()
+            if not sql_item_exists:
+                _create_table(
+                    schema=schema, table_name=table_name, creds=creds, df=df, if_exists=if_exists
+                )
 
         # BCP the data in
         bcp(
