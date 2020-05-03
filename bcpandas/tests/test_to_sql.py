@@ -309,17 +309,16 @@ class TestToSqlColumnScenarios(_BaseToSql):
         # then insert data into only some of the columns, and out of order
         df_changed = self.df.copy()
         df_changed.loc[:, "col_N"] = [17.5, 18.5, 19.5, 20.5]
-        to_sql(
-            df=df_changed,
-            table_name=self.table_name,
-            creds=self.sql_creds,
-            if_exists="append",
-            index=False,
-            sql_type=self.sql_type,
-        )
 
-        # check result
-        self._check_result(df_changed)
+        with pytest.raises(BCPandasValueError):
+            to_sql(
+                df=df_changed,
+                table_name=self.table_name,
+                creds=self.sql_creds,
+                if_exists="append",
+                index=False,
+                sql_type=self.sql_type,
+            )
 
 
 class TestToSqlReplace(_BaseToSql):

@@ -183,7 +183,8 @@ def to_sql(
         How to behave if the table already exists.
         * fail: Raise a BCPandasValueError.
         * replace: Drop the table before inserting new values.
-        * append: Insert new values to the existing table.
+        * append: Insert new values to the existing table. Note, in this case some database columns can be missing
+            from the dataframe, but the dataframe cannot have column names that aren't present in the database.
     batch_size : int, optional
         Rows will be written in batches of this size at a time. By default,
         all rows will be written at once.
@@ -249,6 +250,14 @@ def to_sql(
                 creds.engine,
             ).values
         )
+
+        # check that column names match in db and dataframe exactly
+        extra_cols = [x for x in df.columns if x not in cols_dict.keys()]
+        if extra_cols:
+            raise BCPandasValueError(
+                f"Column(s) detected in the dataframe that are not in the database, "
+                f"cannot have new columns if `if_exists=='append'`. The extra column(s): {extra_cols}"
+            )
 
     fmt_file_txt = build_format_file(df=df, delimiter=delim, db_cols_order=cols_dict)
     with open(fmt_file_path, "w") as ff:

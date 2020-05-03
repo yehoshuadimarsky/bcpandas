@@ -98,16 +98,14 @@ As you can see, pandas native clearly wins here
 
 ## Requirements
 ### Database
-Any version of Microsoft SQL Server. Can be installed on-prem, in the cloud, on a VM, or the Azure SQL Database/Data Warehouse versions.
+Any version of Microsoft SQL Server. Can be installed on-prem, in the cloud, on a VM, or one of the Azure versions.
 ### Python User
 - [BCP](https://docs.microsoft.com/en-us/sql/tools/bcp-utility) Utility
 - Microsoft ODBC Driver **11, 13, 13.1, or 17** for SQL Server. See the [pyodbc docs](https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Windows) for details.
 - Python >= 3.6
 - `pandas` >= 0.19
 - `sqlalchemy` >= 1.1.4
-- `pyodbc` as the [supported DBAPI](https://docs.sqlalchemy.org/en/lastest/dialects/mssql.html#dialect-mssql)
-- Windows as the client OS
-  - Linux and MacOS are theoretically compatible, but never tested
+- `pyodbc` as the [supported DBAPI](https://docs.sqlalchemy.org/en/13/dialects/mssql.html#module-sqlalchemy.dialects.mssql.pyodbc)
 
 ## Installation
 Source | Command
@@ -148,35 +146,21 @@ Bcpandas requires a `bcpandas.SqlCreds` object in order to use it, and also a `s
 
 ### Recommended Usage
 
-#### General
 | Feature                                           |    Pandas native   |      BCPandas      |
 |---------------------------------------------------|:------------------:|:------------------:|
 | Super speed                                       |         :x:        | :white_check_mark: |
 | Good for simple data types like numbers and dates |         :x:        | :white_check_mark: |
-| Handle edge cases                                 | :white_check_mark: |         :x:        |
 | Handle messy string data                          | :white_check_mark: |         :x:        |
 
-#### `to_sql` specific
-| Feature                                           |    Pandas native   |      BCPandas      |
-|---------------------------------------------------|:------------------:|:------------------:|
-| Super speed                                       |         :x:        | :white_check_mark: |
-| Only write to some columns in the SQL table       | :white_check_mark: |         :x:        |
-
-#### `read_sql` specific
-Use pandas native! (See earlier section _IMPORTANT - Read vs. Write_)
-| Feature                                           |    Pandas native   |      BCPandas      |
-|---------------------------------------------------|:------------------:|:------------------:|
-| Speed and accuracy (basically, everything)        | :white_check_mark: |         :x:        |
 
 > built with the help of https://www.tablesgenerator.com/markdown_tables# and https://gist.github.com/rxaviers/7360908
 
 ## Known Issues
 
-Here are some caveats and limitations of bcpandas. Hopefully they will be addressed in future releases
+Here are some caveats and limitations of bcpandas.
 * In the `to_sql` function:
   * Bcpandas has been tested with all ASCII characters 32-127. Unicode characters beyond that range have not been tested.
-  * For now, an empty string (`""`) in the dataframe becomes `NULL` in the SQL database instead of remaining an empty string. We will hopefully fix this soon.
-  * If `append` is passed to the `if_exists` parameter, if the dataframe columns don't match the SQL table columns exactly by both name and order, it will fail.
+  * For now, an empty string (`""`) in the dataframe becomes `NULL` in the SQL database instead of remaining an empty string.
   * ~~If there is a NaN/Null in the last column of the dataframe it will throw an error. This is due to a BCP issue. See my issue with Microsoft about this [here](https://github.com/MicrosoftDocs/sql-docs/issues/2689).~~ This doesn't seem to be a problem based on the tests.
   * Because bcpandas first outputs to CSV, it needs to use several specific characters to create the CSV, including a _delimiter_ and a _quote character_. Bcpandas attempts to use  characters that are not present in the dataframe for this, going through the possilbe delimiters and quote characters specified in `constants.py`. If all possible characters are present in the dataframe and bcpandas cannot find both a delimiter and quote character to use, it will throw an error. 
     * The BCP utility does __not__ ignore delimiter characters when surrounded by quotes, unlike CSVs - see [here](https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-field-and-row-terminators-sql-server#characters-supported-as-terminators) in the Microsoft docs.
