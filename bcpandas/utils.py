@@ -12,7 +12,7 @@ import shlex
 import string
 from subprocess import PIPE, Popen
 import tempfile
-from typing import List
+from typing import Dict, List, Optional
 
 import pandas as pd
 
@@ -115,7 +115,7 @@ def bcp(
         raise BCPandasException(f"Bcp command failed with exit code {ret_code}")
 
 
-def get_temp_file():
+def get_temp_file() -> str:
     """
     Returns full path to a temporary file without creating it.
     """
@@ -126,7 +126,7 @@ def get_temp_file():
     return file_path
 
 
-def _escape(input_string: str):
+def _escape(input_string: str) -> str:
     """
     Adopted from https://github.com/titan550/bcpy/blob/master/bcpy/format_file_builder.py#L25
     """
@@ -138,7 +138,9 @@ def _escape(input_string: str):
     )
 
 
-def build_format_file(df: pd.DataFrame, delimiter: str):
+def build_format_file(
+    df: pd.DataFrame, delimiter: str, db_cols_order: Optional[Dict[str, int]] = None
+) -> str:
     """
     Creates the non-xml SQL format file. Puts 4 spaces between each section.
     See https://docs.microsoft.com/en-us/sql/relational-databases/import-export/non-xml-format-files-sql-server
@@ -151,6 +153,11 @@ def build_format_file(df: pd.DataFrame, delimiter: str):
     ----------
     df : pandas DataFrame
     delimiter : a valid delimiter character
+    db_cols_order : dict, optional
+        Dict of {database column name -> ordinal position of the column}.
+        Maps existing columns in the database to their ordinal position, i.e. the order of the columns in the db table.
+        1-indexed, so the first columns is 1, second is 2, etc.
+        Only needed if the order of the columns in the dataframe doesn't match the database.
 
     Returns
     -------
@@ -168,7 +175,9 @@ def build_format_file(df: pd.DataFrame, delimiter: str):
                 str(0),  # Prefix length
                 str(0),  # Host file data length
                 f'"{_escape(_delim)}"',  # Terminator (see note below)
-                str(col_num),  # Server column order
+                str(
+                    col_num if not db_cols_order else db_cols_order[col_name]
+                ),  # Server column order
                 str(col_name),  # Server column name, optional as long as not blank
                 sql_collation,  # Column collation
                 "\n",
@@ -180,7 +189,7 @@ def build_format_file(df: pd.DataFrame, delimiter: str):
     return format_file_str
 
 
-def quote_this(this: str, skip: bool = False):
+def quote_this(this: str, skip: bool = False) -> str:
     """
     OS-safe way to quote a string.
 
@@ -197,7 +206,7 @@ def quote_this(this: str, skip: bool = False):
         return this
 
 
-def run_cmd(cmd: List[str], executable=None):
+def run_cmd(cmd: List[str], executable: str = None) -> int:
     """
     Runs the given command. 
     

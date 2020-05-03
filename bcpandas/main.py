@@ -98,7 +98,7 @@ class SqlCreds:
         logger.info(f"Created engine for sqlalchemy:\t{self.engine}")
 
     @classmethod
-    def from_engine(cls, engine: sa.engine.base.Engine):
+    def from_engine(cls, engine: sa.engine.base.Engine) -> "SqlCreds":
         """
         Alternate constructor, from a `sqlalchemy.engine.base.Engine` that uses `pyodbc` as the DBAPI 
         (which is the SQLAlchemy default for MS SQL) and using an exact PyODBC connection string (not DSN or hostname).
@@ -232,7 +232,25 @@ def to_sql(
 
     # build format file
     fmt_file_path = get_temp_file()
-    fmt_file_txt = build_format_file(df=df, delimiter=delim)
+
+    cols_dict = None
+    if if_exists == "append":
+        # get dict of column names -> order of column
+        cols_dict = dict(
+            pd.read_sql_query(
+                """
+                SELECT COLUMN_NAME, ORDINAL_POSITION 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = '{_schema}'
+                AND TABLE_NAME = '{_tbl}'
+            """.format(
+                    _schema=schema, _tbl=table_name
+                ),
+                creds.engine,
+            ).values
+        )
+
+    fmt_file_txt = build_format_file(df=df, delimiter=delim, db_cols_order=cols_dict)
     with open(fmt_file_path, "w") as ff:
         ff.write(fmt_file_txt)
     logger.debug(f"Created BCP format file at {fmt_file_path}")

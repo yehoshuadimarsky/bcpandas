@@ -202,7 +202,6 @@ class _BaseToSql:
             setattr(self, name, request.getfixturevalue(name))
 
 
-@pytest.mark.skip(reason="Didn't finish implementing this yet")
 class TestToSqlColumnScenarios(_BaseToSql):
     """
     Various tests for scenarios where the dataframe columns don't map exactly to the database columns,
@@ -211,6 +210,7 @@ class TestToSqlColumnScenarios(_BaseToSql):
 
     table_name = "tosql_column_scenarios"
 
+    @pytest.mark.skip(reason="Not implemented yet")
     def test_tosql_append_skip_cols(self):
         """
         see https://docs.microsoft.com/en-us/sql/relational-databases/import-export/use-a-format-file-to-skip-a-table-column-sql-server
@@ -261,9 +261,9 @@ class TestToSqlColumnScenarios(_BaseToSql):
         """
         df = pd.DataFrame(
             {
-                "col1": ["a", "b", "c", "d"],
-                "col2": [1.5, 2.5, 3.5, 4.5],
-                "col3": [1.5, 2.5, 3.5, 4.5],
+                "col1": [1.5, 2.5, 3.5, 4.5],
+                "col2": [5.5, 6.5, 7.5, 8.5],
+                "col3": [9.5, 10.5, 11.5, 12.5],
             }
         )
 
@@ -299,13 +299,13 @@ class TestToSqlColumnScenarios(_BaseToSql):
         )
         assert_frame_equal(expected, actual)
 
+    @pytest.mark.skip(reason="Not implemented yet")
     def test_tosql_cols_skip_and_out_of_order(self):
         df = pd.DataFrame(
             {
                 "col1": ["a", "b", "c", "d"],
                 "col2": [1.5, 2.5, 3.5, 4.5],
                 "col3": [1.5, 2.5, 3.5, 4.5],
-                "col4": [True, False, False, True],
             }
         )
 
