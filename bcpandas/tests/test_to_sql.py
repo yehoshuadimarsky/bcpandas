@@ -295,7 +295,7 @@ class TestToSqlColumnScenarios(_BaseToSql):
             sql=f"SELECT * FROM {self.schema_name}.{self.table_name}", con=self.sql_creds.engine
         )
         expected = prep_df_for_comparison(
-            df=pd.concat([df, df.iloc[:, ::-1]], axis=0, ignore_index=True, sort=False), index=False
+            df=pd.concat([df, df], axis=0, ignore_index=True, sort=False), index=False
         )
         assert_frame_equal(expected, actual)
 
