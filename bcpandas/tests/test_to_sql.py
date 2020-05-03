@@ -209,36 +209,50 @@ class TestToSqlColumnScenarios(_BaseToSql):
     """
 
     table_name = "tosql_column_scenarios"
+    df = pd.DataFrame(
+        {
+            "col1": [1.5, 2.5, 3.5, 4.5],
+            "col2": [5.5, 6.5, 7.5, 8.5],
+            "col3": [9.5, 10.5, 11.5, 12.5],
+            "col4": [13.5, 14.5, 15.5, 16.5],
+        }
+    )
 
-    @pytest.mark.skip(reason="Not implemented yet")
-    def test_tosql_append_skip_cols(self):
+    def _create_tbl_with_data(self):
+        # first create a new table and put some data into it
+        execute_sql_statement(
+            self.sql_creds.engine, f"DROP TABLE IF EXISTS {self.schema_name}.{self.table_name}"
+        )
+        to_sql(
+            df=self.df,
+            table_name=self.table_name,
+            creds=self.sql_creds,
+            if_exists="replace",
+            index=False,
+            sql_type=self.sql_type,
+        )
+
+    def _check_result(self, df_modified):
+        # check result
+        actual = pd.read_sql_query(
+            sql=f"SELECT * FROM {self.schema_name}.{self.table_name}", con=self.sql_creds.engine
+        )
+        expected = prep_df_for_comparison(
+            df=pd.concat([self.df, df_modified], axis=0, ignore_index=True, sort=False), index=False
+        )
+        assert_frame_equal(expected, actual)
+
+    def test_skip_cols(self):
         """
         see https://docs.microsoft.com/en-us/sql/relational-databases/import-export/use-a-format-file-to-skip-a-table-column-sql-server
         """
-        df = pd.DataFrame(
-            {
-                "col1": ["a", "b", "c", "d"],
-                "col2": [1.5, 2.5, 3.5, 4.5],
-                "col3": [1.5, 2.5, 3.5, 4.5],
-            }
-        )
-
         # first create a new table and put some data into it
-        execute_sql_statement(
-            self.sql_creds.engine, f"DROP TABLE IF EXISTS {self.schema_name}.{self.table_name}"
-        )
-        to_sql(
-            df=df,
-            table_name=self.table_name,
-            creds=self.sql_creds,
-            if_exists="replace",
-            index=False,
-            sql_type=self.sql_type,
-        )
+        self._create_tbl_with_data()
 
         # then insert (append) data into only some of the columns
+        df_changed = self.df.iloc[:, 1:]
         to_sql(
-            df=df.iloc[:, 1:],
+            df=df_changed,
             table_name=self.table_name,
             creds=self.sql_creds,
             if_exists="append",
@@ -247,42 +261,19 @@ class TestToSqlColumnScenarios(_BaseToSql):
         )
 
         # check result
-        actual = pd.read_sql_query(
-            sql=f"SELECT * FROM {self.schema_name}.{self.table_name}", con=self.sql_creds.engine
-        )
-        expected = prep_df_for_comparison(
-            df=pd.concat([df, df.iloc[:, 1:]], axis=0, ignore_index=True, sort=False), index=False
-        )
-        assert_frame_equal(expected, actual)
+        self._check_result(df_changed)
 
-    def test_tosql_cols_out_of_order(self):
+    def test_cols_out_of_order(self):
         """
         see https://docs.microsoft.com/en-us/sql/relational-databases/import-export/use-a-format-file-to-map-table-columns-to-data-file-fields-sql-server
         """
-        df = pd.DataFrame(
-            {
-                "col1": [1.5, 2.5, 3.5, 4.5],
-                "col2": [5.5, 6.5, 7.5, 8.5],
-                "col3": [9.5, 10.5, 11.5, 12.5],
-            }
-        )
-
         # first create a new table and put some data into it
-        execute_sql_statement(
-            self.sql_creds.engine, f"DROP TABLE IF EXISTS {self.schema_name}.{self.table_name}"
-        )
-        to_sql(
-            df=df,
-            table_name=self.table_name,
-            creds=self.sql_creds,
-            if_exists="replace",
-            index=False,
-            sql_type=self.sql_type,
-        )
+        self._create_tbl_with_data()
 
         # then insert (append) data with columns out of order
+        df_changed = self.df.iloc[:, ::-1]  # columns reversed
         to_sql(
-            df=df.iloc[:, ::-1],  # columns reversed
+            df=df_changed,
             table_name=self.table_name,
             creds=self.sql_creds,
             if_exists="append",
@@ -291,40 +282,16 @@ class TestToSqlColumnScenarios(_BaseToSql):
         )
 
         # check result
-        actual = pd.read_sql_query(
-            sql=f"SELECT * FROM {self.schema_name}.{self.table_name}", con=self.sql_creds.engine
-        )
-        expected = prep_df_for_comparison(
-            df=pd.concat([df, df], axis=0, ignore_index=True, sort=False), index=False
-        )
-        assert_frame_equal(expected, actual)
+        self._check_result(df_changed)
 
-    @pytest.mark.skip(reason="Not implemented yet")
-    def test_tosql_cols_skip_and_out_of_order(self):
-        df = pd.DataFrame(
-            {
-                "col1": ["a", "b", "c", "d"],
-                "col2": [1.5, 2.5, 3.5, 4.5],
-                "col3": [1.5, 2.5, 3.5, 4.5],
-            }
-        )
-
+    def test_cols_skip_and_out_of_order(self):
         # first create a new table and put some data into it
-        execute_sql_statement(
-            self.sql_creds.engine, f"DROP TABLE IF EXISTS {self.schema_name}.{self.table_name}"
-        )
-        to_sql(
-            df=df,
-            table_name=self.table_name,
-            creds=self.sql_creds,
-            if_exists="replace",
-            index=False,
-            sql_type=self.sql_type,
-        )
+        self._create_tbl_with_data()
 
-        # then insert (append) data into only some of the columns
+        # then insert data into only some of the columns, and out of order
+        df_changed = self.df.loc[:, ["col4", "col1", "col2"]]
         to_sql(
-            df=df.iloc[:, 1:],
+            df=df_changed,
             table_name=self.table_name,
             creds=self.sql_creds,
             if_exists="append",
@@ -333,13 +300,26 @@ class TestToSqlColumnScenarios(_BaseToSql):
         )
 
         # check result
-        actual = pd.read_sql_query(
-            sql=f"SELECT * FROM {self.schema_name}.{self.table_name}", con=self.sql_creds.engine
+        self._check_result(df_changed)
+
+    def test_extra_col(self):
+        # first create a new table and put some data into it
+        self._create_tbl_with_data()
+
+        # then insert data into only some of the columns, and out of order
+        df_changed = self.df.copy()
+        df_changed.loc[:, "col_N"] = [17.5, 18.5, 19.5, 20.5]
+        to_sql(
+            df=df_changed,
+            table_name=self.table_name,
+            creds=self.sql_creds,
+            if_exists="append",
+            index=False,
+            sql_type=self.sql_type,
         )
-        expected = prep_df_for_comparison(
-            df=pd.concat([df, df.iloc[:, 1:]], axis=0, ignore_index=True, sort=False), index=False
-        )
-        assert_frame_equal(expected, actual)
+
+        # check result
+        self._check_result(df_changed)
 
 
 class TestToSqlReplace(_BaseToSql):
