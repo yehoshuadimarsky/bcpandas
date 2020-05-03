@@ -14,5 +14,7 @@
 - [x] Better docs
 - [x] Remove SqlCmd and all references to it
 - [ ] Remove the deprecated `read_sql` and all references to it
+- [ ] Test inserting dataframe with (all) boolean values
+- [ ] Implement if dataframe is missing some database columns and/or the columns are out of order
 
 ... and of course, anything marked `# TODO` in the code.

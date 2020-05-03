@@ -18,7 +18,7 @@ from .utils import execute_sql_statement
 server = "127.0.0.1,1433"
 _pwd = "MyBigSQLPassword!!!"
 _db_name = "db_bcpandas"
-_docker_startup = 25  # seconds to wait to give the container time to start
+_docker_startup = 15  # seconds to wait to give the container time to start
 
 docker_mssql_linux = "mcr.microsoft.com/mssql/server"
 
