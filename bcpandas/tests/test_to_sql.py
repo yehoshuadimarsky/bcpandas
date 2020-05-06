@@ -10,8 +10,10 @@ There are 2 categories of tests we want to do:
     - Test with different datasets that have different properties
 """
 
+from os.path import expandvars
+from pathlib import Path
 import sys
-from typing import no_type_check
+from typing import Optional, no_type_check
 
 from bcpandas import to_sql
 from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS, BCPandasValueError
@@ -52,24 +54,47 @@ def test_tosql_all_quotechars(sql_creds):
         to_sql(df=df, table_name="tbl_all_delims", creds=sql_creds, if_exists="replace")
 
 
-@pytest.mark.usefixtures("database")
+def _get_bcp_path() -> Optional[str]:
+    """
+    On Windows, is typically in C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/130/Tools/Binn
+    On Linux it depends where you install it, but usually in /opt/mssql-tools/bin
+    """
+    try:
+        if sys.platform == "win32":
+            first_part = (
+                Path(expandvars("%ProgramFiles%")) / "Microsoft SQL Server" / "Client SDK" / "ODBC"
+            )
+            version = max(x.parts[-1] for x in first_part.iterdir())
+            bcp_path = first_part / version / "Tools" / "Binn"
+            return str(bcp_path / "bcp.exe")
+        else:
+            bcp_path = Path("/opt/mssql-tools/bin")
+            return str(bcp_path / "bcp")
+    except FileNotFoundError:
+        return None
+
+
+_bcp_path = _get_bcp_path()
+
+
 @pytest.mark.parametrize(
-    "shell",
+    "bcp_path",
     [
-        pytest.param("/bin/bash", id="/bin/bash"),
         pytest.param(
-            "/bin/blahblah",
-            id="bad shell",
+            _bcp_path,
+            id=_bcp_path,
             marks=[
-                pytest.mark.xfail,
-                pytest.mark.skipif(sys.platform == "win32", reason="Not on Linux"),
+                pytest.mark.skipif(
+                    _bcp_path is None, reason=f"Didn't find full path to BCP on {sys.platform}"
+                )
             ],
-        ),
+        )
     ],
 )
-def test_tosql_custom_shell(shell, sql_creds):
+@pytest.mark.usefixtures("database")
+def test_tosql_full_bcp_path(bcp_path, sql_creds):
     df = pd.DataFrame({"col1": ["a", "b", "c", "d"], "col2": [1.5, 2.5, 3.5, 4.5]})
-    tbl_name = "tbl_df_custom_shell"
+    tbl_name = "tbl_df_full_bcp_path"
     schema_name = "dbo"
     execute_sql_statement(sql_creds.engine, f"DROP TABLE IF EXISTS {schema_name}.{tbl_name}")
     to_sql(
@@ -79,7 +104,7 @@ def test_tosql_custom_shell(shell, sql_creds):
         schema=schema_name,
         if_exists="replace",
         index=False,
-        executable=shell,
+        bcp_path=bcp_path,
     )
 
     # check result

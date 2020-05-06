@@ -6,7 +6,7 @@ from .main import SqlCreds, read_sql, to_sql
 from .utils import bcp
 
 name = "bcpandas"
-__version__ = "0.4.1"
+__version__ = "0.5.0"
 
 
 # BCP check

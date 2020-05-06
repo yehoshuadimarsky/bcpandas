@@ -7,12 +7,13 @@ Created on Sat Aug  3 23:07:15 2019
 
 import logging
 import os
+from pathlib import Path
 import random
 import shlex
 import string
 from subprocess import PIPE, Popen
 import tempfile
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import pandas as pd
 
@@ -47,7 +48,7 @@ def bcp(
     batch_size: int = None,
     col_delimiter: str = None,
     row_terminator: str = None,
-    executable: str = None,
+    bcp_path: Union[str, Path] = None,
 ):
     """
     See https://docs.microsoft.com/en-us/sql/tools/bcp-utility
@@ -79,7 +80,7 @@ def bcp(
 
     # construct BCP command
     bcp_command = [
-        "bcp",
+        "bcp" if bcp_path is None else quote_this(str(bcp_path)),
         sql_item_string,
         direc,
         flat_file,
@@ -110,7 +111,7 @@ def bcp(
     # execute
     bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
     logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log}")
-    ret_code = run_cmd(bcp_command, executable=executable)
+    ret_code = run_cmd(bcp_command)
     if ret_code:
         raise BCPandasException(f"Bcp command failed with exit code {ret_code}")
 
@@ -199,14 +200,14 @@ def quote_this(this: str, skip: bool = False) -> str:
     """
     if isinstance(this, str):
         if IS_WIN32:
-            return this  # maybe change?
+            return this  # TODO maybe change?
         else:
             return shlex.quote(this)
     else:
         return this
 
 
-def run_cmd(cmd: List[str], executable: str = None) -> int:
+def run_cmd(cmd: List[str]) -> int:
     """
     Runs the given command. 
     
@@ -217,10 +218,6 @@ def run_cmd(cmd: List[str], executable: str = None) -> int:
     ---------
     cmd : list of str
         The command to run, to be submitted to `subprocess.Popen()`
-    executable : str, the shell to use, default None
-        Only used for Linux. Can specify a shell to use instead of the default `/bin/sh`
-        Per the Python docs: `If shell=True, on POSIX the executable argument specifies a replacement shell for the default /bin/sh.`
-        See https://docs.python.org/3/library/subprocess.html#subprocess.Popen for more details.
 
     Returns
     -------
@@ -228,19 +225,10 @@ def run_cmd(cmd: List[str], executable: str = None) -> int:
     """
     if IS_WIN32:
         with_shell = False
-        executable = None
     else:
         with_shell = True
         cmd = " ".join(cmd)  # type: ignore
-    proc = Popen(
-        cmd,
-        stdout=PIPE,
-        stderr=PIPE,
-        encoding="utf-8",
-        errors="utf-8",
-        shell=with_shell,
-        executable=executable,
-    )
+    proc = Popen(cmd, stdout=PIPE, stderr=PIPE, encoding="utf-8", errors="utf-8", shell=with_shell,)
     # live stream STDOUT
     while True:
         outs = proc.stdout.readline()
