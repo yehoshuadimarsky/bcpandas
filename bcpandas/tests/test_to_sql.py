@@ -52,18 +52,6 @@ def test_tosql_all_quotechars(sql_creds):
         to_sql(df=df, table_name="tbl_all_delims", creds=sql_creds, if_exists="replace")
 
 
-# TODO
-@pytest.mark.skip
-def test_tosql_debug():
-    assert 1 == 2
-
-
-# TODO
-@pytest.mark.skip
-def test_tosql_batchsize():
-    assert 1 == 2
-
-
 @pytest.mark.usefixtures("database")
 @pytest.mark.parametrize(
     "shell",
