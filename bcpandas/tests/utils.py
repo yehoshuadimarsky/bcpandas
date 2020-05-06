@@ -13,6 +13,7 @@ import sqlalchemy as sa
 #   - Floats: between -2**31-1 and 2**31-1, without NaN or inf
 #   - Dates
 #   - Datetimes
+#   - (some) booleans
 
 MAX_VAL = 2 ** 31 - 1
 
@@ -33,6 +34,7 @@ df_hypo_mixed = hpd.data_frames(
         hpd.column(name="col2_ints", elements=strat_ints),
         hpd.column(name="col3_floats", elements=strat_floats),
         hpd.column(name="col4_dates", elements=strat_dates),
+        hpd.column(name="col4_bools", elements=st.booleans()),
     ],
     index=strat_df_index,
 )
