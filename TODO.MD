@@ -14,7 +14,7 @@
 - [x] Better docs
 - [x] Remove SqlCmd and all references to it
 - [ ] Remove the deprecated `read_sql` and all references to it
-- [ ] Test inserting dataframe with (all) boolean values
+- [x] Test inserting dataframe with (all) boolean values
 - [x] Implement if dataframe is missing some database columns and/or the columns are out of order
 - [ ] Add to docs required SQL permissions to run diff parts, and that bcpandas uses `INFORMATION_SCHEMA` SQL views
 - [ ] Add to docs when/if NULL/NaNs are inserted and how
