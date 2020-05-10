@@ -230,6 +230,12 @@ def to_sql(
     assert sql_type == TABLE, "only supporting table, not view, for now"
     assert if_exists in IF_EXISTS_OPTIONS
 
+    if df.columns.has_duplicates:
+        raise BCPandasValueError(
+            "Columns with duplicate names detected, SQL requires that column names be unique. "
+            f"Duplicates: {df.columns[df.columns.duplicated(keep=False)]}"
+        )
+
     # TODO diff way to implement? could be big performance hit with big dataframe
     if index:
         df = df.copy(deep=True).reset_index()

@@ -202,6 +202,38 @@ def test_tosql_empty_df(df, sql_creds):
 
 
 @pytest.mark.usefixtures("database")
+def test_duplicate_columns(sql_creds):
+    table_name = "tosql_column_scenarios_1"
+    df = pd.DataFrame(
+        {
+            "col1": [1.5, 2.5, 3.5, 4.5],
+            "col2": [5.5, 6.5, 7.5, 8.5],
+            "col3": [9.5, 10.5, 11.5, 12.5],
+            "col4": [13.5, 14.5, 15.5, 16.5],
+        }
+    )
+
+    # set duplicate column
+    df = df.rename(columns={"col3": "col2"})
+
+    with pytest.raises(BCPandasValueError):
+        to_sql(
+            df=df,
+            table_name=table_name,
+            creds=sql_creds,
+            if_exists="replace",
+            index=False,
+            sql_type="table",
+        )
+
+
+@pytest.mark.skip(reason="Didn't test yet")
+def test_non_string_columns():
+    # TODO
+    pass
+
+
+@pytest.mark.usefixtures("database")
 class _BaseToSql:
     sql_type = "table"
     schema_name = "dbo"
