@@ -22,7 +22,19 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest] # [windows-latest, ubuntu-latest]
+        name: 
+          - linux
+          - windows
+          
+        include:
+          - name: linux
+            os: ubuntu-latest
+            mssql_image: mcr.microsoft.com/mssql/server:2017-latest
+            shell_name: bash -l {0}
+          - name: windows
+            os: windows-latest
+            mssql_image: microsoft/mssql-server-windows-express:2016
+            shell_name: pwsh
         python-version: [3.6, 3.7, 3.8]
 
     steps:
@@ -34,24 +46,16 @@ jobs:
        environment-file: env.yml
        python-version: ${{ matrix.python-version }}
        auto-activate-base: false
-    - name: Lint with flake8 and check with mypy (on Linux)
-      if: ${{ runner.os == 'Linux'}}
-      # per https://github.com/goanpeca/setup-miniconda#important
-      shell: bash -l {0}
+     
+    - name: Lint with flake8 and check with mypy
+      shell: ${{ matrix.shell_name }}
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --statistics --select=E9,F63,F7,F82 --show-source 
         # regular flake8 check
         flake8 . --count --statistics
         mypy .
-    - name: Lint with flake8 and check with mypy (on Windows)
-      if: ${{ runner.os == 'Windows'}}
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --statistics --select=E9,F63,F7,F82 --show-source 
-        # regular flake8 check
-        flake8 . --count --statistics
-        mypy .
+    
     - name: Install BCP Utility (on Linux)
       if: ${{ runner.os == 'Linux'}}
       run: |
@@ -62,24 +66,20 @@ jobs:
         sudo apt-get install mssql-tools unixodbc-dev
         echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
         source ~/.bashrc
+    
     - name: Test BCP
       run: bcp -v
-    - name: Prepare Docker image for testing (Linux)
+   
+    - name: Pull Docker image for testing
       if: ${{ runner.os == 'Linux'}}
-      run: docker pull mcr.microsoft.com/mssql/server:2017-latest
-    - name: Prepare Docker image for testing (Windows)
-      if: ${{ runner.os == 'Windows'}}
-      run: docker pull microsoft/mssql-server-windows-express:2016
+      run: docker pull ${{ matrix.mssql_image }}
+    
     - name: Test with pytest (on Linux)
-      if: ${{ runner.os == 'Linux'}}
-      shell: bash -l {0}
+      shell: ${{ matrix.shell_name }}
       run: |
-        pytest -x --cov-report=xml --mssql-docker-image mcr.microsoft.com/mssql/server:2017-latest bcpandas/tests/test_to_sql.py
-    - name: Test with pytest (on Windows)
-      if: ${{ runner.os == 'Windows'}}
-      run: |
-        pytest -x --cov-report=xml --mssql-docker-image microsoft/mssql-server-windows-express:2016 bcpandas/tests/test_to_sql.py
+        pytest -x --cov-report=xml --mssql-docker-image ${{ matrix.mssql_image }} bcpandas/tests/test_to_sql.py
+    
     - name: Upload Codecov.io report (Linux)
       if: ${{ runner.os == 'Linux'}}
-      shell: bash -l {0}
+      shell: ${{ matrix.shell_name }}
       run: bash <(curl -s https://codecov.io/bash) 
