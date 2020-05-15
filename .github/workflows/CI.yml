@@ -31,12 +31,9 @@ jobs:
           - name: linux
             os: ubuntu-latest
             mssql_image: mcr.microsoft.com/mssql/server:2017-latest
-            shell_name: bash -l {0}
           - name: windows
             os: windows-latest
             mssql_image: microsoft/mssql-server-windows-express:2016
-            shell_name: pwsh
-        
 
     steps:
     - uses: actions/checkout@v2
@@ -49,7 +46,7 @@ jobs:
        auto-activate-base: false
      
     - name: Lint with flake8 and check with mypy
-      shell: ${{ matrix.shell_name }}
+      shell: bash -l {0}
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --statistics --select=E9,F63,F7,F82 --show-source 
@@ -76,11 +73,11 @@ jobs:
       run: docker pull ${{ matrix.mssql_image }}
     
     - name: Test with pytest (on Linux)
-      shell: ${{ matrix.shell_name }}
+      shell: bash -l {0}
       run: |
         pytest -x --cov-report=xml --mssql-docker-image ${{ matrix.mssql_image }} bcpandas/tests/test_to_sql.py
     
     - name: Upload Codecov.io report (Linux)
       if: ${{ runner.os == 'Linux'}}
-      shell: ${{ matrix.shell_name }}
+      shell: bash -l {0}
       run: bash <(curl -s https://codecov.io/bash) 
