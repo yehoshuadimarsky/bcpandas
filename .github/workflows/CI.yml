@@ -69,10 +69,9 @@ jobs:
       run: bcp -v
    
     - name: Pull Docker image for testing
-      if: ${{ runner.os == 'Linux'}}
       run: docker pull ${{ matrix.mssql_image }}
     
-    - name: Test with pytest (on Linux)
+    - name: Test with pytest
       shell: bash -l {0}
       run: |
         pytest -x --cov-report=xml --mssql-docker-image ${{ matrix.mssql_image }} bcpandas/tests/test_to_sql.py
