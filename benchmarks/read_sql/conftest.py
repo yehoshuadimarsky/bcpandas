@@ -10,15 +10,14 @@ import time
 import urllib
 
 from bcpandas import SqlCreds
+import pyodbc
 import pytest
 import sqlalchemy as sa
-
-from .utils import execute_sql_statement
 
 server = "127.0.0.1,1433"
 _pwd = "MyBigSQLPassword!!!"
 _db_name = "db_bcpandas"
-_docker_startup = 15  # seconds to wait to give the container time to start
+_docker_startup = 20  # seconds to wait to give the container time to start
 
 docker_mssql_linux = "mcr.microsoft.com/mssql/server"
 
@@ -29,10 +28,7 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="session")
 def docker_db(pytestconfig):
-    try:
-        docker_image = pytestconfig.getoption("--mssql-docker-image", default=None)
-    except AttributeError:  # for using in benchmark.py without pytest
-        docker_image = None
+    docker_image = pytestconfig.getoption("--mssql-docker-image", default=None)
     if docker_image is None:
         # assume Linux containers
         docker_image = f"{docker_mssql_linux}:2017-latest"
@@ -95,6 +91,13 @@ def pyodbc_creds(database):
     return engine
 
 
-def test_logins(sql_creds, pyodbc_creds):
-    sql_creds.engine.connect()
-    pyodbc_creds.connect()
+def execute_sql_statement(sql_alchemy_engine: sa.engine.Engine, statement: str):
+    """
+    Executes the SQL statement using the provided engine. Assumes uses pyodbc.
+
+    need to use pyodbc instead of sqlalchemy, otherwise get error:
+    [SQL Server]CREATE DATABASE statement not allowed within multi-statement transaction.
+    """
+    conn = pyodbc.connect(sql_alchemy_engine.url.query["odbc_connect"], autocommit=True)
+    conn.execute(statement)
+    conn.close()

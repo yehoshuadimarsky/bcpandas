@@ -6,12 +6,13 @@ from subprocess import PIPE, run
 import sys
 from typing import Dict, List, Union
 
-from bcpandas import SqlCreds, read_sql, to_sql
+from bcpandas import SqlCreds, to_sql
 from bcpandas.tests import conftest as cf
 import click
 from codetiming import Timer
 import numpy as np
 import pandas as pd
+from read_sql import read_sql
 
 mssql_image = "mcr.microsoft.com/mssql/server:2017-latest"
 _IS_WIN32 = sys.platform == "win32"
@@ -90,7 +91,7 @@ def gather_env_info():
 
 def setup():
     # create docker container
-    gen_docker_db = cf.docker_db.__pytest_wrapped__.obj()
+    gen_docker_db = cf.docker_db.__pytest_wrapped__.obj(None)
     next(gen_docker_db)
 
     # create database
@@ -270,13 +271,8 @@ def main(func, num_cols, min_rows, max_rows, num_examples):
     Will generate `num-examples` of DataFrames using numpy.linspace, going from `min-rows` rows to
     `max-rows` rows.
     """
-    IS_PY38 = sys.version_info.major == 3 and sys.version_info.minor >= 8
-    if IS_PY38:
-        bmark_name = (
-            f"Benchmark run: {func=}, {num_cols=}, {min_rows=}, {max_rows=}, {num_examples=}"
-        )
-    else:
-        bmark_name = f"benchmarks run for {func}"
+    bmark_name = f"Benchmark run: func={func}, num_cols={num_cols}, min_rows={min_rows}, max_rows={max_rows}, num_examples={num_examples}"
+
     print(f"Starting {bmark_name}")
     timer = Timer(name=bmark_name)
     timer.start()

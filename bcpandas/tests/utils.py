@@ -47,17 +47,6 @@ df_hypo_floats = hpd.data_frames(
 df_hypo_dates = hpd.data_frames(columns=hpd.columns(5, elements=strat_dates), index=strat_df_index)
 
 
-hypo_df = hpd.data_frames(
-    columns=[
-        hpd.column(name="col1_text", elements=strat_text),
-        hpd.column(name="col2_ints", elements=strat_ints),
-        hpd.column(name="col3_floats", elements=strat_floats),
-        hpd.column(name="col4_dates", elements=strat_dates),
-    ],
-    index=hpd.range_indexes(min_size=1),
-)
-
-
 def not_has_all_delims(df):
     return not all(
         df.applymap(lambda x: delim in x if isinstance(x, str) else False).any().any()
