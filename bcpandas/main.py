@@ -139,7 +139,7 @@ class SqlCreds:
     __str__ = __repr__
 
 
-def _sql_item_exists(sql_type: str, schema: str, table_name: str, creds: SqlCreds):
+def _sql_item_exists(sql_type: str, schema: str, table_name: str, creds: SqlCreds) -> bool:
     _qry = """
         SELECT * 
         FROM INFORMATION_SCHEMA.{_typ}S 

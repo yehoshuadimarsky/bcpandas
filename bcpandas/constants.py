@@ -61,14 +61,14 @@ https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-
 """
 
 
-def get_delimiter(df: pd.DataFrame):
+def get_delimiter(df: pd.DataFrame) -> str:
     for delim in _DELIMITER_OPTIONS:
         if not df.applymap(lambda x: delim in x if isinstance(x, str) else False).any().any():
             return delim
     raise BCPandasValueError(error_msg.format(typ="delimiter", opts=_DELIMITER_OPTIONS))
 
 
-def get_quotechar(df: pd.DataFrame):
+def get_quotechar(df: pd.DataFrame) -> str:
     for qc in _QUOTECHAR_OPTIONS:
         if not df.applymap(lambda x: qc in x if isinstance(x, str) else False).any().any():
             return qc

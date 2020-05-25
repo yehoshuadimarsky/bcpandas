@@ -50,21 +50,21 @@ df_hypo_floats = hpd.data_frames(
 df_hypo_dates = hpd.data_frames(columns=hpd.columns(5, elements=strat_dates), index=strat_df_index)
 
 
-def not_has_all_delims(df):
+def not_has_all_delims(df: pd.DataFrame) -> bool:
     return not all(
         df.applymap(lambda x: delim in x if isinstance(x, str) else False).any().any()
         for delim in _DELIMITER_OPTIONS
     )
 
 
-def not_has_all_quotechars(df):
+def not_has_all_quotechars(df: pd.DataFrame) -> bool:
     return not all(
         df.applymap(lambda x: qc in x if isinstance(x, str) else False).any().any()
         for qc in _QUOTECHAR_OPTIONS
     )
 
 
-def assume_not_all_delims_and_quotechars(df):
+def assume_not_all_delims_and_quotechars(df: pd.DataFrame) -> bool:
     return assume(not_has_all_delims(df) and not_has_all_quotechars(df))
 
 
@@ -157,7 +157,7 @@ class DockerDB:
     def remove(self):
         self.container.remove()
 
-    def create_engine(self, db_name="master"):
+    def create_engine(self, db_name="master") -> sa.engine.Engine:
         """Creates SQLAlchemy pyodbc engine for connecting to specified database (default master) as SA user"""
         db_url = (
             "Driver={ODBC Driver 17 for SQL Server};"
