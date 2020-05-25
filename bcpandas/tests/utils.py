@@ -1,4 +1,7 @@
+import urllib
+
 from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS
+import docker
 from hypothesis import assume
 from hypothesis.extra import pandas as hpd
 import hypothesis.strategies as st
@@ -99,3 +102,83 @@ def execute_sql_statement(sql_alchemy_engine: sa.engine.Engine, statement: str):
     conn = pyodbc.connect(sql_alchemy_engine.url.query["odbc_connect"], autocommit=True)
     conn.execute(statement)
     conn.close()
+
+
+class DockerDB:
+    """
+    Class to create and run a SQL Server database using a Docker container. All the docker stuff is taken care of 
+    by Python under the hood.
+
+    Each instance of this class can only support a single specific combination of settings, such as container name
+    and SQL password. To create more than one, create more instances of the class.
+    """
+
+    def __init__(
+        self,
+        container_name: str,
+        sa_sql_password: str,
+        mssql_image: str = "mcr.microsoft.com/mssql/server:2017-latest",
+        port_host: int = 1433,
+        port_container: int = 1433,
+        accept_eula: bool = True,
+        mssql_pid: str = "Express",
+    ):
+        self.client = docker.from_env()
+        self.container_name = container_name
+        self.sa_sql_password = sa_sql_password
+        self.mssql_image = mssql_image
+        self.port_host = port_host
+        self.port_container = port_container
+        self.accept_eula = accept_eula
+        self.mssql_pid = mssql_pid
+
+    def start(self):
+        if not self.accept_eula:
+            raise ValueError("Must accept Microsft's End User License Agreement")
+        env = {
+            "ACCEPT_EULA": "Y",
+            "SA_PASSWORD": self.sa_sql_password,
+        }
+        if self.mssql_image.startswith("mcr.microsoft.com/mssql/server"):
+            # means it's linux
+            env["MSSQL_PID"] = self.mssql_pid
+
+        self.container = self.client.containers.run(
+            image=self.mssql_image,
+            name=self.container_name,
+            detach=True,  # '-d' flag
+            environment=env,
+            ports={self.port_container: self.port_host},
+        )
+
+    def stop(self):
+        self.container.stop()
+
+    def remove(self):
+        self.container.remove()
+
+    def create_engine(self, db_name="master"):
+        """Creates SQLAlchemy pyodbc engine for connecting to specified database (default master) as SA user"""
+        db_url = (
+            "Driver={ODBC Driver 17 for SQL Server};"
+            + f"Server={self.address};Database={db_name};UID=sa;PWD={self.sa_sql_password};"
+        )
+        return sa.engine.create_engine(
+            f"mssql+pyodbc:///?odbc_connect={urllib.parse.quote_plus(db_url)}"
+        )
+
+    def create_database(self, name):
+        """Creates a SQL database on the SQL server"""
+        execute_sql_statement(self.create_engine("master"), f"CREATE DATABASE {name}")
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.stop()
+        return
+
+    @property
+    def address(self):
+        return f"127.0.0.1,{self.port_container}"
