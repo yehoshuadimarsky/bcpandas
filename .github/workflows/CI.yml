@@ -25,15 +25,15 @@ jobs:
       matrix:
         name: 
           - linux
-          - windows
+          # - windows
         python-version: [3.6, 3.7, 3.8]
         include:
           - name: linux
             os: ubuntu-latest
             mssql_image: mcr.microsoft.com/mssql/server:2017-latest
-          - name: windows
-            os: windows-latest
-            mssql_image: microsoft/mssql-server-windows-express:2017-latest
+         # - name: windows
+         #   os: windows-latest
+         #  mssql_image: microsoft/mssql-server-windows-express:2017-latest
 
     steps:
     - uses: actions/checkout@v2
