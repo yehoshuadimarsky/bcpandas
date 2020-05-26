@@ -19,7 +19,7 @@ High-level wrapper around BCP for high performance data transfers between pandas
 In [1]: import pandas as pd
    ...: import numpy as np
    ...: 
-   ...: from bcpandas import SqlCreds, to_sql, read_sql
+   ...: from bcpandas import SqlCreds, to_sql
 
 In [2]: creds = SqlCreds(
    ...:     'my_server',
@@ -49,7 +49,7 @@ Out[4]:
 
 In [5]: to_sql(df, 'my_test_table', creds, index=False, if_exists='replace')
 
-In [6]: df2 = read_sql('my_test_table', creds)
+In [6]: df2 = pd.read_sql_table(table_name='my_test_table', con=creds.engine)
 
 In [7]: df2
 Out[7]: 
@@ -67,16 +67,10 @@ Out[7]:
 ```
 
 ## IMPORTANT - Read vs. Write
-The big speedup benefit of bcpandas is in the `to_sql` function, as the benchmarks below show. However, the `read_sql` function actually performs __slower__ than the pandas equivalent. So don't use it. Use bcpandas for the `to_sql` function only and to use native pandas in `read_sql`. 
-
-Also, `read_sql` is not fully tested for this reason, as it became apparant that it is not worth the effort to fix all of the edge cases.
-
-**Q**: So why do we even have a `read_sql` function?
-
-**A**: To complete the API, and in order to discover that there is no speedup for it in bcpandas. Now that this is determined, it will be removed in a future release.
+The big speedup benefit of bcpandas is in the `to_sql` function, as the benchmarks below show. However, the bcpandas `read_sql` function actually performs __slower__ than the pandas equivalent. Therefore, the bcpandas `read_sql` function was deprecated in v5.0 and has now been removed in v6.0+. To read data __from__ SQL to pandas, use the native pandas method `pd.read_sql_table` or `pd.read_sql_query`.
 
 ## Benchmarks
-See figures below. All code is in the `/benchmarks` directory. To run the benchmarks, run `python benchmark.py main` and fill in the command line options that are presented. 
+See figures below. All code is in the `/benchmarks` directory. To run the benchmarks, from the root directory of this repository, run `python benchmarks/benchmark.py main --help` and fill in the command line options that are presented. 
 
 Running this will output
 1. PNG image of the graph
@@ -159,12 +153,12 @@ Bcpandas requires a `bcpandas.SqlCreds` object in order to use it, and also a `s
 ## Known Issues
 
 Here are some caveats and limitations of bcpandas.
-* In the `to_sql` function:
-  * Bcpandas has been tested with all ASCII characters 32-127. Unicode characters beyond that range have not been tested.
-  * For now, an empty string (`""`) in the dataframe becomes `NULL` in the SQL database instead of remaining an empty string.
-  * ~~If there is a NaN/Null in the last column of the dataframe it will throw an error. This is due to a BCP issue. See my issue with Microsoft about this [here](https://github.com/MicrosoftDocs/sql-docs/issues/2689).~~ This doesn't seem to be a problem based on the tests.
-  * Because bcpandas first outputs to CSV, it needs to use several specific characters to create the CSV, including a _delimiter_ and a _quote character_. Bcpandas attempts to use  characters that are not present in the dataframe for this, going through the possilbe delimiters and quote characters specified in `constants.py`. If all possible characters are present in the dataframe and bcpandas cannot find both a delimiter and quote character to use, it will throw an error. 
-    * The BCP utility does __not__ ignore delimiter characters when surrounded by quotes, unlike CSVs - see [here](https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-field-and-row-terminators-sql-server#characters-supported-as-terminators) in the Microsoft docs.
+* Bcpandas has been tested with all ASCII characters 32-127. Unicode characters beyond that range have not been tested.
+* An empty string (`""`) in the dataframe becomes `NULL` in the SQL database instead of remaining an empty string.
+* Because bcpandas first outputs to CSV, it needs to use several specific characters to create the CSV, including a _delimiter_ and a _quote character_. Bcpandas attempts to use  characters that are not present in the dataframe for this, going through the possilbe delimiters and quote characters specified in `constants.py`. If all possible characters are present in the dataframe and bcpandas cannot find both a delimiter and quote character to use, it will throw an error. 
+   * The BCP utility does __not__ ignore delimiter characters when surrounded by quotes, unlike CSVs - see [here](https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-field-and-row-terminators-sql-server#characters-supported-as-terminators) in the Microsoft docs.
+* ~~If there is a NaN/Null in the last column of the dataframe it will throw an error. This is due to a BCP issue. See my issue with Microsoft about this [here](https://github.com/MicrosoftDocs/sql-docs/issues/2689).~~ This doesn't seem to be a problem based on the tests.
+
 
 ## Background
 Writing data from pandas DataFrames to a SQL database is very slow using the built-in `to_sql` method, even with the newly introduced [`execute_many`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-sql-method) option. For Microsoft SQL Server, a far far faster method is to use the BCP utility provided by Microsoft. This utility is a command line tool that transfers data to/from the database and flat text files.
@@ -192,7 +186,37 @@ For now, we are using the non-XML BCP format file type. In the future, XML forma
 
 
 ## Testing
-Testing uses `pytest`. A local SQL Server is spun up using Docker.
+### Testing Requirements
+* Docker Desktop installed, either of the Linux or Windows runtimes, doesn't matter
+* pytest
+* hypothesis
+* pytest-cov (coverage.py)
+* docker-py (for controlling Docker)
+
+### What Is Tested?
+We take testing very seriously here. In order to rely on a library like this in production, it **MUST** be ruthlessly tested, which thankfully it is.
+Here is a partial list of what has been tested so far. Pull Requests welcome!
+* Data types: All ASCII characters 32-127 (using the Hypothesis library, see below). Unicode characters beyond that range have not been tested.
+* `numpy.NaN`, `None`
+* `numpy.inf` (fails, as expected)
+* Empty dataframe (nothing happens, database not modified)
+* Duplicate column names (raises error)
+* Database columns that are missing from the dataframe, are out of order, or both (passes)
+* Extra dataframe columns that aren't in database, when `if_exists="append"` specified (fails)
+
+### Testing Implementation
+* Testing uses `pytest`. 
+* To test for all possible data types, we use the `hypothesis` library, instead of trying to come up with every single case on our own.
+* `pytest-cov` (which uses `coverage.py` under the hood) is used to measure code coverage. This is then uploaded to [codecov.io](https://codecov.io/gh/yehoshuadimarsky/bcpandas) as part of the CI/CD process (see below).
+* In order to spin up a local SQL Server during testing, we use Docker. Specifically, we run one of the images that Microsoft provides that already have SQL Server fully installed, all we have to do is use the image to run a container. Here are the links to the [Linux versions](https://hub.docker.com/_/microsoft-mssql-server) and the Windows versions - [Express](https://hub.docker.com/r/microsoft/mssql-server-windows-express/) and [Developer](https://hub.docker.com/r/microsoft/mssql-server-windows-developer).
+   * When running the tests, we can specify a specific Docker image to use, by invoking the custom command line option called `--mssql-docker-image`. For example:
+      ```bash 
+      pytest bcpandas/tests --mssql-docker-image mcr.microsoft.com/mssql/server:2019-latest
+      ```
+* Instead of using the `subprocess` library to control Docker manually, we use the elegant `docker-py` library which works very nicely. A `DockerDB` Python class is defined in `bcpandas/tests/utils.py` and it wraps up all the Docker commands and functionality needed to use SQL Server into one class. This class is used in `conftest.py` in the core bcpandas tests, and in the `benchmarks/` directory for both the benchmarks code as well as the legacy tests for `read_sql`.
+
+## CI/CD
+Github Actions is used for CI/CD, although it is still somewhat a work in progress. 
 
 ## Contributing
 Please, all contributions are very welcome! 
