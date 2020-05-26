@@ -5,20 +5,18 @@ Created on Sat Aug  3 23:36:07 2019
 @author: ydima
 """
 
+
 import time
 import urllib
 
 from bcpandas import SqlCreds
+from bcpandas.tests.utils import DockerDB
 import pytest
 import sqlalchemy as sa
 
-from .utils import DockerDB
-
 _db_name = "db_bcpandas"
 _docker_startup = 15  # seconds to wait to give the container time to start
-docker_db_obj = DockerDB(
-    container_name="bcpandas-mssql-container", sa_sql_password="MyBigSQLPassword!!!"
-)
+docker_db_obj = DockerDB(container_name="bcpandas-readsql", sa_sql_password="MyBigSQLPassword!!!")
 
 
 def pytest_addoption(parser):

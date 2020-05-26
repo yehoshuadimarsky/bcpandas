@@ -4,14 +4,16 @@ from math import floor
 import platform
 from subprocess import PIPE, run
 import sys
+import time
 from typing import Dict, List, Union
 
-from bcpandas import SqlCreds, read_sql, to_sql
-from bcpandas.tests import conftest as cf
+from bcpandas import SqlCreds, to_sql
+from bcpandas.tests.utils import DockerDB
 import click
 from codetiming import Timer
 import numpy as np
 import pandas as pd
+from read_sql.read_sql import read_sql
 
 mssql_image = "mcr.microsoft.com/mssql/server:2017-latest"
 _IS_WIN32 = sys.platform == "win32"
@@ -88,26 +90,23 @@ def gather_env_info():
     return config
 
 
-def setup():
-    # create docker container
-    gen_docker_db = cf.docker_db.__pytest_wrapped__.obj()
-    next(gen_docker_db)
+def setup(docker_db):
+    # start docker container
+    docker_db.start()
+    time.sleep(20)  # wait for container to start up
 
     # create database
-    gen_database = cf.database.__pytest_wrapped__.obj("dummy param")
-    next(gen_database)
+    docker_db.create_database("benchmark_db")
 
     # create creds
-    creds = cf.sql_creds.__pytest_wrapped__.obj()
+    creds = SqlCreds.from_engine(docker_db.create_engine(db_name="benchmark_db"))
 
-    return gen_docker_db, creds
+    return creds
 
 
-def teardown(gen_docker_db):
-    try:
-        next(gen_docker_db)
-    except StopIteration:
-        pass
+def teardown(docker_db):
+    docker_db.stop()
+    docker_db.remove()
 
 
 def _run_single_func(title, func, **kwargs):
@@ -270,19 +269,15 @@ def main(func, num_cols, min_rows, max_rows, num_examples):
     Will generate `num-examples` of DataFrames using numpy.linspace, going from `min-rows` rows to
     `max-rows` rows.
     """
-    IS_PY38 = sys.version_info.major == 3 and sys.version_info.minor >= 8
-    if IS_PY38:
-        bmark_name = (
-            f"Benchmark run: {func=}, {num_cols=}, {min_rows=}, {max_rows=}, {num_examples=}"
-        )
-    else:
-        bmark_name = f"benchmarks run for {func}"
+    bmark_name = f"Benchmark run: func={func}, num_cols={num_cols}, min_rows={min_rows}, max_rows={max_rows}, num_examples={num_examples}"
+
     print(f"Starting {bmark_name}")
     timer = Timer(name=bmark_name)
     timer.start()
+    docker_db = DockerDB("bcpandas-benchmarks", "MyBigSQLPasswordAlso!!!")
     try:
         # run benchmarks
-        docker_generator, creds = setup()
+        creds = setup(docker_db)
         results = []
         for n in np.linspace(min_rows, max_rows, num=num_examples):
             num_rows = int(n)
@@ -296,7 +291,7 @@ def main(func, num_cols, min_rows, max_rows, num_examples):
                 _results = run_benchmark_tosql(df=df, creds=creds)
             results.append({"num_rows": num_rows, **_results})
     finally:
-        teardown(docker_generator)
+        teardown(docker_db)
 
     save_and_plot(func=func, results=results, num_cols=num_cols)
 

@@ -2,11 +2,11 @@
 from subprocess import DEVNULL, run
 import warnings
 
-from .main import SqlCreds, read_sql, to_sql
+from .main import SqlCreds, to_sql
 from .utils import bcp
 
 name = "bcpandas"
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 
 # BCP check
