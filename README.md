@@ -7,7 +7,6 @@
 [![codecov](https://codecov.io/gh/yehoshuadimarsky/bcpandas/branch/master/graph/badge.svg)](https://codecov.io/gh/yehoshuadimarsky/bcpandas)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/bcpandas.svg)](https://pypi.python.org/pypi/bcpandas/)
-[![PyPI status](https://img.shields.io/pypi/status/bcpandas.svg)](https://pypi.python.org/pypi/bcpandas/)
 [![Awesome Badges](https://img.shields.io/badge/badges-awesome-green.svg)](https://github.com/Naereen/badges)
 
 

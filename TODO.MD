@@ -19,6 +19,7 @@
 ## Open
 
 ### General
+- [ ] `1.0.0` Release
 - [ ] Write more tests for 100% code coverage
 - [ ] Build in auto-retry with native pandas methods if BCP method fails
 
