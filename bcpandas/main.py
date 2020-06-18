@@ -232,7 +232,7 @@ def to_sql(
     delim = get_delimiter(df)
     quotechar = get_quotechar(df)
 
-    if batch_size:
+    if batch_size is not None:
         if batch_size == 0:
             raise BCPandasValueError("Param batch_size can't be 0")
         if batch_size > df.shape[0]:
