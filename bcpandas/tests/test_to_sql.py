@@ -233,6 +233,33 @@ def test_non_string_columns():
     pass
 
 
+@pytest.mark.parametrize("batch_size", [0, 50])
+def test_batch_size_param(sql_creds, batch_size):
+    """
+    Test that batch size can't be:
+        - 0
+        - larger than the number of rows
+    """
+    df = pd.DataFrame(
+        {
+            "col1": [1.5, 2.5, 3.5, 4.5],
+            "col2": [5.5, 6.5, 7.5, 8.5],
+            "col3": [9.5, 10.5, 11.5, 12.5],
+            "col4": [13.5, 14.5, 15.5, 16.5],
+        }
+    )
+    with pytest.raises(BCPandasValueError):
+        to_sql(
+            df=df,
+            table_name="some_table",
+            creds=sql_creds,
+            if_exists="replace",
+            index=False,
+            sql_type="table",
+            batch_size=batch_size,
+        )
+
+
 @pytest.mark.usefixtures("database")
 class _BaseToSql:
     sql_type = "table"
