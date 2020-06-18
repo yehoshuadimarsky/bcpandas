@@ -64,10 +64,6 @@ class SqlCreds:
         driver_version: int = 17,
         odbc_kwargs: Optional[Dict[str, Union[str, int]]] = None,
     ):
-        if not server or not database:
-            raise BCPandasValueError(
-                f"Server and database can't be None, you passed {server}, {database}"
-            )
         self.server = server
         self.database = database
         if username and password:
