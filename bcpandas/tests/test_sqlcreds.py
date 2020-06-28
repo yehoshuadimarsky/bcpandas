@@ -59,8 +59,8 @@ def test_sql_creds_for_windows_auth():
     creds = SqlCreds(server="test_server", database="test_database", driver_version=99,)
     assert creds.server == "test_server"
     assert creds.database == "test_database"
-    assert creds.username is None
-    assert creds.password is None
+    assert creds.username == ""
+    assert creds.password == ""
     assert creds.port == 1433
     assert creds.with_krb_auth is True
     assert isinstance(creds.engine, engine.Connectable)
@@ -186,8 +186,8 @@ def test_sql_creds_from_sqlalchemy_windows_auth():
     creds = SqlCreds.from_engine(mssql_engine)
     assert creds.server == "test_server"
     assert creds.database == "test_database"
-    assert creds.username is None
-    assert creds.password is None
+    assert creds.username == ""
+    assert creds.password == ""
     assert creds.port == 1433
     assert creds.with_krb_auth is True
     assert isinstance(creds.engine, engine.Connectable)
@@ -238,8 +238,8 @@ def test_sql_creds_from_sqlalchemy_windows_auth_non_default_port():
     creds = SqlCreds.from_engine(mssql_engine)
     assert creds.server == "test_server"
     assert creds.database == "test_database"
-    assert creds.username is None
-    assert creds.password is None
+    assert creds.username == ""
+    assert creds.password == ""
     assert creds.port == 9999
     assert creds.with_krb_auth is True
     assert isinstance(creds.engine, engine.Connectable)
@@ -284,8 +284,8 @@ def test_sql_creds_from_sqlalchemy_windows_auth_blank_port():
     creds = SqlCreds.from_engine(mssql_engine)
     assert creds.server == "test_server"
     assert creds.database == "test_database"
-    assert creds.username is None
-    assert creds.password is None
+    assert creds.username == ""
+    assert creds.password == ""
     assert creds.port is None
     assert creds.with_krb_auth is True
     assert isinstance(creds.engine, engine.Connectable)

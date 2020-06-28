@@ -59,8 +59,8 @@ class SqlCreds:
         self,
         server: str,
         database: str,
-        username: str = None,
-        password: str = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
         driver_version: int = 17,
         port: int = 1433,
         odbc_kwargs: Optional[Dict[str, Union[str, int]]] = None,
@@ -86,8 +86,8 @@ class SqlCreds:
                 f"UID={username};PWD={password}"
             )
         else:
-            self.username = None
-            self.password = None
+            self.username = ""
+            self.password = ""
             self.with_krb_auth = True
             db_url = f"Driver={self.driver};Server=tcp:{self.server}{port_str};Database={self.database};Trusted_Connection=yes;"
 
