@@ -59,27 +59,41 @@ class SqlCreds:
         self,
         server: str,
         database: str,
-        username: str = None,
-        password: str = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
         driver_version: int = 17,
+        port: int = 1433,
         odbc_kwargs: Optional[Dict[str, Union[str, int]]] = None,
     ):
         self.server = server
         self.database = database
+        self.port = port
+
+        self.driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
+
+        # Append a comma for use in connection strings (optionally blank)
+        if port:
+            port_str = f",{self.port}"
+        else:
+            port_str = ""
+
+        db_url = (
+            f"Driver={self.driver};Server=tcp:{self.server}{port_str};Database={self.database};"
+        )
         if username and password:
             self.username = username
             self.password = password
             self.with_krb_auth = False
+            db_url += f"UID={username};PWD={password}"
         else:
+            self.username = ""
+            self.password = ""
             self.with_krb_auth = True
+            db_url += "Trusted_Connection=yes;"
+
         logger.info(f"Created creds:\t{self}")
 
         # construct the engine for sqlalchemy
-        driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
-        db_url = (
-            f"Driver={driver};Server=tcp:{self.server},1433;Database={self.database};"
-            f"UID={self.username};PWD={self.password}"
-        )
         if odbc_kwargs:
             db_url += ";".join(f"{k}={v}" for k, v in odbc_kwargs.items())
         conn_string = f"mssql+pyodbc:///?odbc_connect={quote_plus(db_url)}"
@@ -109,12 +123,17 @@ class SqlCreds:
             # convert into dict
             conn_dict = {x.split("=")[0]: x.split("=")[1] for x in conn_url if "=" in x}
 
+            if "," in conn_dict["Server"]:
+                conn_dict["port"] = int(conn_dict["Server"].split(",")[1])
+
             sql_creds = cls(
-                server=conn_dict["Server"].replace("tcp:", "").replace(",1433", ""),
+                server=conn_dict["Server"].replace("tcp:", "").split(",")[0],
                 database=conn_dict["Database"],
-                username=conn_dict["UID"],
-                password=conn_dict["PWD"],
+                username=conn_dict.get("UID", None),
+                password=conn_dict.get("PWD", None),
+                port=conn_dict.get("port", None),
             )
+
             # add Engine object as attribute
             sql_creds.engine = engine
             return sql_creds
