@@ -77,19 +77,19 @@ class SqlCreds:
         else:
             port_str = ""
 
+        db_url = (
+            f"Driver={self.driver};Server=tcp:{self.server}{port_str};Database={self.database};"
+        )
         if username and password:
             self.username = username
             self.password = password
             self.with_krb_auth = False
-            db_url = (
-                f"Driver={self.driver};Server=tcp:{self.server}{port_str};Database={self.database};"
-                f"UID={username};PWD={password}"
-            )
+            db_url += f"UID={username};PWD={password}"
         else:
             self.username = ""
             self.password = ""
             self.with_krb_auth = True
-            db_url = f"Driver={self.driver};Server=tcp:{self.server}{port_str};Database={self.database};Trusted_Connection=yes;"
+            db_url += "Trusted_Connection=yes;"
 
         logger.info(f"Created creds:\t{self}")
 
@@ -125,14 +125,13 @@ class SqlCreds:
 
             if "," in conn_dict["Server"]:
                 conn_dict["port"] = int(conn_dict["Server"].split(",")[1])
-                
+
             sql_creds = cls(
                 server=conn_dict["Server"].replace("tcp:", "").split(",")[0],
                 database=conn_dict["Database"],
                 username=conn_dict.get("UID", None),
                 password=conn_dict.get("PWD", None),
                 port=conn_dict.get("port", None),
-
             )
 
             # add Engine object as attribute
