@@ -15,18 +15,18 @@
 - [x] Remove the deprecated `read_sql` and all references to it
 - [x] Test inserting dataframe with (all) boolean values
 - [x] Implement if dataframe is missing some database columns and/or the columns are out of order
+- [x] Add section in docs detailing testing and Docker
 
 ## Open
 
 ### General
 - [ ] `1.0.0` Release
+- [ ] Explore alternatives to `INFORMATION_SCHEMA` SQL views
 - [ ] Write more tests for 100% code coverage
 - [ ] Build in auto-retry with native pandas methods if BCP method fails
 
 ### Docs
-- [ ] Add to docs required SQL permissions to run diff parts, and that bcpandas uses `INFORMATION_SCHEMA` SQL views
-- [ ] Add to docs when/if NULL/NaNs are inserted and how
-- [ ] Add section in docs detailing testing and Docker
+- [ ] Add to docs the exact required SQL permissions
 
 ### CI/CD
 - [ ] Add the benchmarks to CI/CD
