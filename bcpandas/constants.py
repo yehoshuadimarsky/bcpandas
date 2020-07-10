@@ -6,6 +6,7 @@ Created on Sat Aug  3 23:20:19 2019
 """
 
 import os
+import string
 import sys
 
 import pandas as pd
@@ -35,8 +36,23 @@ IF_EXISTS_OPTIONS = ("append", "replace", "fail")
 
 
 # Text settings
-_DELIMITER_OPTIONS = (",", "|", "\t")
+
+# https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-field-and-row-terminators-sql-server
+# Can technically use almost any character as a delimiter (terminator).
+# Main thing is that it should NOT appear in the data
+# For simplicity, it should be limited to a single character. So can't/shouldn't use backslash because
+# would need to escape it
+invalid_delims = ("'", '"', "\\")
+_DELIMITER_OPTIONS = (
+    string.ascii_letters
+    + string.digits
+    + "".join(set(string.punctuation) - set(invalid_delims))
+    + "\t"
+)
+
 _QUOTECHAR_OPTIONS = ('"', "'", "`", "~")
+
+# TODO can also theoretically make this a range of characters, as long as doesn't overlap with delimiter
 NEWLINE = os.linesep
 
 # settings for both BCP and pandas.read_csv for reading from SQL
