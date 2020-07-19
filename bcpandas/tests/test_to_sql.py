@@ -661,3 +661,59 @@ class TestToSqlOther(_BaseToSql):
     @settings(deadline=None)
     def test_df_dates(self, df, sql_creds, index):
         self._test_df_template(df, sql_creds, index)
+
+
+@pytest.mark.usefixtures("database")
+def test_supported_delimiter_range(sql_creds):
+    """
+    Tests for all weird and wonderful delimiters.
+
+    Generates one dataframe for each ASCII character option, with a column for
+    each character - each time excluding one, which must therefore be used as
+    the delimiter.
+
+    Uploads each dataframe to its own db table then pulls it back and
+    verifies the results match the original dataframe.
+    
+    Critically, this includes testing core delimiter characters:
+        9 - tab (\t)
+        44 - comma (,)
+        124 - pipe (|)
+    """
+
+    # static asserts
+    assert "\t" in _DELIMITER_OPTIONS
+    assert "," in _DELIMITER_OPTIONS
+    assert "|" in _DELIMITER_OPTIONS
+
+    assert '"' in _QUOTECHAR_OPTIONS
+    assert "'" in _QUOTECHAR_OPTIONS
+    assert "`" in _QUOTECHAR_OPTIONS
+    assert "~" in _QUOTECHAR_OPTIONS
+
+    # This bit takes a little while
+    for d in _DELIMITER_OPTIONS:
+        # Could run this for all quotechar options - but will take a while
+        for q in _QUOTECHAR_OPTIONS[0]:
+            # Test every available delimiter against a dataframe containing all 128 ASCII characters
+            # purposefully excluding value under test plus allow 1 quotechar at a time.
+            
+            # Convert current character to ascii character code 
+            i = ord(d)
+
+            source_df = pd.DataFrame([{f"chr_{i}_{j}": chr(j)
+                                      for j in range(1, 128)
+                                      if i != j and chr(j) != q and chr(j) not in NEWLINE}])
+
+            to_sql(creds=sql_creds,
+                   df=source_df,
+                   table_name=f"test_delimiter_chr_{i}",
+                   if_exists="replace",
+                   index=None,
+                   batch_size=1,
+                   )
+
+            actual_df = pd.read_sql(con=sql_creds.engine, sql=f"SELECT * FROM test_delimiter_chr_{i}")
+
+            assert actual_df.shape[0] == 1
+            pd.testing.assert_frame_equal(source_df, actual_df)
