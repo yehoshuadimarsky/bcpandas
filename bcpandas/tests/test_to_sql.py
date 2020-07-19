@@ -16,7 +16,7 @@ import sys
 from typing import Optional, no_type_check
 
 from bcpandas import to_sql
-from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS, BCPandasValueError
+from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS, BCPandasValueError, NEWLINE
 from hypothesis import HealthCheck, given, settings
 import hypothesis.strategies as st
 import numpy as np
