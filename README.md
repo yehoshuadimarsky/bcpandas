@@ -10,7 +10,6 @@
 [![Awesome Badges](https://img.shields.io/badge/badges-awesome-green.svg)](https://github.com/Naereen/badges)
 [![Downloads](https://static.pepy.tech/personalized-badge/bcpandas?period=total&units=international_system&left_color=grey&right_color=orange&left_text=PyPI%20Total%20Downloads)](https://pepy.tech/project/bcpandas)
 
-
 High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!! (pronounced _BEE-CEE-Pandas_)
 
 ## Quickstart
@@ -222,3 +221,7 @@ Github Actions is used for CI/CD, although it is still somewhat a work in progre
 Please, all contributions are very welcome! 
 
 I will attempt to use the `pandas` docstring style as detailed [here](https://pandas.pydata.org/pandas-docs/stable/development/contributing_docstring.html).
+
+## GitHub Stars Trend
+
+[![Stargazers over time](https://starchart.cc/yehoshuadimarsky/bcpandas.svg)](https://starchart.cc/yehoshuadimarsky/bcpandas)
