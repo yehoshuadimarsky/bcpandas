@@ -192,6 +192,7 @@ def to_sql(
     schema: str = "dbo",
     index: bool = True,
     if_exists: str = "fail",
+    delim: str = None,
     batch_size: int = None,
     debug: bool = False,
     bcp_path: str = None,
@@ -225,6 +226,8 @@ def to_sql(
         * append: Insert new values to the existing table. Matches the dataframe columns to the database columns by name.
             If the database table exists then the dataframe cannot have new columns that aren't in the table, 
             but conversely table columns can be missing from the dataframe.
+    delim: str, optional
+        Custom delimiter given by user, else it will fall back to preset delimiters.
     batch_size : int, optional
         Rows will be written in batches of this size at a time. By default, BCP sets this to 1000.
     debug : bool, default False
@@ -248,7 +251,13 @@ def to_sql(
     if index:
         df = df.copy(deep=True).reset_index()
 
-    delim = get_delimiter(df)
+    # check if delimiter is ascii
+    if delim and not delim.isascii():
+        raise BCPandasValueError(
+            f"Given delimiter {delim} is not ascii encodable"
+        )
+    else:
+        delim = get_delimiter(df)
     quotechar = get_quotechar(df)
 
     if batch_size is not None:
