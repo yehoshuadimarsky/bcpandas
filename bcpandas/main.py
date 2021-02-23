@@ -252,7 +252,7 @@ def to_sql(
         df = df.copy(deep=True).reset_index()
 
     # check if delimiter is ascii
-    if delim and not delim.isascii():
+    if delim and not len(delim) == len(delim.encode()):
         raise BCPandasValueError(
             f"Given delimiter {delim} is not ascii encodable"
         )
