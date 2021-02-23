@@ -242,4 +242,3 @@ def run_cmd(cmd: List[str]) -> int:
         print(errs, end="")
         logger.error(errs)
     return proc.returncode
-
