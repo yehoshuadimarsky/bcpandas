@@ -16,11 +16,11 @@
 - [x] Test inserting dataframe with (all) boolean values
 - [x] Implement if dataframe is missing some database columns and/or the columns are out of order
 - [x] Add section in docs detailing testing and Docker
+- [x] `1.0.0` Release
 
 ## Open
 
 ### General
-- [ ] `1.0.0` Release
 - [ ] Explore alternatives to `INFORMATION_SCHEMA` SQL views
 - [ ] Write more tests for 100% code coverage
 - [ ] Build in auto-retry with native pandas methods if BCP method fails

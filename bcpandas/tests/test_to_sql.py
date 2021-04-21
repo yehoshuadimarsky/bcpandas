@@ -57,7 +57,7 @@ def test_tosql_all_quotechars(sql_creds):
 
 def _get_bcp_path() -> Optional[str]:
     """
-    On Windows, is typically in C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/130/Tools/Binn
+    On Windows, is typically in C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/170/Tools/Binn
     On Linux it depends where you install it, but usually in /opt/mssql-tools/bin
     """
     try:
