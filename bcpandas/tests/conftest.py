@@ -8,9 +8,10 @@ Created on Sat Aug  3 23:36:07 2019
 import time
 import urllib
 
-from bcpandas import SqlCreds
 import pytest
 import sqlalchemy as sa
+
+from bcpandas import SqlCreds
 
 from .utils import DockerDB
 

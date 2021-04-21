@@ -21,10 +21,12 @@ Not included (yet):
 """
 
 import urllib
-import pytest
+
 import pandas as pd
+import pytest
+from sqlalchemy import create_engine, engine
+
 from bcpandas import SqlCreds
-from sqlalchemy import engine, create_engine
 
 
 def test_sql_creds_for_username_password():

@@ -1,3 +1,10 @@
+from hypothesis import assume, given, settings
+from hypothesis.extra import pandas as hpd
+import pandas as pd
+from pandas.testing import assert_frame_equal
+import pyodbc
+import pytest
+
 from bcpandas.constants import BCPandasValueError, read_data_settings
 from bcpandas.tests.utils import (
     not_has_all_delims,
@@ -7,12 +14,6 @@ from bcpandas.tests.utils import (
     strat_ints,
     strat_text,
 )
-from hypothesis import assume, given, settings
-from hypothesis.extra import pandas as hpd
-import pandas as pd
-from pandas.testing import assert_frame_equal
-import pyodbc
-import pytest
 
 from .read_sql import read_sql
 

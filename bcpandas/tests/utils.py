@@ -1,6 +1,5 @@
 import urllib
 
-from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS
 import docker
 from hypothesis import assume
 from hypothesis.extra import pandas as hpd
@@ -8,6 +7,8 @@ import hypothesis.strategies as st
 import pandas as pd
 import pyodbc
 import sqlalchemy as sa
+
+from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS
 
 # Hypo - typical use cases
 #   - DataFrame: at least one row

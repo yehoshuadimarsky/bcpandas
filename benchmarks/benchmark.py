@@ -7,13 +7,14 @@ import sys
 import time
 from typing import Dict, List, Union
 
-from bcpandas import SqlCreds, to_sql
-from bcpandas.tests.utils import DockerDB
 import click
 from codetiming import Timer
 import numpy as np
 import pandas as pd
 from read_sql.read_sql import read_sql
+
+from bcpandas import SqlCreds, to_sql
+from bcpandas.tests.utils import DockerDB
 
 mssql_image = "mcr.microsoft.com/mssql/server:2017-latest"
 _IS_WIN32 = sys.platform == "win32"

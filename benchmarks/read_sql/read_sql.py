@@ -2,6 +2,8 @@ import logging
 import os
 import warnings
 
+import pandas as pd
+
 from bcpandas.constants import (
     OUT,
     QUERY,
@@ -14,7 +16,6 @@ from bcpandas.constants import (
 )
 from bcpandas.main import SqlCreds
 from bcpandas.utils import bcp, get_temp_file
-import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +148,7 @@ def read_sql(
         )
     finally:
         if not debug:
-            logger.debug(f"Deleting temp CSV file")
+            logger.debug("Deleting temp CSV file")
             os.remove(file_path)
         else:
             logger.debug(
