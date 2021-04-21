@@ -231,13 +231,13 @@ def run_cmd(cmd: List[str]) -> int:
     proc = Popen(cmd, stdout=PIPE, stderr=PIPE, encoding="utf-8", errors="utf-8", shell=with_shell,)
     # live stream STDOUT
     while True:
-        outs = proc.stdout.readline()
+        outs = proc.stdout.readline()  # type: ignore[union-attr]
         if outs:
             print(outs, end="")
             logger.info(outs)
         if proc.poll() is not None and outs == "":
             break
-    errs = proc.stderr.readlines()
+    errs = proc.stderr.readlines()  # type: ignore[union-attr]
     if errs:
         print(errs, end="")
         logger.error(errs)

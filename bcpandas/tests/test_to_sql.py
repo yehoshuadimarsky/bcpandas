@@ -15,14 +15,15 @@ from pathlib import Path
 import sys
 from typing import Optional, no_type_check
 
-from bcpandas import to_sql
-from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS, BCPandasValueError
 from hypothesis import HealthCheck, given, settings
 import hypothesis.strategies as st
 import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal
 import pytest
+
+from bcpandas import to_sql
+from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS, BCPandasValueError
 
 from .utils import (
     assume_not_all_delims_and_quotechars,
