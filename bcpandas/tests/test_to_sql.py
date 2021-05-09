@@ -70,7 +70,10 @@ def _get_bcp_path() -> Optional[str]:
             return str(bcp_path / "bcp.exe")
         else:
             bcp_path = Path("/opt/mssql-tools/bin")
-            return str(bcp_path / "bcp")
+            if bcp_path.resolve().exists():
+                return str(bcp_path / "bcp")
+            else:
+                return None
     except FileNotFoundError:
         return None
 

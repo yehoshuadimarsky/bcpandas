@@ -95,7 +95,7 @@ As you can see, pandas native clearly wins here
 Any version of Microsoft SQL Server. Can be installed on-prem, in the cloud, on a VM, or one of the Azure versions.
 ### Python User
 - [BCP](https://docs.microsoft.com/en-us/sql/tools/bcp-utility) Utility
-- Microsoft ODBC Driver **11, 13, 13.1, or 17** for SQL Server. See the [pyodbc docs](https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Windows) for details.
+- Microsoft ODBC Driver **11, 13, 13.1, or 17** for SQL Server. ([Microsoft Docs](https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server)) See the [pyodbc docs](https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Windows) for more on different driver versions.
 - Python >= 3.6
 - `pandas` >= 0.19
 - `sqlalchemy` >= 1.1.4
