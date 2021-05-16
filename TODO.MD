@@ -1,5 +1,16 @@
 # Master To-Do List
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Completed](#completed)
+- [Open](#open)
+  - [General](#general)
+  - [Docs](#docs)
+  - [CI/CD](#cicd)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Completed
 - [x] **COME UP WITH A GOOD NAME!** (`pandasql` is already taken in PyPI)
 - [x] Fix up `setup.py`

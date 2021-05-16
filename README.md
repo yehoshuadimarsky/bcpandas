@@ -12,6 +12,36 @@
 
 High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!! (pronounced _BEE-CEE-Pandas_)
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Quickstart](#quickstart)
+- [IMPORTANT - Read vs. Write](#important---read-vs-write)
+- [Benchmarks](#benchmarks)
+  - [to_sql](#to_sql)
+    - [Why not just use the new pandas `method='multi'`?](#why-not-just-use-the-new-pandas-methodmulti)
+  - [read_sql](#read_sql)
+- [Requirements](#requirements)
+  - [Database](#database)
+  - [Python User](#python-user)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Credential/Connection object](#credentialconnection-object)
+  - [Recommended Usage](#recommended-usage)
+- [Known Issues](#known-issues)
+- [Background](#background)
+  - [Existing Solutions](#existing-solutions)
+  - [Design and Scope](#design-and-scope)
+- [Testing](#testing)
+  - [Testing Requirements](#testing-requirements)
+  - [What Is Tested?](#what-is-tested)
+  - [Testing Implementation](#testing-implementation)
+- [CI/CD](#cicd)
+- [Contributing](#contributing)
+- [GitHub Stars Trend](#github-stars-trend)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Quickstart
 
 ```python
