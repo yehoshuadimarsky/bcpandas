@@ -13,6 +13,11 @@ on:
     branches: [ master ]
     paths:
       - 'bcpandas/**'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for triggering the workflow'
+        required: false
 
 jobs:
   build:
