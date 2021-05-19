@@ -10,11 +10,11 @@ There are 2 categories of tests we want to do:
     - Test with different datasets that have different properties
 """
 
+from datetime import date
 from os.path import expandvars
 from pathlib import Path
 import sys
 from typing import Optional, no_type_check
-from datetime import date
 
 from hypothesis import HealthCheck, given, settings
 import hypothesis.strategies as st
@@ -634,21 +634,21 @@ class TestToSqlDtypeScenarios(_BaseToSql):
         {
             "col1": [1, 2, 3, 4],
             "col2": [5.5, 6.5, 7.5, 8.5],
-            "col3": ['foo', 'bar', 'baz', 'qux'],
+            "col3": ["foo", "bar", "baz", "qux"],
             "col4": [date(2021, 1, 1), date(2021, 1, 2), date(2021, 1, 3), date(2021, 1, 4)],
-            "col5": [True, True, False, False]
+            "col5": [True, True, False, False],
         }
     )
 
-    def test_no_dtype(self, df, index):
+    def test_no_dtype(self):
         to_sql(
-            df=df,
+            df=self.df,
             table_name=self.table_name,
             creds=self.sql_creds,
-            index=index,
+            index=False,
             sql_type=self.sql_type,
             if_exists="replace",
-            dtype=None
+            dtype=None,
         )
 
         actual = pd.read_sql_query(
@@ -660,21 +660,24 @@ class TestToSqlDtypeScenarios(_BaseToSql):
             FROM
               INFORMATION_SCHEMA.COLUMNS 
             WHERE
-              TABLE_NAME = '{self.table_name}'""", con=self.pyodbc_creds
+              TABLE_NAME = '{self.table_name}'""",
+            con=self.pyodbc_creds,
         )
-        expected = pd.DataFrame({
-            "COLUMN_NAME": ["col1", "col2", "col3", "col4", "col5"],
-            "DATA_TYPE": ["bigint", "float", "varchar", "date", "bit"],
-            "CHARACTER_MAXIMUM_LENGTH": [np.NaN, np.NaN, -1., np.NaN, np.NaN]
-        })
+        expected = pd.DataFrame(
+            {
+                "COLUMN_NAME": ["col1", "col2", "col3", "col4", "col5"],
+                "DATA_TYPE": ["bigint", "float", "varchar", "date", "bit"],
+                "CHARACTER_MAXIMUM_LENGTH": [np.NaN, np.NaN, -1.0, np.NaN, np.NaN],
+            }
+        )
         assert_frame_equal(expected, actual)
 
-    def test_with_dtype(self, df, index):
+    def test_with_dtype(self):
         to_sql(
-            df=df,
+            df=self.df,
             table_name=self.table_name,
             creds=self.sql_creds,
-            index=index,
+            index=False,
             sql_type=self.sql_type,
             if_exists="replace",
             dtype={
@@ -682,8 +685,8 @@ class TestToSqlDtypeScenarios(_BaseToSql):
                 "col2": sqlalchemy.types.FLOAT(),
                 "col3": sqlalchemy.types.NVARCHAR(length=10),
                 "col4": sqlalchemy.types.DATE(),
-                "col5": sqlalchemy.dialects.mssql.BIT()
-            }
+                "col5": sqlalchemy.dialects.mssql.BIT(),
+            },
         )
 
         actual = pd.read_sql_query(
@@ -695,13 +698,16 @@ class TestToSqlDtypeScenarios(_BaseToSql):
             FROM
               INFORMATION_SCHEMA.COLUMNS 
             WHERE
-              TABLE_NAME = '{self.table_name}'""", con=self.pyodbc_creds
+              TABLE_NAME = '{self.table_name}'""",
+            con=self.pyodbc_creds,
         )
-        expected = pd.DataFrame({
-            "COLUMN_NAME": ["col1", "col2", "col3", "col4", "col5"],
-            "DATA_TYPE": ["int", "float", "nvarchar", "date", "bit"],
-            "CHARACTER_MAXIMUM_LENGTH": [np.NaN, np.NaN, 10., np.NaN, np.NaN]
-        })
+        expected = pd.DataFrame(
+            {
+                "COLUMN_NAME": ["col1", "col2", "col3", "col4", "col5"],
+                "DATA_TYPE": ["int", "float", "nvarchar", "date", "bit"],
+                "CHARACTER_MAXIMUM_LENGTH": [np.NaN, np.NaN, 10.0, np.NaN, np.NaN],
+            }
+        )
         assert_frame_equal(expected, actual)
 
 
