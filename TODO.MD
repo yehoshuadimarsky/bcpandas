@@ -3,6 +3,7 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+
 - [Completed](#completed)
 - [Open](#open)
   - [General](#general)
@@ -37,6 +38,7 @@
 - [ ] Build in auto-retry with native pandas methods if BCP method fails
 
 ### Docs
+- [ ] Add instructions for contributing (setup conda env, how to write tests, pre-commit, etc.)
 - [ ] Add to docs the exact required SQL permissions
 
 ### CI/CD
