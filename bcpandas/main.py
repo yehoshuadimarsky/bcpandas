@@ -167,7 +167,7 @@ def _sql_item_exists(sql_type: str, schema: str, table_name: str, creds: SqlCred
     return res.shape[0] > 0
 
 
-def _create_table(schema: str, table_name: str, creds: SqlCreds, df: pd.DataFrame, if_exists: str):
+def _create_table(schema: str, table_name: str, creds: SqlCreds, df: pd.DataFrame, if_exists: str, dtype: dict = None):
     """use pandas' own code to create the table and schema"""
 
     sql_db = SQLDatabase(engine=creds.engine, schema=schema)
@@ -179,7 +179,7 @@ def _create_table(schema: str, table_name: str, creds: SqlCreds, df: pd.DataFram
         if_exists=if_exists,
         index_label=None,
         schema=schema,
-        dtype=None,
+        dtype=dtype,
     )
     table.create()
 
@@ -195,6 +195,7 @@ def to_sql(
     batch_size: int = None,
     debug: bool = False,
     bcp_path: str = None,
+    dtype: dict = None
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -231,6 +232,9 @@ def to_sql(
         If True, will not delete the temporary CSV and format files, and will output their location.
     bcp_path : str, default None
         The full path to the BCP utility, useful if it is not in the PATH environment variable
+    dtype: dict, default None
+        A dict with keys the names of columns and values SqlAlchemy types for defining their types. These are
+        directly passed into pandas' API
     """
     # validation
     if df.shape[0] == 0 or df.shape[1] == 0:
@@ -323,16 +327,16 @@ def to_sql(
                 )
             else:
                 _create_table(
-                    schema=schema, table_name=table_name, creds=creds, df=df, if_exists=if_exists
+                    schema=schema, table_name=table_name, creds=creds, df=df, if_exists=if_exists, dtype=dtype
                 )
         elif if_exists == "replace":
             _create_table(
-                schema=schema, table_name=table_name, creds=creds, df=df, if_exists=if_exists
+                schema=schema, table_name=table_name, creds=creds, df=df, if_exists=if_exists, dtype=dtype
             )
         elif if_exists == "append":
             if not sql_item_exists:
                 _create_table(
-                    schema=schema, table_name=table_name, creds=creds, df=df, if_exists=if_exists
+                    schema=schema, table_name=table_name, creds=creds, df=df, if_exists=if_exists, dtype=dtype
                 )
 
         # BCP the data in

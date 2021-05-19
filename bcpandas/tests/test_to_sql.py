@@ -10,6 +10,7 @@ There are 2 categories of tests we want to do:
     - Test with different datasets that have different properties
 """
 
+from datetime import date
 from os.path import expandvars
 from pathlib import Path
 import sys
@@ -21,6 +22,7 @@ import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal
 import pytest
+import sqlalchemy
 
 from bcpandas import to_sql
 from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS, BCPandasValueError
@@ -620,6 +622,93 @@ class TestToSqlFail(_BaseToSql):
     def test_df_dates(self, df, index):
         self._test_exists(df, index)
         self._test_not_exists(df, index)
+
+
+class TestToSqlDtypeScenarios(_BaseToSql):
+    """
+    Various tests for scenarios where dtype is and is not passed, to check that the columns are the correct types
+    """
+
+    table_name = "tosql_dtype_scenarios"
+    df = pd.DataFrame(
+        {
+            "col1": [1, 2, 3, 4],
+            "col2": [5.5, 6.5, 7.5, 8.5],
+            "col3": ["foo", "bar", "baz", "qux"],
+            "col4": [date(2021, 1, 1), date(2021, 1, 2), date(2021, 1, 3), date(2021, 1, 4)],
+            "col5": [True, True, False, False],
+        }
+    )
+
+    def test_no_dtype(self):
+        to_sql(
+            df=self.df,
+            table_name=self.table_name,
+            creds=self.sql_creds,
+            index=False,
+            sql_type=self.sql_type,
+            if_exists="replace",
+            dtype=None,
+        )
+
+        actual = pd.read_sql_query(
+            sql=f"""
+            SELECT
+              COLUMN_NAME,
+              DATA_TYPE,
+              CHARACTER_MAXIMUM_LENGTH
+            FROM
+              INFORMATION_SCHEMA.COLUMNS 
+            WHERE
+              TABLE_NAME = '{self.table_name}'""",
+            con=self.pyodbc_creds,
+        )
+        expected = pd.DataFrame(
+            {
+                "COLUMN_NAME": ["col1", "col2", "col3", "col4", "col5"],
+                "DATA_TYPE": ["bigint", "float", "varchar", "date", "bit"],
+                "CHARACTER_MAXIMUM_LENGTH": [np.NaN, np.NaN, -1.0, np.NaN, np.NaN],
+            }
+        )
+        assert_frame_equal(expected, actual)
+
+    def test_with_dtype(self):
+        to_sql(
+            df=self.df,
+            table_name=self.table_name,
+            creds=self.sql_creds,
+            index=False,
+            sql_type=self.sql_type,
+            if_exists="replace",
+            dtype={
+                "col1": sqlalchemy.types.INTEGER(),
+                "col2": sqlalchemy.types.FLOAT(),
+                "col3": sqlalchemy.types.NVARCHAR(length=10),
+                "col4": sqlalchemy.types.DATE(),
+                "col5": sqlalchemy.dialects.mssql.BIT(),
+            },
+        )
+
+        actual = pd.read_sql_query(
+            sql=f"""
+            SELECT
+              COLUMN_NAME,
+              DATA_TYPE,
+              CHARACTER_MAXIMUM_LENGTH
+            FROM
+              INFORMATION_SCHEMA.COLUMNS 
+            WHERE
+              TABLE_NAME = '{self.table_name}'""",
+            con=self.pyodbc_creds,
+        )
+        expected = pd.DataFrame(
+            {
+                "COLUMN_NAME": ["col1", "col2", "col3", "col4", "col5"],
+                "DATA_TYPE": ["int", "float", "nvarchar", "date", "bit"],
+                "CHARACTER_MAXIMUM_LENGTH": [np.NaN, np.NaN, 10.0, np.NaN, np.NaN],
+            }
+        )
+        assert_frame_equal(expected, actual)
 
 
 class TestToSqlOther(_BaseToSql):
