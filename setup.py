@@ -6,14 +6,14 @@ with open("./README.md", "r") as file:
 
 setup(
     name="bcpandas",
-    version="1.0.1",
+    version="1.1.0",
     author="yehoshuadimarsky",
     description="High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yehoshuadimarsky/bcpandas",
     packages=find_packages(),
-    install_requires=["pandas>=0.19", "pyodbc", "sqlalchemy>=1.1.4"],
+    install_requires=["pandas>=0.19", "pyodbc", "sqlalchemy>=1.1.4, <=1.3.17"],
     python_requires=">=3.6, <3.9",
     keywords="bcp mssql pandas",
     classifiers=[
