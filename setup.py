@@ -16,6 +16,7 @@ setup(
     install_requires=["pandas>=0.19", "pyodbc", "sqlalchemy>=1.1.4, <=1.3.17"],
     python_requires=">=3.6, <3.9",
     keywords="bcp mssql pandas",
+    entry_points={"pandas.sql.engine": ["bcpandas = bcpandas.main:to_sql"]},
     classifiers=[
         "Topic :: Database",
         "Intended Audience :: Developers",
