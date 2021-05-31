@@ -8,6 +8,7 @@ Created on Sat Aug  3 23:07:15 2019
 import csv
 import logging
 import os
+from textwrap import dedent
 from typing import Dict, Optional, Union
 from urllib.parse import quote_plus
 
@@ -155,19 +156,28 @@ class SqlCreds:
 
 
 def _sql_item_exists(sql_type: str, schema: str, table_name: str, creds: SqlCreds) -> bool:
-    _qry = """
+    _qry = dedent(
+        """
         SELECT * 
         FROM INFORMATION_SCHEMA.{_typ}S 
         WHERE TABLE_SCHEMA = '{_schema}' 
         AND TABLE_NAME = '{_tbl}'
         """.format(
-        _typ=sql_type.upper(), _schema=schema, _tbl=table_name
+            _typ=sql_type.upper(), _schema=schema, _tbl=table_name
+        )
     )
     res = pd.read_sql_query(sql=_qry, con=creds.engine)
     return res.shape[0] > 0
 
 
-def _create_table(schema: str, table_name: str, creds: SqlCreds, df: pd.DataFrame, if_exists: str, dtype: dict = None):
+def _create_table(
+    schema: str,
+    table_name: str,
+    creds: SqlCreds,
+    df: pd.DataFrame,
+    if_exists: str,
+    dtype: dict = None,
+):
     """use pandas' own code to create the table and schema"""
 
     sql_db = SQLDatabase(engine=creds.engine, schema=schema)
@@ -184,6 +194,116 @@ def _create_table(schema: str, table_name: str, creds: SqlCreds, df: pd.DataFram
     table.create()
 
 
+def _handle_cols_for_append(
+    df: pd.DataFrame,
+    table_name: str,
+    creds: SqlCreds,
+    sql_item_exists: bool,
+    schema: str,
+    if_exists: str,
+):
+    cols_dict = None
+    if if_exists == "append":
+        # get dict of column names -> order of column
+        cols_dict = dict(
+            pd.read_sql_query(
+                dedent(
+                    """
+                SELECT COLUMN_NAME, ORDINAL_POSITION 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = '{_schema}'
+                AND TABLE_NAME = '{_tbl}'
+            """.format(
+                        _schema=schema, _tbl=table_name
+                    )
+                ),
+                creds.engine,
+            ).values
+        )
+
+        # check that column names match in db and dataframe exactly
+        if sql_item_exists:
+            # the db cols are always strings, unlike df cols
+            extra_cols = [str(x) for x in df.columns if str(x) not in cols_dict.keys()]
+            if extra_cols:
+                raise BCPandasValueError(
+                    f"Column(s) detected in the dataframe that are not in the database, "
+                    f"cannot have new columns if `if_exists=='append'`, "
+                    f"the extra column(s): {extra_cols}"
+                )
+    return cols_dict
+
+
+def _prepare_table(
+    df: pd.DataFrame,
+    table_name: str,
+    creds: SqlCreds,
+    sql_item_exists: bool,
+    sql_type: str,
+    schema: str,
+    if_exists: str,
+    dtype: Optional[dict],
+) -> None:
+    """
+    Prepares the destination SQL table, handling the `if_exists` param.
+    """
+    if if_exists == "fail":
+        if sql_item_exists:
+            raise BCPandasValueError(
+                f"The {sql_type} called {schema}.{table_name} already exists, "
+                f"`if_exists` param was set to `fail`."
+            )
+        else:
+            _create_table(
+                schema=schema,
+                table_name=table_name,
+                creds=creds,
+                df=df,
+                if_exists=if_exists,
+                dtype=dtype,
+            )
+    elif if_exists == "replace":
+        _create_table(
+            schema=schema,
+            table_name=table_name,
+            creds=creds,
+            df=df,
+            if_exists=if_exists,
+            dtype=dtype,
+        )
+    elif if_exists == "append":
+        if not sql_item_exists:
+            _create_table(
+                schema=schema,
+                table_name=table_name,
+                creds=creds,
+                df=df,
+                if_exists=if_exists,
+                dtype=dtype,
+            )
+
+
+def _validate_args(
+    df: pd.DataFrame, sql_type: str, if_exists: str, batch_size: Optional[int],
+) -> None:
+    assert sql_type == TABLE, "only supporting table, not view, for now"
+    assert if_exists in IF_EXISTS_OPTIONS
+
+    if df.columns.has_duplicates:
+        raise BCPandasValueError(
+            "Columns with duplicate names detected, SQL requires that column names be unique. "
+            f"Duplicates: {df.columns[df.columns.duplicated(keep=False)]}"
+        )
+
+    if batch_size is not None:
+        if batch_size == 0:
+            raise BCPandasValueError("Param batch_size can't be 0")
+        if batch_size > df.shape[0]:
+            raise BCPandasValueError(
+                "Param batch_size can't be larger than the number of rows in the DataFrame"
+            )
+
+
 def to_sql(
     df: pd.DataFrame,
     table_name: str,
@@ -195,7 +315,8 @@ def to_sql(
     batch_size: int = None,
     debug: bool = False,
     bcp_path: str = None,
-    dtype: dict = None
+    dtype: dict = None,
+    process_dest_table: bool = True,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -235,18 +356,17 @@ def to_sql(
     dtype: dict, default None
         A dict with keys the names of columns and values SqlAlchemy types for defining their types. These are
         directly passed into pandas' API
+    process_dest_table: bool, default True
+        Internal: Only to be used when calling directly from within pandas using the `sql_engine` param.
+        If False, then will skip preparing the destination table via the `if_exists` param,
+        and will only attempt to insert data.
+        You should generally not set this param yourself.
     """
     # validation
     if df.shape[0] == 0 or df.shape[1] == 0:
         return
-    assert sql_type == TABLE, "only supporting table, not view, for now"
-    assert if_exists in IF_EXISTS_OPTIONS
 
-    if df.columns.has_duplicates:
-        raise BCPandasValueError(
-            "Columns with duplicate names detected, SQL requires that column names be unique. "
-            f"Duplicates: {df.columns[df.columns.duplicated(keep=False)]}"
-        )
+    _validate_args(df=df, sql_type=sql_type, if_exists=if_exists, batch_size=batch_size)
 
     # TODO diff way to implement? could be big performance hit with big dataframe
     if index:
@@ -254,14 +374,6 @@ def to_sql(
 
     delim = get_delimiter(df)
     quotechar = get_quotechar(df)
-
-    if batch_size is not None:
-        if batch_size == 0:
-            raise BCPandasValueError("Param batch_size can't be 0")
-        if batch_size > df.shape[0]:
-            raise BCPandasValueError(
-                "Param batch_size can't be larger than the number of rows in the DataFrame"
-            )
 
     # save to temp path
     csv_file_path = get_temp_file()
@@ -285,33 +397,15 @@ def to_sql(
     sql_item_exists = _sql_item_exists(
         sql_type=sql_type, schema=schema, table_name=table_name, creds=creds
     )
-    cols_dict = None  # for mypy
-    if if_exists == "append":
-        # get dict of column names -> order of column
-        cols_dict = dict(
-            pd.read_sql_query(
-                """
-                SELECT COLUMN_NAME, ORDINAL_POSITION 
-                FROM INFORMATION_SCHEMA.COLUMNS 
-                WHERE TABLE_SCHEMA = '{_schema}'
-                AND TABLE_NAME = '{_tbl}'
-            """.format(
-                    _schema=schema, _tbl=table_name
-                ),
-                creds.engine,
-            ).values
-        )
 
-        # check that column names match in db and dataframe exactly
-        if sql_item_exists:
-            # the db cols are always strings, unlike df cols
-            extra_cols = [str(x) for x in df.columns if str(x) not in cols_dict.keys()]
-            if extra_cols:
-                raise BCPandasValueError(
-                    f"Column(s) detected in the dataframe that are not in the database, "
-                    f"cannot have new columns if `if_exists=='append'`, "
-                    f"the extra column(s): {extra_cols}"
-                )
+    cols_dict = _handle_cols_for_append(
+        df=df,
+        table_name=table_name,
+        creds=creds,
+        sql_item_exists=sql_item_exists,
+        schema=schema,
+        if_exists=if_exists,
+    )
 
     fmt_file_txt = build_format_file(df=df, delimiter=delim, db_cols_order=cols_dict)
     with open(fmt_file_path, "w") as ff:
@@ -319,25 +413,17 @@ def to_sql(
     logger.debug(f"Created BCP format file at {fmt_file_path}")
 
     try:
-        if if_exists == "fail":
-            if sql_item_exists:
-                raise BCPandasValueError(
-                    f"The {sql_type} called {schema}.{table_name} already exists, "
-                    f"`if_exists` param was set to `fail`."
-                )
-            else:
-                _create_table(
-                    schema=schema, table_name=table_name, creds=creds, df=df, if_exists=if_exists, dtype=dtype
-                )
-        elif if_exists == "replace":
-            _create_table(
-                schema=schema, table_name=table_name, creds=creds, df=df, if_exists=if_exists, dtype=dtype
+        if process_dest_table:
+            _prepare_table(
+                df=df,
+                table_name=table_name,
+                creds=creds,
+                sql_item_exists=sql_item_exists,
+                sql_type=sql_type,
+                schema=schema,
+                if_exists=if_exists,
+                dtype=dtype,
             )
-        elif if_exists == "append":
-            if not sql_item_exists:
-                _create_table(
-                    schema=schema, table_name=table_name, creds=creds, df=df, if_exists=if_exists, dtype=dtype
-                )
 
         # BCP the data in
         bcp(
