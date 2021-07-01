@@ -42,6 +42,7 @@ def bcp(
     direction: str,
     flat_file: str,
     creds,
+    print_output: bool,
     sql_type: str = "table",
     schema: str = "dbo",
     format_file_path: str = None,
@@ -111,7 +112,7 @@ def bcp(
     # execute
     bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
     logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log}")
-    ret_code = run_cmd(bcp_command)
+    ret_code = run_cmd(bcp_command, print_output=print_output)
     if ret_code:
         raise BCPandasException(f"Bcp command failed with exit code {ret_code}")
 
@@ -207,7 +208,7 @@ def quote_this(this: str, skip: bool = False) -> str:
         return this
 
 
-def run_cmd(cmd: List[str]) -> int:
+def run_cmd(cmd: List[str], *, print_output: bool) -> int:
     """
     Runs the given command. 
     
@@ -218,6 +219,9 @@ def run_cmd(cmd: List[str]) -> int:
     ---------
     cmd : list of str
         The command to run, to be submitted to `subprocess.Popen()`
+    print_output: bool
+        Whether to print output to STDOUT in real time.
+        Regardless, the output will be logged.
 
     Returns
     -------
@@ -233,12 +237,14 @@ def run_cmd(cmd: List[str]) -> int:
     while True:
         outs = proc.stdout.readline()  # type: ignore[union-attr]
         if outs:
-            print(outs, end="")
+            if print_output:
+                print(outs, end="")
             logger.info(outs)
         if proc.poll() is not None and outs == "":
             break
     errs = proc.stderr.readlines()  # type: ignore[union-attr]
     if errs:
-        print(errs, end="")
+        if print_output:
+            print(errs, end="")
         logger.error(errs)
     return proc.returncode

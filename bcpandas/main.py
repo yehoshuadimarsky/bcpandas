@@ -317,6 +317,7 @@ def to_sql(
     bcp_path: str = None,
     dtype: dict = None,
     process_dest_table: bool = True,
+    print_output: bool = True,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -347,6 +348,7 @@ def to_sql(
         * append: Insert new values to the existing table. Matches the dataframe columns to the database columns by name.
             If the database table exists then the dataframe cannot have new columns that aren't in the table, 
             but conversely table columns can be missing from the dataframe.
+
     batch_size : int, optional
         Rows will be written in batches of this size at a time. By default, BCP sets this to 1000.
     debug : bool, default False
@@ -361,6 +363,9 @@ def to_sql(
         If False, then will skip preparing the destination table via the `if_exists` param,
         and will only attempt to insert data.
         You should generally not set this param yourself.
+    print_output: bool, default True
+        Whether to print output to STDOUT in real time. Regardless, the output will be logged.
+        Added in version 1.3
     """
     # validation
     if df.shape[0] == 0 or df.shape[1] == 0:
@@ -432,6 +437,7 @@ def to_sql(
             flat_file=csv_file_path,
             format_file_path=fmt_file_path,
             creds=creds,
+            print_output=print_output,
             sql_type=sql_type,
             schema=schema,
             batch_size=batch_size,
