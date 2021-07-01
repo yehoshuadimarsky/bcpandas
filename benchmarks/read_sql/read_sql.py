@@ -112,6 +112,7 @@ def read_sql(
             direction=QUERYOUT if sql_type == QUERY else OUT,
             flat_file=file_path,
             creds=creds,
+            print_output=True,
             sql_type=sql_type,
             schema=schema,
             batch_size=batch_size,
