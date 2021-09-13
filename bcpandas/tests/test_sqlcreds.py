@@ -24,7 +24,7 @@ from __future__ import annotations
 from functools import lru_cache
 from urllib.parse import quote_plus
 
-from packaging.version import Version, parse
+from packaging.version import LegacyVersion, Version, parse
 import pandas as pd
 import pytest
 from sqlalchemy import create_engine, engine
@@ -33,7 +33,7 @@ from bcpandas import SqlCreds
 
 
 @lru_cache
-def _get_sqlalchemy_version() -> Version:
+def _get_sqlalchemy_version() -> Version | LegacyVersion:
     import sqlalchemy as sa
 
     version = parse(sa.__version__)
