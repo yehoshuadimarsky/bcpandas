@@ -19,14 +19,36 @@ Not included (yet):
 
 # TODO creating SqlCreds from SqlAlchemy engine case insensitivity
 """
+from __future__ import annotations
 
-import urllib
+from functools import lru_cache
+from urllib.parse import quote_plus
 
+from packaging.version import Version, parse
 import pandas as pd
 import pytest
 from sqlalchemy import create_engine, engine
 
 from bcpandas import SqlCreds
+
+
+@lru_cache
+def _get_sqlalchemy_version() -> Version:
+    import sqlalchemy as sa
+
+    version = parse(sa.__version__)
+    return version
+
+
+def _quote_engine_url(conn_str: str) -> str:
+    prefix = "mssql+pyodbc:///?odbc_connect="
+    sa_version = _get_sqlalchemy_version()
+    # sqlalchemy >=1.3.18 needs quoting
+    # https://docs.sqlalchemy.org/en/14/changelog/changelog_13.html#change-a4bcb1e1c47b780b849c28fea285c81c
+    if sa_version >= Version("1.3.18"):
+        return prefix + quote_plus(conn_str)
+    else:
+        return prefix + conn_str
 
 
 def test_sql_creds_for_username_password():
@@ -47,8 +69,7 @@ def test_sql_creds_for_username_password():
     assert creds.port == 1433
     assert creds.with_krb_auth is False
     assert isinstance(creds.engine, engine.Connectable)
-    assert str(creds.engine.url) == (
-        "mssql+pyodbc:///?odbc_connect="
+    assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database;"
         "UID=test_user;PWD=test_password"
     )
@@ -70,8 +91,7 @@ def test_sql_creds_for_windows_auth():
     assert creds.port == 1433
     assert creds.with_krb_auth is True
     assert isinstance(creds.engine, engine.Connectable)
-    assert str(creds.engine.url) == (
-        "mssql+pyodbc:///?odbc_connect="
+    assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database;Trusted_Connection=yes;"
     )
     # n.b. this is automatically appending tcp: and port 1433
@@ -92,8 +112,7 @@ def test_sql_creds_for_username_password_non_default_port():
     assert creds.port == 9999
     assert creds.with_krb_auth is False
     assert isinstance(creds.engine, engine.Connectable)
-    assert str(creds.engine.url) == (
-        "mssql+pyodbc:///?odbc_connect="
+    assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,9999;Database=test_database;"
         "UID=test_user;PWD=test_password"
     )
@@ -112,8 +131,7 @@ def test_sql_creds_for_windows_auth_non_default_port():
     assert creds.port == 9999
     assert creds.with_krb_auth is True
     assert isinstance(creds.engine, engine.Connectable)
-    assert str(creds.engine.url) == (
-        "mssql+pyodbc:///?odbc_connect="
+    assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,9999;Database=test_database;Trusted_Connection=yes;"
     )
 
@@ -134,8 +152,7 @@ def test_sql_creds_for_username_password_blank_port():
         port=None,
     )
     assert creds.port is None
-    assert str(creds.engine.url) == (
-        "mssql+pyodbc:///?odbc_connect="
+    assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database;"
         "UID=test_user;PWD=test_password"
     )
@@ -155,8 +172,7 @@ def test_sql_creds_for_windows_auth_blank_port():
         port=None,
     )
     assert creds.port is None
-    assert str(creds.engine.url) == (
-        "mssql+pyodbc:///?odbc_connect="
+    assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database;Trusted_Connection=yes;"
     )
 
@@ -168,7 +184,7 @@ def test_sql_creds_from_sqlalchemy():
     * With Username and Password
     * Use default port (1433)
     """
-    params = urllib.parse.quote_plus(
+    params = quote_plus(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database;"
         "UID=test_user;PWD=test_password"
     )
@@ -181,9 +197,8 @@ def test_sql_creds_from_sqlalchemy():
     assert creds.port == 1433
     assert creds.with_krb_auth is False
     assert isinstance(creds.engine, engine.Connectable)
-    assert str(creds.engine.url) == (
-        "mssql+pyodbc:///?odbc_connect="
-        + "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database;"
+    assert str(creds.engine.url) == _quote_engine_url(
+        "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database;"
         + "UID=test_user;PWD=test_password"
     )
 
@@ -195,7 +210,7 @@ def test_sql_creds_from_sqlalchemy_windows_auth():
     * Without Username and Password
     * Use default port (1433)
     """
-    params = urllib.parse.quote_plus(
+    params = quote_plus(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database"
     )
     mssql_engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
@@ -207,9 +222,8 @@ def test_sql_creds_from_sqlalchemy_windows_auth():
     assert creds.port == 1433
     assert creds.with_krb_auth is True
     assert isinstance(creds.engine, engine.Connectable)
-    assert str(creds.engine.url) == (
-        "mssql+pyodbc:///?odbc_connect="
-        + "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database"
+    assert str(creds.engine.url) == _quote_engine_url(
+        "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database"
     )
 
 
@@ -220,7 +234,7 @@ def test_sql_creds_from_sqlalchemy_non_default_port():
     * With Username and Password
     * Non-Default Port specified (9999)
     """
-    params = urllib.parse.quote_plus(
+    params = quote_plus(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,9999;Database=test_database;"
         "UID=test_user;PWD=test_password"
     )
@@ -233,9 +247,8 @@ def test_sql_creds_from_sqlalchemy_non_default_port():
     assert creds.port == 9999
     assert creds.with_krb_auth is False
     assert isinstance(creds.engine, engine.Connectable)
-    assert str(creds.engine.url) == (
-        "mssql+pyodbc:///?odbc_connect="
-        + "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,9999;Database=test_database;"
+    assert str(creds.engine.url) == _quote_engine_url(
+        "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,9999;Database=test_database;"
         + "UID=test_user;PWD=test_password"
     )
 
@@ -247,7 +260,7 @@ def test_sql_creds_from_sqlalchemy_windows_auth_non_default_port():
     * Without Username and Password
     * Non-Default Port specifed (9999)
     """
-    params = urllib.parse.quote_plus(
+    params = quote_plus(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,9999;Database=test_database"
     )
     mssql_engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
@@ -259,9 +272,8 @@ def test_sql_creds_from_sqlalchemy_windows_auth_non_default_port():
     assert creds.port == 9999
     assert creds.with_krb_auth is True
     assert isinstance(creds.engine, engine.Connectable)
-    assert str(creds.engine.url) == (
-        "mssql+pyodbc:///?odbc_connect="
-        + "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,9999;Database=test_database"
+    assert str(creds.engine.url) == _quote_engine_url(
+        "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,9999;Database=test_database"
     )
 
 
@@ -269,7 +281,7 @@ def test_sql_creds_from_sqlalchemy_blank_port():
     """
     Tests that the SqlCreds object can be created from a SqlAlchemy engine with no Port specified
     """
-    params = urllib.parse.quote_plus(
+    params = quote_plus(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database;"
         "UID=test_user;PWD=test_password"
     )
@@ -282,9 +294,8 @@ def test_sql_creds_from_sqlalchemy_blank_port():
     assert creds.port is None
     assert creds.with_krb_auth is False
     assert isinstance(creds.engine, engine.Connectable)
-    assert str(creds.engine.url) == (
-        "mssql+pyodbc:///?odbc_connect="
-        + "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database;"
+    assert str(creds.engine.url) == _quote_engine_url(
+        "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database;"
         + "UID=test_user;PWD=test_password"
     )
 
@@ -293,7 +304,7 @@ def test_sql_creds_from_sqlalchemy_windows_auth_blank_port():
     """
     Tests that the SqlCreds object can be created from a SqlAlchemy engine - without Username, Password or Port
     """
-    params = urllib.parse.quote_plus(
+    params = quote_plus(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database"
     )
     mssql_engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
@@ -305,9 +316,8 @@ def test_sql_creds_from_sqlalchemy_windows_auth_blank_port():
     assert creds.port is None
     assert creds.with_krb_auth is True
     assert isinstance(creds.engine, engine.Connectable)
-    assert str(creds.engine.url) == (
-        "mssql+pyodbc:///?odbc_connect="
-        + "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database"
+    assert str(creds.engine.url) == _quote_engine_url(
+        "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database"
     )
 
 
@@ -342,7 +352,7 @@ def test_sqlcreds_connection_from_sqlalchemy(sql_creds):
         f"UID={sql_creds.username};"
         f"PWD={sql_creds.password};"
     )
-    params = urllib.parse.quote_plus(conn_str)
+    params = quote_plus(conn_str)
 
     mssql_engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
 
