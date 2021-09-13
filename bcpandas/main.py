@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 class SqlCreds:
     """
-    Credential object for all SQL operations. Will automatically also create a SQLAlchemy 
+    Credential object for all SQL operations. Will automatically also create a SQLAlchemy
     engine that uses `pyodbc` as the DBAPI, and store it in the `self.engine` attribute.
 
     If `username` and `password` are not provided, `with_krb_auth` will be `True`.
@@ -46,11 +46,11 @@ class SqlCreds:
     username : str, optional
     password : str, optional
     driver_version : int, default 17
-        The version of the Microsoft ODBC Driver for SQL Server to use 
+        The version of the Microsoft ODBC Driver for SQL Server to use
     odbc_kwargs : dict of {str, str or int}, optional
-        additional keyword arguments, to pass into ODBC connection string, 
+        additional keyword arguments, to pass into ODBC connection string,
         such as Encrypted='yes'
-    
+
     Returns
     -------
     `bcpandas.SqlCreds`
@@ -105,10 +105,10 @@ class SqlCreds:
     @classmethod
     def from_engine(cls, engine: sa.engine.base.Engine) -> "SqlCreds":
         """
-        Alternate constructor, from a `sqlalchemy.engine.base.Engine` that uses `pyodbc` as the DBAPI 
+        Alternate constructor, from a `sqlalchemy.engine.base.Engine` that uses `pyodbc` as the DBAPI
         (which is the SQLAlchemy default for MS SQL) and using an exact PyODBC connection string (not DSN or hostname).
         See https://docs.sqlalchemy.org/en/13/dialects/mssql.html#connecting-to-pyodbc for more.
-        
+
         Parameters
         ----------
         engine : `sqlalchemy.engine.base.Engine`
@@ -284,7 +284,10 @@ def _prepare_table(
 
 
 def _validate_args(
-    df: pd.DataFrame, sql_type: str, if_exists: str, batch_size: Optional[int],
+    df: pd.DataFrame,
+    sql_type: str,
+    if_exists: str,
+    batch_size: Optional[int],
 ) -> None:
     assert sql_type == TABLE, "only supporting table, not view, for now"
     assert if_exists in IF_EXISTS_OPTIONS
@@ -346,7 +349,7 @@ def to_sql(
         * fail: Raise a BCPandasValueError.
         * replace: Drop the table before inserting new values.
         * append: Insert new values to the existing table. Matches the dataframe columns to the database columns by name.
-            If the database table exists then the dataframe cannot have new columns that aren't in the table, 
+            If the database table exists then the dataframe cannot have new columns that aren't in the table,
             but conversely table columns can be missing from the dataframe.
 
     batch_size : int, optional

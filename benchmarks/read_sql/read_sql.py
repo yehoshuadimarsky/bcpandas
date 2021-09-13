@@ -33,7 +33,7 @@ def read_sql(
 ) -> pd.DataFrame:
     """
     ** It is HIGHLY recommended to not use this method, and instead use the native pandas `read_sql*` methods. See README for details. **
-    
+
     Reads a SQL table, view, or query into a pandas DataFrame.
 
     Parameters
@@ -60,14 +60,14 @@ def read_sql(
         See note below.
     bcp_path : str, default None
         The full path to the BCP utility, useful if it is not in the PATH environment variable
-    
+
     Returns
     -------
     `pandas.DataFrame`
 
     Notes
     -----
-    Will actually read the SQL table/view/query twice - first to get the names of the columns 
+    Will actually read the SQL table/view/query twice - first to get the names of the columns
     (will only read first few rows), then all the rows using BCP.
 
     Also, the temporary CSV file will be read into memory twice, to check for the presence of

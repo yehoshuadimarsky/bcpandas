@@ -254,7 +254,9 @@ def cli():
 )
 @click.option(
     "--min-rows",
-    type=click.IntRange(0,),
+    type=click.IntRange(
+        0,
+    ),
     default=50_000,
     show_default=True,
     help="Min rows in the DataFrames",
