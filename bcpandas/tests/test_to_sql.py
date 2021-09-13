@@ -400,9 +400,7 @@ class TestToSqlColumnScenarios(_BaseToSql):
 
 
 class TestToSqlReplace(_BaseToSql):
-    """
-
-    """
+    """ """
 
     table_name = "lotr_tosql_replace"
 
@@ -461,9 +459,7 @@ class TestToSqlReplace(_BaseToSql):
 
 
 class TestToSqlAppend(_BaseToSql):
-    """
-
-    """
+    """ """
 
     table_name = "lotr_tosql_append"
 
@@ -547,9 +543,7 @@ class TestToSqlAppend(_BaseToSql):
 
 
 class TestToSqlFail(_BaseToSql):
-    """
-
-    """
+    """ """
 
     table_name = "lotr_tosql_fail"
 
@@ -712,9 +706,7 @@ class TestToSqlDtypeScenarios(_BaseToSql):
 
 
 class TestToSqlOther(_BaseToSql):
-    """
-
-    """
+    """ """
 
     table_name = "lotr_tosql_other"
 

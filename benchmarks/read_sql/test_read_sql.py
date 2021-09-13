@@ -30,8 +30,8 @@ hypo_df = hpd.data_frames(
 
 class TestReadSqlBasic:
     """
-    For all tests, the 'actual' is retrieved using the built-in pandas methods, to compare to the 
-    'expected' which used bcpandas. 
+    For all tests, the 'actual' is retrieved using the built-in pandas methods, to compare to the
+    'expected' which used bcpandas.
 
     Because dtypes change when reading from text files, ignoring dtypes checks. TODO how to really fix this
     """

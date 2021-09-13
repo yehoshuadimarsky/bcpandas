@@ -58,7 +58,11 @@ def test_sql_creds_for_windows_auth():
     """
     Tests that the SqlCreds object can be created without Username and Password (Windows Auth)
     """
-    creds = SqlCreds(server="test_server", database="test_database", driver_version=99,)
+    creds = SqlCreds(
+        server="test_server",
+        database="test_database",
+        driver_version=99,
+    )
     assert creds.server == "test_server"
     assert creds.database == "test_database"
     assert creds.username == ""
@@ -99,7 +103,12 @@ def test_sql_creds_for_windows_auth_non_default_port():
     """
     Tests that the SqlCreds object can be created without Username and Password (Windows Auth)
     """
-    creds = SqlCreds(server="test_server", database="test_database", driver_version=99, port=9999,)
+    creds = SqlCreds(
+        server="test_server",
+        database="test_database",
+        driver_version=99,
+        port=9999,
+    )
     assert creds.port == 9999
     assert creds.with_krb_auth is True
     assert isinstance(creds.engine, engine.Connectable)
@@ -112,7 +121,7 @@ def test_sql_creds_for_windows_auth_non_default_port():
 def test_sql_creds_for_username_password_blank_port():
     """
     Tests that the SqlCreds object can be created with Username and Password (SQL Auth) and blank Port
-    
+
     * With Username and Password
     * Use blank port
     """
@@ -135,11 +144,16 @@ def test_sql_creds_for_username_password_blank_port():
 def test_sql_creds_for_windows_auth_blank_port():
     """
     Tests that the SqlCreds object can be created
-    
+
     * Without Username and Password (Windows Auth)
     * Use blank port
     """
-    creds = SqlCreds(server="test_server", database="test_database", driver_version=99, port=None,)
+    creds = SqlCreds(
+        server="test_server",
+        database="test_database",
+        driver_version=99,
+        port=None,
+    )
     assert creds.port is None
     assert str(creds.engine.url) == (
         "mssql+pyodbc:///?odbc_connect="
@@ -150,7 +164,7 @@ def test_sql_creds_for_windows_auth_blank_port():
 def test_sql_creds_from_sqlalchemy():
     """
     Tests that the SqlCreds object can be created from a SqlAlchemy engine
-    
+
     * With Username and Password
     * Use default port (1433)
     """
@@ -177,7 +191,7 @@ def test_sql_creds_from_sqlalchemy():
 def test_sql_creds_from_sqlalchemy_windows_auth():
     """
     Tests that the SqlCreds object can be created from a SqlAlchemy engine
-    
+
     * Without Username and Password
     * Use default port (1433)
     """
@@ -229,7 +243,7 @@ def test_sql_creds_from_sqlalchemy_non_default_port():
 def test_sql_creds_from_sqlalchemy_windows_auth_non_default_port():
     """
     Tests that the SqlCreds object can be created from a SqlAlchemy engine
-    
+
     * Without Username and Password
     * Non-Default Port specifed (9999)
     """

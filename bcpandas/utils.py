@@ -196,7 +196,7 @@ def quote_this(this: str, skip: bool = False) -> str:
     OS-safe way to quote a string.
 
     Returns the string with quotes around it.
-    On Windows ~~it's double quotes~~ we skip quoting, 
+    On Windows ~~it's double quotes~~ we skip quoting,
     on Linux it's single quotes.
     """
     if isinstance(this, str):
@@ -210,9 +210,9 @@ def quote_this(this: str, skip: bool = False) -> str:
 
 def run_cmd(cmd: List[str], *, print_output: bool) -> int:
     """
-    Runs the given command. 
-    
-    Prints STDOUT in real time,  prints STDERR when command is complete, 
+    Runs the given command.
+
+    Prints STDOUT in real time,  prints STDERR when command is complete,
     and logs both STDOUT and STDERR.
 
     Paramters
@@ -232,7 +232,14 @@ def run_cmd(cmd: List[str], *, print_output: bool) -> int:
     else:
         with_shell = True
         cmd = " ".join(cmd)  # type: ignore
-    proc = Popen(cmd, stdout=PIPE, stderr=PIPE, encoding="utf-8", errors="utf-8", shell=with_shell,)
+    proc = Popen(
+        cmd,
+        stdout=PIPE,
+        stderr=PIPE,
+        encoding="utf-8",
+        errors="utf-8",
+        shell=with_shell,
+    )
     # live stream STDOUT
     while True:
         outs = proc.stdout.readline()  # type: ignore[union-attr]

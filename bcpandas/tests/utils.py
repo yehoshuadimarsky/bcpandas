@@ -107,7 +107,7 @@ def execute_sql_statement(sql_alchemy_engine: sa.engine.Engine, statement: str):
 
 class DockerDB:
     """
-    Class to create and run a SQL Server database using a Docker container. All the docker stuff is taken care of 
+    Class to create and run a SQL Server database using a Docker container. All the docker stuff is taken care of
     by Python under the hood.
 
     Each instance of this class can only support a single specific combination of settings, such as container name
