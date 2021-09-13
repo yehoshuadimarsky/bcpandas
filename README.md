@@ -128,7 +128,7 @@ Any version of Microsoft SQL Server. Can be installed on-prem, in the cloud, on 
 - Microsoft ODBC Driver **11, 13, 13.1, or 17** for SQL Server. ([Microsoft Docs](https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server)) See the [pyodbc docs](https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Windows) for more on different driver versions.
 - Python >= 3.6
 - `pandas` >= 0.19
-- `sqlalchemy` >= 1.1.4
+- `sqlalchemy` >= 1.0
 - `pyodbc` as the [supported DBAPI](https://docs.sqlalchemy.org/en/13/dialects/mssql.html#module-sqlalchemy.dialects.mssql.pyodbc)
 
 ## Installation

@@ -10,6 +10,7 @@
 * Change the version in `setup.py`
 * Change the version in `bcpandas/__init__.py`
 * Update Readme with any new information, as needed
+* Commit to git with the message `v{num}`, like `v1.4.0`, push
 * Make a new release in Github
     * Add release notes based on the changes
 * It will automatically push the new version to PyPI, using GH Actions

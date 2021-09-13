@@ -6,7 +6,7 @@ with open("./README.md", "r") as file:
 
 setup(
     name="bcpandas",
-    version="1.3.0",
+    version="1.4.0",
     author="yehoshuadimarsky",
     description="High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!",
     long_description=long_description,
@@ -20,12 +20,12 @@ setup(
     classifiers=[
         "Topic :: Database",
         "Intended Audience :: Developers",
-        "Intended Audience :: Financial and Insurance Industry",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: SQL",
     ],
 )
