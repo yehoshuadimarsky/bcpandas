@@ -19,9 +19,8 @@ Not included (yet):
 
 # TODO creating SqlCreds from SqlAlchemy engine case insensitivity
 """
-from __future__ import annotations
-
 from functools import lru_cache
+from typing import Union
 from urllib.parse import quote_plus
 
 from packaging.version import LegacyVersion, Version, parse
@@ -33,7 +32,7 @@ from bcpandas import SqlCreds
 
 
 @lru_cache
-def _get_sqlalchemy_version() -> Version | LegacyVersion:
+def _get_sqlalchemy_version() -> Union[Version, LegacyVersion]:
     import sqlalchemy as sa
 
     version = parse(sa.__version__)
