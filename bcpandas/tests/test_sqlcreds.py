@@ -31,7 +31,7 @@ from sqlalchemy import create_engine, engine
 from bcpandas import SqlCreds
 
 
-@lru_cache
+@lru_cache(maxsize=256)
 def _get_sqlalchemy_version() -> Union[Version, LegacyVersion]:
     import sqlalchemy as sa
 
