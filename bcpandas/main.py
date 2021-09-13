@@ -321,6 +321,8 @@ def to_sql(
     dtype: dict = None,
     process_dest_table: bool = True,
     print_output: bool = True,
+    delimiter: str = None,
+    quotechar: str = None,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -369,6 +371,15 @@ def to_sql(
     print_output: bool, default True
         Whether to print output to STDOUT in real time. Regardless, the output will be logged.
         Added in version 1.3
+    delimiter: str, default None
+        Optional delimiter to use, otherwise will use the result of `constants.get_delimiter`
+    quotechar: str, default None
+        Optional quotechar to use, otherwise will use the result of `constants.get_quotechar`
+
+    Notes
+    -----
+    If `delimiter` and/or `quotechar` are specified, you must ensure that those characters
+    are not present in the actual data.
     """
     # validation
     if df.shape[0] == 0 or df.shape[1] == 0:
@@ -380,8 +391,8 @@ def to_sql(
     if index:
         df = df.copy(deep=True).reset_index()
 
-    delim = get_delimiter(df)
-    quotechar = get_quotechar(df)
+    delim = get_delimiter(df) if delimiter is None else delimiter
+    _quotechar = get_quotechar(df) if quotechar is None else quotechar
 
     # save to temp path
     csv_file_path = get_temp_file()
@@ -392,7 +403,7 @@ def to_sql(
         header=False,
         index=False,  # already set as new col earlier if index=True
         quoting=csv.QUOTE_MINIMAL,  # pandas default
-        quotechar=quotechar,
+        quotechar=_quotechar,
         line_terminator=NEWLINE,
         doublequote=True,
         escapechar=None,  # not needed, as using doublequote
