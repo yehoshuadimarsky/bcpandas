@@ -8,7 +8,8 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/bcpandas.svg)](https://pypi.python.org/pypi/bcpandas/)
 [![Awesome Badges](https://img.shields.io/badge/badges-awesome-green.svg)](https://github.com/Naereen/badges)
-[![Downloads](https://static.pepy.tech/personalized-badge/bcpandas?period=total&units=international_system&left_color=grey&right_color=orange&left_text=PyPI%20Total%20Downloads)](https://pepy.tech/project/bcpandas)
+[![Downloads](https://static.pepy.tech/personalized-badge/bcpandas?period=total&units=international_system&left_color=grey&right_color=orange&left_text=pypi%20total%20downloads)](https://pepy.tech/project/bcpandas)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/yehoshuadimarsky/bcpandas/master.svg)](https://results.pre-commit.ci/latest/github/yehoshuadimarsky/bcpandas/master)
 
 High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!! (pronounced _BEE-CEE-Pandas_)
 
