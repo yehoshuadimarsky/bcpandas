@@ -48,6 +48,8 @@ jobs:
        activate-environment: ${{ env.CONDA_ENV_NAME }}
        environment-file: env.yml
        python-version: ${{ matrix.python-version }}
+       miniforge-variant: Mambaforge
+       mamba-version: "*"
        auto-activate-base: false
      
     - uses: pre-commit/action@v2.0.3
