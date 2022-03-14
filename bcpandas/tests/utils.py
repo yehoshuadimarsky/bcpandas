@@ -19,7 +19,7 @@ from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS
 #   - Datetimes
 #   - (some) booleans
 
-MAX_VAL = 2 ** 31 - 1
+MAX_VAL = 2**31 - 1
 
 # Strategies
 strat_text = st.text(alphabet=st.characters(min_codepoint=32, max_codepoint=127), min_size=0)
