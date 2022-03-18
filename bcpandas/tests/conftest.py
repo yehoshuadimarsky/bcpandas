@@ -11,8 +11,7 @@ import pytest
 import sqlalchemy as sa
 
 from bcpandas import SqlCreds
-
-from .utils import DockerDB
+from bcpandas.tests.utils import DockerDB
 
 _db_name = "db_bcpandas"
 _docker_startup = 15  # seconds to wait to give the container time to start

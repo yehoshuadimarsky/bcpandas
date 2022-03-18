@@ -25,8 +25,7 @@ import sqlalchemy
 
 from bcpandas import to_sql
 from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS, BCPandasValueError
-
-from .utils import (
+from bcpandas.tests.utils import (
     assume_not_all_delims_and_quotechars,
     df_hypo_dates,
     df_hypo_floats,

@@ -15,7 +15,7 @@ import pandas as pd
 from pandas.io.sql import SQLDatabase, SQLTable
 import sqlalchemy as sa
 
-from .constants import (
+from bcpandas.constants import (
     IF_EXISTS_OPTIONS,
     IN,
     NEWLINE,
@@ -24,7 +24,7 @@ from .constants import (
     get_delimiter,
     get_quotechar,
 )
-from .utils import bcp, build_format_file, get_temp_file
+from bcpandas.utils import bcp, build_format_file, get_temp_file
 
 logger = logging.getLogger(__name__)
 

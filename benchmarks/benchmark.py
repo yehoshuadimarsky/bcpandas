@@ -1,8 +1,8 @@
-from contextlib import contextmanager  # noqa: E999
+from contextlib import contextmanager
 import json
 from math import floor
 import platform
-from subprocess import PIPE, run
+from subprocess import run
 import sys
 import time
 from typing import Dict, List, Union

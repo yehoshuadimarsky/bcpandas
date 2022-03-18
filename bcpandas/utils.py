@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Union
 
 import pandas as pd
 
-from .constants import (
+from bcpandas.constants import (
     DIRECTIONS,
     IN,
     IS_WIN32,

@@ -14,8 +14,7 @@ from bcpandas.tests.utils import (
     strat_ints,
     strat_text,
 )
-
-from .read_sql import read_sql
+from benchmarks.read_sql.read_sql import read_sql
 
 hypo_df = hpd.data_frames(
     columns=[
