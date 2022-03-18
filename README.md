@@ -127,7 +127,7 @@ Any version of Microsoft SQL Server. Can be installed on-prem, in the cloud, on 
 ### Python User
 - [BCP](https://docs.microsoft.com/en-us/sql/tools/bcp-utility) Utility
 - Microsoft ODBC Driver **11, 13, 13.1, or 17** for SQL Server. ([Microsoft Docs](https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server)) See the [pyodbc docs](https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Windows) for more on different driver versions.
-- Python >= 3.6
+- Python >= 3.7
 - `pandas` >= 0.19
 - `sqlalchemy` >= 1.0
 - `pyodbc` as the [supported DBAPI](https://docs.sqlalchemy.org/en/13/dialects/mssql.html#module-sqlalchemy.dialects.mssql.pyodbc)

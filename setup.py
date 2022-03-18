@@ -14,7 +14,7 @@ setup(
     url="https://github.com/yehoshuadimarsky/bcpandas",
     packages=find_packages(),
     install_requires=["pandas>=0.19", "pyodbc", "sqlalchemy>=1.0"],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     keywords="bcp mssql pandas",
     entry_points={"pandas.sql.engine": ["bcpandas = bcpandas.main:to_sql"]},
     classifiers=[
@@ -22,7 +22,6 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
