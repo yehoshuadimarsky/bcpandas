@@ -158,9 +158,9 @@ class SqlCreds:
 def _sql_item_exists(sql_type: str, schema: str, table_name: str, creds: SqlCreds) -> bool:
     _qry = dedent(
         """
-        SELECT * 
-        FROM INFORMATION_SCHEMA.{_typ}S 
-        WHERE TABLE_SCHEMA = '{_schema}' 
+        SELECT *
+        FROM INFORMATION_SCHEMA.{_typ}S
+        WHERE TABLE_SCHEMA = '{_schema}'
         AND TABLE_NAME = '{_tbl}'
         """.format(
             _typ=sql_type.upper(), _schema=schema, _tbl=table_name
@@ -209,8 +209,8 @@ def _handle_cols_for_append(
             pd.read_sql_query(
                 dedent(
                     """
-                SELECT COLUMN_NAME, ORDINAL_POSITION 
-                FROM INFORMATION_SCHEMA.COLUMNS 
+                SELECT COLUMN_NAME, ORDINAL_POSITION
+                FROM INFORMATION_SCHEMA.COLUMNS
                 WHERE TABLE_SCHEMA = '{_schema}'
                 AND TABLE_NAME = '{_tbl}'
             """.format(

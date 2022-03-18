@@ -195,9 +195,9 @@ def test_tosql_empty_df(df, sql_creds):
     to_sql(df=df, table_name=tbl_name, creds=sql_creds, schema=schema_name, if_exists="replace")
     # make sure nothing happened in the database
     qry = """
-        SELECT * 
-        FROM INFORMATION_SCHEMA.TABLES 
-        WHERE TABLE_SCHEMA = '{_schema}' 
+        SELECT *
+        FROM INFORMATION_SCHEMA.TABLES
+        WHERE TABLE_SCHEMA = '{_schema}'
         AND TABLE_NAME = '{_tbl}'
         """.format(
         _tbl=tbl_name, _schema=schema_name
@@ -652,7 +652,7 @@ class TestToSqlDtypeScenarios(_BaseToSql):
               DATA_TYPE,
               CHARACTER_MAXIMUM_LENGTH
             FROM
-              INFORMATION_SCHEMA.COLUMNS 
+              INFORMATION_SCHEMA.COLUMNS
             WHERE
               TABLE_NAME = '{self.table_name}'""",
             con=self.pyodbc_creds,
@@ -690,7 +690,7 @@ class TestToSqlDtypeScenarios(_BaseToSql):
               DATA_TYPE,
               CHARACTER_MAXIMUM_LENGTH
             FROM
-              INFORMATION_SCHEMA.COLUMNS 
+              INFORMATION_SCHEMA.COLUMNS
             WHERE
               TABLE_NAME = '{self.table_name}'""",
             con=self.pyodbc_creds,

@@ -48,7 +48,7 @@ High-level wrapper around BCP for high performance data transfers between pandas
 ```python
 In [1]: import pandas as pd
    ...: import numpy as np
-   ...: 
+   ...:
    ...: from bcpandas import SqlCreds, to_sql
 
 In [2]: creds = SqlCreds(
@@ -59,12 +59,12 @@ In [2]: creds = SqlCreds(
    ...: )
 
 In [3]: df = pd.DataFrame(
-   ...:         data=np.ndarray(shape=(10, 6), dtype=int), 
+   ...:         data=np.ndarray(shape=(10, 6), dtype=int),
    ...:         columns=[f"col_{x}" for x in range(6)]
    ...:     )
 
 In [4]: df
-Out[4]: 
+Out[4]:
      col_0    col_1    col_2    col_3    col_4    col_5
 0  4128860  6029375  3801155  5570652  6619251  7536754
 1  4849756  7536751  4456552  7143529  7471201  7012467
@@ -82,7 +82,7 @@ In [5]: to_sql(df, 'my_test_table', creds, index=False, if_exists='replace')
 In [6]: df2 = pd.read_sql_table(table_name='my_test_table', con=creds.engine)
 
 In [7]: df2
-Out[7]: 
+Out[7]:
      col_0    col_1    col_2    col_3    col_4    col_5
 0  4128860  6029375  3801155  5570652  6619251  7536754
 1  4849756  7536751  4456552  7143529  7471201  7012467
@@ -100,7 +100,7 @@ Out[7]:
 The big speedup benefit of bcpandas is in the `to_sql` function, as the benchmarks below show. However, the bcpandas `read_sql` function actually performs __slower__ than the pandas equivalent. Therefore, the bcpandas `read_sql` function was deprecated in v5.0 and has now been removed in v6.0+. To read data __from__ SQL to pandas, use the native pandas method `pd.read_sql_table` or `pd.read_sql_query`.
 
 ## Benchmarks
-See figures below. All code is in the `/benchmarks` directory. To run the benchmarks, from the root directory of this repository, run `python benchmarks/benchmark.py main --help` and fill in the command line options that are presented. 
+See figures below. All code is in the `/benchmarks` directory. To run the benchmarks, from the root directory of this repository, run `python benchmarks/benchmark.py main --help` and fill in the command line options that are presented.
 
 Running this will output
 1. PNG image of the graph
@@ -113,7 +113,7 @@ Running this will output
 ![to_sql benchmark graph](benchmarks/tosql_benchmark.png)
 
 #### Why not just use the new pandas [`method='multi'`](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-sql-method)?
-1. Because it is still much slower 
+1. Because it is still much slower
 2. Because you are forced to set the `chunksize` parameter to a very small number for it to work - generally a bit less then `2100/<number of columns>`. This is because SQL Server can only accept up to 2100 parameters in a query. See [here](https://stackoverflow.com/questions/50689082/to-sql-pyodbc-count-field-incorrect-or-syntax-error) and [here](https://github.com/mkleehammer/pyodbc/issues/217) for more discussion on this, and the recommendation to use a bulk insert tool such as BCP. It seems that SQL Server simply didn't design the regular `INSERT` statement to support huge amounts of data.
 
 ### read_sql
@@ -135,7 +135,7 @@ Any version of Microsoft SQL Server. Can be installed on-prem, in the cloud, on 
 ## Installation
 Source | Command
 :---: | :---:
-PyPI | ```pip install bcpandas``` 
+PyPI | ```pip install bcpandas```
 Conda| ```conda install -c conda-forge bcpandas```
 
 ## Usage
@@ -157,7 +157,7 @@ Bcpandas requires a `bcpandas.SqlCreds` object in order to use it, and also a `s
 
     ```
 2. Pass a full `Engine` object to the bcpandas `SqlCreds` object, and bcpandas will attempt to parse out the server, database, username, and password to pass to the command line utilities. If a DSN is used, this will fail.
-    
+
     (continuing example above)
     ```python
     In [4]: creds2 = SqlCreds.from_engine(creds.engine)
@@ -185,7 +185,7 @@ Bcpandas requires a `bcpandas.SqlCreds` object in order to use it, and also a `s
 Here are some caveats and limitations of bcpandas.
 * Bcpandas has been tested with all ASCII characters 32-127. Unicode characters beyond that range have not been tested.
 * An empty string (`""`) in the dataframe becomes `NULL` in the SQL database instead of remaining an empty string.
-* Because bcpandas first outputs to CSV, it needs to use several specific characters to create the CSV, including a _delimiter_ and a _quote character_. Bcpandas attempts to use  characters that are not present in the dataframe for this, going through the possilbe delimiters and quote characters specified in `constants.py`. If all possible characters are present in the dataframe and bcpandas cannot find both a delimiter and quote character to use, it will throw an error. 
+* Because bcpandas first outputs to CSV, it needs to use several specific characters to create the CSV, including a _delimiter_ and a _quote character_. Bcpandas attempts to use  characters that are not present in the dataframe for this, going through the possilbe delimiters and quote characters specified in `constants.py`. If all possible characters are present in the dataframe and bcpandas cannot find both a delimiter and quote character to use, it will throw an error.
    * The BCP utility does __not__ ignore delimiter characters when surrounded by quotes, unlike CSVs - see [here](https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-field-and-row-terminators-sql-server#characters-supported-as-terminators) in the Microsoft docs.
 * ~~If there is a NaN/Null in the last column of the dataframe it will throw an error. This is due to a BCP issue. See my issue with Microsoft about this [here](https://github.com/MicrosoftDocs/sql-docs/issues/2689).~~ This doesn't seem to be a problem based on the tests.
 
@@ -235,21 +235,21 @@ Here is a partial list of what has been tested so far. Pull Requests welcome!
 * Extra dataframe columns that aren't in database, when `if_exists="append"` specified (fails)
 
 ### Testing Implementation
-* Testing uses `pytest`. 
+* Testing uses `pytest`.
 * To test for all possible data types, we use the `hypothesis` library, instead of trying to come up with every single case on our own.
 * `pytest-cov` (which uses `coverage.py` under the hood) is used to measure code coverage. This is then uploaded to [codecov.io](https://codecov.io/gh/yehoshuadimarsky/bcpandas) as part of the CI/CD process (see below).
 * In order to spin up a local SQL Server during testing, we use Docker. Specifically, we run one of the images that Microsoft provides that already have SQL Server fully installed, all we have to do is use the image to run a container. Here are the links to the [Linux versions](https://hub.docker.com/_/microsoft-mssql-server) and the Windows versions - [Express](https://hub.docker.com/r/microsoft/mssql-server-windows-express/) and [Developer](https://hub.docker.com/r/microsoft/mssql-server-windows-developer).
    * When running the tests, we can specify a specific Docker image to use, by invoking the custom command line option called `--mssql-docker-image`. For example:
-      ```bash 
+      ```bash
       pytest bcpandas/tests --mssql-docker-image mcr.microsoft.com/mssql/server:2019-latest
       ```
 * Instead of using the `subprocess` library to control Docker manually, we use the elegant `docker-py` library which works very nicely. A `DockerDB` Python class is defined in `bcpandas/tests/utils.py` and it wraps up all the Docker commands and functionality needed to use SQL Server into one class. This class is used in `conftest.py` in the core bcpandas tests, and in the `benchmarks/` directory for both the benchmarks code as well as the legacy tests for `read_sql`.
 
 ## CI/CD
-Github Actions is used for CI/CD, although it is still somewhat a work in progress. 
+Github Actions is used for CI/CD, although it is still somewhat a work in progress.
 
 ## Contributing
-Please, all contributions are very welcome! 
+Please, all contributions are very welcome!
 
 I will attempt to use the `pandas` docstring style as detailed [here](https://pandas.pydata.org/pandas-docs/stable/development/contributing_docstring.html).
 

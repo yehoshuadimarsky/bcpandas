@@ -51,7 +51,7 @@ SQLCHAR = "SQLCHAR"
 sql_collation = "SQL_Latin1_General_CP1_CI_AS"
 
 
-error_msg = """Data contains all of the possible {typ} characters {opts}, 
+error_msg = """Data contains all of the possible {typ} characters {opts},
 cannot use BCP to import it. Replace one of the possible {typ} characters in
 your data, or use another method besides bcpandas.
 
