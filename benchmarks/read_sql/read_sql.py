@@ -125,7 +125,7 @@ def read_sql(
         # there should be len(cols)-1 instances of the delimiter per row
         if check_delim:
             num_delims = len(cols) - 1
-            with open(file_path, "r") as file:
+            with open(file_path) as file:
                 for line in file:
                     if line.count(delim) > num_delims:
                         raise BCPandasValueError(

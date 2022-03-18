@@ -77,13 +77,13 @@ def gather_env_info():
 
     # Sql Tools
     cmd_bcp = ["bcp", "-v"]
-    res = run(_parse_cmd(cmd_bcp), stdout=PIPE, stderr=PIPE, shell=with_shell)
+    res = run(_parse_cmd(cmd_bcp), capture_output=True, shell=with_shell)
     if res.returncode == 0:
         config["mssql_tools"] = {"bcp-version": res.stdout.decode().strip().split("\r\n")}
 
     # Docker
     cmd_docker = ["docker", "version", "--format", "'{{json .}}'"]
-    res = run(_parse_cmd(cmd_docker), stdout=PIPE, stderr=PIPE, shell=with_shell)
+    res = run(_parse_cmd(cmd_docker), capture_output=True, shell=with_shell)
     if res.returncode == 0:
         docker_out = res.stdout.decode().strip()[1:-1]  # strip outer single quotes
         config["docker"] = {"docker-version-output": json.loads(docker_out)}
