@@ -21,24 +21,20 @@ jobs:
     env:
       CONDA_ENV_NAME: bcpandas-env
     runs-on: ${{ matrix.os }}
-    # continue-on-error: false
     strategy:
       fail-fast: true
       matrix:
         name:
           - linux
-          # - windows
         python-version: [3.6, 3.7, 3.8, 3.9]
         include:
           - name: linux
             os: ubuntu-20.04
-            mssql_image: mcr.microsoft.com/mssql/server:2017-latest
-            # - name: windows
-            #   os: windows-latest
-            #  mssql_image: microsoft/mssql-server-windows-express:2017-latest
+            mssql_image: mcr.microsoft.com/mssql/server:2019-latest
 
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
@@ -48,7 +44,6 @@ jobs:
           miniforge-variant: Mambaforge
           mamba-version: "*"
           auto-activate-base: false
-      - uses: actions/setup-go@v2
       - uses: pre-commit/action@v2.0.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
