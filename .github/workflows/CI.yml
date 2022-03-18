@@ -48,7 +48,7 @@ jobs:
           miniforge-variant: Mambaforge
           mamba-version: "*"
           auto-activate-base: false
-
+      - uses: actions/setup-go@v2
       - uses: pre-commit/action@v2.0.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
