@@ -5,6 +5,6 @@ rules:
   document-start:
     present: false
   line-length:
-    max: 110
+    max: 130
   truthy:
     check-keys: false
