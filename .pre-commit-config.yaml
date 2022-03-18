@@ -5,7 +5,7 @@ repos:
       hooks:
           - id: isort
     - repo: https://github.com/psf/black
-      rev: 21.12b0
+      rev: 22.1.0
       hooks:
           - id: black
             language_version: python3
@@ -17,7 +17,7 @@ repos:
       hooks:
           - id: flake8
     - repo: https://github.com/pre-commit/mirrors-mypy
-      rev: v0.931
+      rev: v0.941
       hooks:
           - id: mypy
     - repo: https://github.com/thlorenz/doctoc
@@ -31,7 +31,7 @@ repos:
       hooks:
           - id: absolufy-imports
     - repo: https://github.com/asottile/pyupgrade
-      rev: v2.31.0
+      rev: v2.31.1
       hooks:
           - id: pyupgrade
             args: [--py37-plus, --keep-runtime-typing]
@@ -40,7 +40,7 @@ repos:
       hooks:
           - id: yesqa
     - repo: https://github.com/asottile/pyupgrade
-      rev: v2.31.0
+      rev: v2.31.1
       hooks:
           - id: pyupgrade
             args:
@@ -70,6 +70,6 @@ repos:
           - id: python-check-blanket-noqa
           - id: python-use-type-annotations
     - repo: https://github.com/zricethezav/gitleaks
-      rev: v8.2.7
+      rev: v8.3.0
       hooks:
           - id: gitleaks
