@@ -1,0 +1,10 @@
+# https://yamllint.readthedocs.io/en/stable/
+extends: default
+
+rules:
+  document-start:
+    present: false
+  line-length:
+    max: 110
+  truthy:
+    check-keys: false
