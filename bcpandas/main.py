@@ -121,16 +121,16 @@ class SqlCreds:
             # get the odbc url part from the engine, split by ';' delimiter
             conn_url = engine.url.query["odbc_connect"].split(";")
             # convert into dict
-            conn_dict = {x.split("=")[0]: x.split("=")[1] for x in conn_url if "=" in x}
+            conn_dict = {x.split("=")[0].lower(): x.split("=")[1] for x in conn_url if "=" in x}
 
-            if "," in conn_dict["Server"]:
-                conn_dict["port"] = int(conn_dict["Server"].split(",")[1])
+            if "," in conn_dict["server"]:
+                conn_dict["port"] = int(conn_dict["server"].split(",")[1])
 
             sql_creds = cls(
-                server=conn_dict["Server"].replace("tcp:", "").split(",")[0],
-                database=conn_dict["Database"],
-                username=conn_dict.get("UID", None),
-                password=conn_dict.get("PWD", None),
+                server=conn_dict["server"].replace("tcp:", "").split(",")[0],
+                database=conn_dict["database"],
+                username=conn_dict.get("uid", None),
+                password=conn_dict.get("pwd", None),
                 port=conn_dict.get("port", None),
             )
 
