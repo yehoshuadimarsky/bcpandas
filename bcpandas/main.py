@@ -14,6 +14,7 @@ from urllib.parse import quote_plus
 import pandas as pd
 from pandas.io.sql import SQLDatabase, SQLTable
 import sqlalchemy as sa
+import pyodbc
 
 from bcpandas.constants import (
     IF_EXISTS_OPTIONS,
@@ -61,7 +62,7 @@ class SqlCreds:
         database: str,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        driver_version: int = 17,
+        driver_version: int = None,
         port: int = 1433,
         odbc_kwargs: Optional[Dict[str, Union[str, int]]] = None,
     ):
@@ -69,6 +70,22 @@ class SqlCreds:
         self.database = database
         self.port = port
 
+        driver_version = (
+            driver_version if driver_version is not None else
+            max(
+                [
+                    i[0] for i in
+                    [
+                        [
+                            int(w) for w in d.split('Driver ')[-1].split(' ')
+                            if w.isnumeric()
+                        ]
+                        for d in pyodbc.drivers() if 'SQL Server' in d
+                    ]
+                    if len(i) > 0
+                ]
+            )
+        )
         self.driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
 
         # Append a comma for use in connection strings (optionally blank)
