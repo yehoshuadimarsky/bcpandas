@@ -8,7 +8,7 @@ import csv
 import logging
 import os
 from textwrap import dedent
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, List
 from urllib.parse import quote_plus
 
 import pandas as pd
@@ -70,21 +70,17 @@ class SqlCreds:
         self.database = database
         self.port = port
 
-        driver_version = (
-            driver_version
-            if driver_version is not None
-            else max(
-
-                    i[0]
-                    for i in [
-                        [int(w) for w in d.split("Driver ")[-1].split(" ") if w.isnumeric()]
-                        for d in pyodbc.drivers()
-                        if "SQL Server" in d
-                    ]
-                    if len(i) > 0
-
-            )
-        )
+        if driver_version is None:
+            all_drivers: List[str] = pyodbc.drivers()
+            driver_candidates: List[List[str]] = [
+                d.split("Driver ")[-1].split(" ")[0] for d in all_drivers if "SQL Server" in d
+            ]
+            try:
+                driver_version: int = max([int(v) for v in driver_candidates if v.isnumeric()])
+            except ValueError:
+                raise BCPandasValueError(
+                    "No SQL Server Driver found. Drivers found:\n" + "\n".join(all_drivers)
+                )
         self.driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
 
         # Append a comma for use in connection strings (optionally blank)
