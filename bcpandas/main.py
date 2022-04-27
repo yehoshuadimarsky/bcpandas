@@ -8,7 +8,7 @@ import csv
 import logging
 import os
 from textwrap import dedent
-from typing import Dict, Optional, Union, List
+from typing import Dict, List, Optional, Union
 from urllib.parse import quote_plus
 
 import pandas as pd
