@@ -1,7 +1,7 @@
 from collections import namedtuple
-import pytest
 from unittest import mock
 
+import pytest
 
 from bcpandas import utils
 
