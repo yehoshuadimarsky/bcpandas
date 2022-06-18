@@ -87,7 +87,7 @@ def test_sql_creds_for_username_password_version_not_specified():
     url_split = str(creds.engine.url).split(";")
     url_driver = url_split[0]
     url_driver_no_version = "".join([letter for letter in url_driver if not letter.isnumeric()])
-    url_other = ";".join(url_split[1:])
+    new_url = url_driver_no_version + ";".join(url_split[1:])
 
     assert creds.server == "test_server"
     assert creds.database == "test_database"
@@ -96,10 +96,9 @@ def test_sql_creds_for_username_password_version_not_specified():
     assert creds.port == 1433
     assert creds.with_krb_auth is False
     assert isinstance(creds.engine, engine.Connectable)
-    assert url_driver_no_version == _quote_engine_url("Driver={ODBC Driver  for SQL Server}")
-    assert url_other == _quote_engine_url(
-        "Server=tcp:test_server,1433;Database=test_database;UID=test_user;PWD=test_password"
-    ).replace("mssql+pyodbc:///?odbc_connect=", "")
+    assert new_url == _quote_engine_url(
+        "Driver={ODBC Driver  for SQL Server};Server=tcp:test_server,1433;Database=test_database;UID=test_user;PWD=test_password"
+    )
 
 
 def test_sql_creds_for_windows_auth():
