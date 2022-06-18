@@ -73,6 +73,35 @@ def test_sql_creds_for_username_password():
     )
 
 
+def test_sql_creds_for_username_password_version_not_specified():
+    """
+    Tests that the SqlCreds object can be created with Username and Password (SQL Auth) without also specifying driver_version
+    """
+    creds = SqlCreds(
+        server="test_server",
+        database="test_database",
+        username="test_user",
+        password="test_password",
+    )
+
+    url_split = str(creds.engine.url).split(';')
+    url_driver = url_split[0]
+    url_driver_no_version = ''.join([l for l in url_driver.split('') if not l.isnumeric()])
+    url_other = url_split[1:].join(';')
+
+    assert creds.server == "test_server"
+    assert creds.database == "test_database"
+    assert creds.username == "test_user"
+    assert creds.password == "test_password"
+    assert creds.port == 1433
+    assert creds.with_krb_auth is False
+    assert isinstance(creds.engine, engine.Connectable)
+    assert url_driver_no_version == _quote_engine_url("Driver={ODBC Driver  for SQL Server}")
+    assert url_other == _quote_engine_url(
+        "Server=tcp:test_server,1433;Database=test_database;UID=test_user;PWD=test_password"
+    )
+
+
 def test_sql_creds_for_windows_auth():
     """
     Tests that the SqlCreds object can be created without Username and Password (Windows Auth)
