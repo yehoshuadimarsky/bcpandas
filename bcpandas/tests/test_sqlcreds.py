@@ -99,7 +99,7 @@ def test_sql_creds_for_username_password_version_not_specified():
     assert url_driver_no_version == _quote_engine_url("Driver={ODBC Driver  for SQL Server}")
     assert url_other == _quote_engine_url(
         "Server=tcp:test_server,1433;Database=test_database;UID=test_user;PWD=test_password"
-    )
+    ).replace("mssql+pyodbc:///?odbc_connect=", "")
 
 
 def test_sql_creds_for_windows_auth():
