@@ -87,7 +87,7 @@ def test_sql_creds_for_username_password_version_not_specified():
     url_split = str(creds.engine.url).split(";")
     url_driver = url_split[0]
     url_driver_no_version = "".join([letter for letter in url_driver if not letter.isnumeric()])
-    url_other = url_split[1:].join(";")
+    url_other = ";".join(url_split[1:])
 
     assert creds.server == "test_server"
     assert creds.database == "test_database"
