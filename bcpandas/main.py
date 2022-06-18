@@ -75,12 +75,7 @@ class SqlCreds:
             driver_candidates: List[str] = [
                 d.split("Driver ")[-1].split(" ")[0] for d in all_drivers if "SQL Server" in d
             ]
-            try:
-                new_driver_version: int = max(int(v) for v in driver_candidates if v.isnumeric())
-            except ValueError:
-                raise BCPandasValueError(
-                    "No SQL Server Driver found. Drivers found:\n" + "\n".join(all_drivers)
-                )
+            new_driver_version: int = max(int(v) for v in driver_candidates if v.isnumeric())
             self.driver = f"{{ODBC Driver {new_driver_version} for SQL Server}}"
         else:
             self.driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
