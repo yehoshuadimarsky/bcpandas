@@ -96,9 +96,8 @@ def test_sql_creds_for_username_password_version_not_specified():
     assert creds.port == 1433
     assert creds.with_krb_auth is False
     assert isinstance(creds.engine, engine.Connectable)
-    assert new_url == _quote_engine_url(
-        "Driver={ODBC Driver  for SQL Server};Server=tcp:test_server,1433;Database=test_database;UID=test_user;PWD=test_password"
-    )
+    print(new_url)
+    assert new_url == "mssql+pyodbc:///?odbc_connect=Driver%D%BODBC+Driver++for+SQL+Server%D%BServer%Dtcp%Atest_server%C%BDatabase%Dtest_database%BUID%Dtest_user%BPWD%Dtest_password"
 
 
 def test_sql_creds_for_windows_auth():
