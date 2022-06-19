@@ -97,7 +97,10 @@ def test_sql_creds_for_username_password_version_not_specified():
     assert creds.with_krb_auth is False
     assert isinstance(creds.engine, engine.Connectable)
     print(new_url)
-    assert new_url == "mssql+pyodbc:///?odbc_connect=Driver%D%BODBC+Driver++for+SQL+Server%D%BServer%Dtcp%Atest_server%C%BDatabase%Dtest_database%BUID%Dtest_user%BPWD%Dtest_password"
+    assert (
+        new_url
+        == "mssql+pyodbc:///?odbc_connect=Driver%D%BODBC+Driver++for+SQL+Server%D%BServer%Dtcp%Atest_server%C%BDatabase%Dtest_database%BUID%Dtest_user%BPWD%Dtest_password"
+    )
 
 
 def test_sql_creds_for_windows_auth():
