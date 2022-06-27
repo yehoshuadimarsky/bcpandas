@@ -60,6 +60,6 @@ repos:
           - id: python-use-type-annotations
           - id: python-no-log-warn
     - repo: https://github.com/zricethezav/gitleaks
-      rev: v8.8.7
+      rev: v8.8.8
       hooks:
           - id: gitleaks
