@@ -31,7 +31,7 @@ repos:
       hooks:
           - id: absolufy-imports
     - repo: https://github.com/asottile/pyupgrade
-      rev: v2.34.0
+      rev: v2.37.1
       hooks:
           - id: pyupgrade
             args: [--py37-plus, --keep-runtime-typing]
@@ -40,7 +40,7 @@ repos:
       hooks:
           - id: yesqa
     - repo: https://github.com/adrienverge/yamllint
-      rev: v1.26.3
+      rev: v1.27.1
       hooks:
           - id: yamllint
             args: ["--strict"]
@@ -60,6 +60,6 @@ repos:
           - id: python-use-type-annotations
           - id: python-no-log-warn
     - repo: https://github.com/zricethezav/gitleaks
-      rev: v8.8.11
+      rev: v8.8.12
       hooks:
           - id: gitleaks
