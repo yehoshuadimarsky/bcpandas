@@ -63,11 +63,13 @@ class SqlCreds:
         password: Optional[str] = None,
         driver_version: int = 17,
         port: int = 1433,
+        useMultiSubnetFailover: bool = False,
         odbc_kwargs: Optional[Dict[str, Union[str, int]]] = None,
     ):
         self.server = server
         self.database = database
         self.port = port
+        self.useMultiSubnetFailover = useMultiSubnetFailover
 
         self.driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
 
@@ -92,6 +94,9 @@ class SqlCreds:
             db_url += "Trusted_Connection=yes;"
 
         logger.info(f"Created creds:\t{self}")
+
+        if useMultiSubnetFailover:
+            db_url += ";MultiSubnetFailover=Yes;"
 
         # construct the engine for sqlalchemy
         if odbc_kwargs:
