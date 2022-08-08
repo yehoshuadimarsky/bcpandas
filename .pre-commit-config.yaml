@@ -13,7 +13,7 @@ repos:
                 - "--line-length"
                 - "100"
     - repo: https://github.com/PyCQA/flake8
-      rev: 5.0.2
+      rev: 5.0.4
       hooks:
           - id: flake8
     - repo: https://github.com/pre-commit/mirrors-mypy
@@ -36,7 +36,7 @@ repos:
           - id: pyupgrade
             args: [--py37-plus, --keep-runtime-typing]
     - repo: https://github.com/asottile/yesqa
-      rev: v1.3.0
+      rev: v1.4.0
       hooks:
           - id: yesqa
     - repo: https://github.com/adrienverge/yamllint
@@ -60,6 +60,6 @@ repos:
           - id: python-use-type-annotations
           - id: python-no-log-warn
     - repo: https://github.com/zricethezav/gitleaks
-      rev: v8.9.0
+      rev: v8.10.1
       hooks:
           - id: gitleaks
