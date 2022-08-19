@@ -46,9 +46,11 @@ class SqlCreds:
     password : str, optional
     driver_version : int, default 17
         The version of the Microsoft ODBC Driver for SQL Server to use
+    engine : `sqlalchemy.engine.base.Engine`
+        Existing engine to use, if not provided a basic engine will be created
     odbc_kwargs : dict of {str, str or int}, optional
         additional keyword arguments, to pass into ODBC connection string,
-        such as Encrypted='yes'
+        such as Encrypted='yes'. Used in engine creation if engine not provided.
 
     Returns
     -------
@@ -64,6 +66,7 @@ class SqlCreds:
         driver_version: int = 17,
         port: int = 1433,
         odbc_kwargs: Optional[Dict[str, Union[str, int]]] = None,
+        engine: Optional[sa.engine.base.Engine] = None,
     ):
         self.server = server
         self.database = database
@@ -93,13 +96,16 @@ class SqlCreds:
 
         logger.info(f"Created creds:\t{self}")
 
-        # construct the engine for sqlalchemy
-        if odbc_kwargs:
-            db_url += ";".join(f"{k}={v}" for k, v in odbc_kwargs.items())
-        conn_string = f"mssql+pyodbc:///?odbc_connect={quote_plus(db_url)}"
-        self.engine = sa.engine.create_engine(conn_string)
+        if engine is None:
+            # construct the engine for sqlalchemy
+            if odbc_kwargs:
+                db_url += ";".join(f"{k}={v}" for k, v in odbc_kwargs.items())
+            conn_string = f"mssql+pyodbc:///?odbc_connect={quote_plus(db_url)}"
+            self.engine = sa.engine.create_engine(conn_string)
 
-        logger.info(f"Created engine for sqlalchemy:\t{self.engine}")
+            logger.info(f"Created engine for sqlalchemy:\t{self.engine}")
+        else:
+            self.engine = engine
 
     @classmethod
     def from_engine(cls, engine: sa.engine.base.Engine) -> "SqlCreds":
