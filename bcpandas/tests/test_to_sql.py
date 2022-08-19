@@ -277,9 +277,7 @@ def test_use_tab_lock_param(sql_creds):
         sql_type="table",
         use_tab_lock=True,
     )
-    assert sql_creds.engine.execute(
-        "SELECT * FROM some_table"
-    ).first()[0] == 1.5
+    assert sql_creds.engine.execute("SELECT * FROM some_table").first()[0] == 1.5
 
 
 @pytest.mark.usefixtures("database")
