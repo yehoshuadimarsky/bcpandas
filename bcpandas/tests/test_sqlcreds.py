@@ -175,6 +175,24 @@ def test_sql_creds_for_windows_auth_blank_port():
     )
 
 
+def test_sql_creds_for_provided_engine():
+    """
+    Tests that when an engine is provided it is used
+    """
+    # GIVEN an engine 
+    mssql_engine = create_engine(
+        "mssql+pyodbc://test_server_1/test_db_1?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server"
+    )
+    # WHEN creds instatiated with this engine
+    creds = SqlCreds(
+        server="test_server_2",
+        database="test_db_2",
+        engine=mssql_engine,
+    )
+    # THEN the provided engine is used
+    assert creds.engine == mssql_engine
+
+
 def test_sql_creds_from_sqlalchemy():
     """
     Tests that the SqlCreds object can be created from a SqlAlchemy engine
