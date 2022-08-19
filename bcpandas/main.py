@@ -315,6 +315,7 @@ def to_sql(
     index: bool = True,
     if_exists: str = "fail",
     batch_size: int = None,
+    use_tab_lock: bool = False,
     debug: bool = False,
     bcp_path: str = None,
     dtype: dict = None,
@@ -454,6 +455,7 @@ def to_sql(
             sql_type=sql_type,
             schema=schema,
             batch_size=batch_size,
+            use_tab_lock=use_tab_lock,
             bcp_path=bcp_path,
         )
     finally:
