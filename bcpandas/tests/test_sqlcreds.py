@@ -179,7 +179,7 @@ def test_sql_creds_for_provided_engine():
     """
     Tests that when an engine is provided it is used
     """
-    # GIVEN an engine 
+    # GIVEN an engine
     mssql_engine = create_engine(
         "mssql+pyodbc://test_server_1/test_db_1?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server"
     )
