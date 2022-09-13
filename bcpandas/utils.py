@@ -47,6 +47,8 @@ def bcp(
     format_file_path: str = None,
     batch_size: int = None,
     col_delimiter: str = None,
+    encoding: str = "-C65001", # for utf-8
+    data_type: str = "-c", 
     row_terminator: str = None,
     bcp_path: Union[str, Path] = None,
 ):
@@ -99,7 +101,8 @@ def bcp(
         bcp_command += ["-f", format_file_path]
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
-            "-c",  # marking as character data, not Unicode (maybe make as param?)
+            quote_this(data_type),  # marking as character data, not Unicode (maybe make as param?)
+            quote_this(encoding),
             quote_this(
                 f"-t{read_data_settings['delimiter'] if col_delimiter is None else col_delimiter}"
             ),
