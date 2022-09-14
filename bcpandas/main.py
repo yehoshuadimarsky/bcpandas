@@ -325,8 +325,7 @@ def to_sql(
     encoding: str = "65001",
     data_type: str = "-c",
     separator: str = ";",
-    use_format_file: bool = True 
-
+    use_format_file: bool = True,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -463,7 +462,7 @@ def to_sql(
             encoding=encoding,
             data_type=data_type,
             separator=separator,
-            use_format_file=use_format_file 
+            use_format_file=use_format_file,
         )
     finally:
         if not debug:

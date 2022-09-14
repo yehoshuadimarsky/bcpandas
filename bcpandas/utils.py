@@ -47,9 +47,9 @@ def bcp(
     format_file_path: str = None,
     batch_size: int = None,
     col_delimiter: str = None,
-    encoding: str = "65001", # for utf-8
+    encoding: str = "65001",  # for utf-8
     data_type: str = "-c",
-    separator: str = ";", 
+    separator: str = ";",
     row_terminator: str = None,
     bcp_path: Union[str, Path] = None,
     use_format_file: bool = True,
@@ -100,14 +100,10 @@ def bcp(
 
     # formats
     if direc == IN and use_format_file:
-        bcp_command += [
-                        "-f", format_file_path] 
+        bcp_command += ["-f", format_file_path]
 
     elif direc == IN and not use_format_file:
-        bcp_command += [
-                        str(data_type), 
-                        "-C", str(encoding),
-                        "-t", quote_this(separator)] 
+        bcp_command += [str(data_type), "-C", str(encoding), "-t", quote_this(separator)]
 
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
@@ -119,7 +115,6 @@ def bcp(
                 f"-r{read_data_settings['newline'] if row_terminator is None else row_terminator}"
             ),
         ]
-
 
     # execute
     bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
@@ -240,13 +235,12 @@ def run_cmd(cmd: List[str], *, print_output: bool) -> int:
     The exit code of the command
     """
 
-
     cmd = " ".join(cmd)  # type: ignore
     if IS_WIN32:
         with_shell = False
     else:
         with_shell = True
-        
+
     proc = Popen(
         cmd,
         stdout=PIPE,
