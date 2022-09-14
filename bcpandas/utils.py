@@ -99,6 +99,11 @@ def bcp(
         bcp_command += ["-b", str(batch_size)]
 
     # formats
+    if data_type not in ('-c','-w'):
+        raise ValueError(
+            f"If not using format file, data_type sould be -c or -w, got: {data_type}"
+        )
+
     if direc == IN and use_format_file:
         bcp_command += ["-f", format_file_path]
 
