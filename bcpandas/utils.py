@@ -109,7 +109,7 @@ def bcp(
             raise ValueError(
                 f"If not using format file, encoding is expected, expected type int or str, got: {type(encoding)}, value: {encoding}"
             )
-            
+
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
             str(data_type),  # marking as character data, not Unicode (maybe make as param?)
