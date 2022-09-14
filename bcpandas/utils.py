@@ -47,9 +47,8 @@ def bcp(
     format_file_path: str = None,
     batch_size: int = None,
     col_delimiter: str = None,
-    encoding: str = "65001",  # for utf-8
+    encoding: str = "65001",
     data_type: str = "-c",
-    separator: str = ";",
     row_terminator: str = None,
     bcp_path: Union[str, Path] = None,
     use_format_file: bool = True,
@@ -57,6 +56,8 @@ def bcp(
     """
     See https://docs.microsoft.com/en-us/sql/tools/bcp-utility
     """
+
+
     combos = {TABLE: [IN, OUT], QUERY: [QUERYOUT], VIEW: [IN, OUT]}
     direc = direction.lower()
     # validation
@@ -103,7 +104,10 @@ def bcp(
         bcp_command += ["-f", format_file_path]
 
     elif direc == IN and not use_format_file:
-        bcp_command += [str(data_type), "-C", str(encoding), "-t", quote_this(separator)]
+        if encoding and col_delimiter:
+            bcp_command += [str(data_type), "-C", str(encoding), "-t", quote_this(col_delimiter)]
+        else:
+            raise ValueError(f'If not using format file, encoding is expected, expected type int or str, got: {type(encoding)}, value: {encoding}')
 
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
@@ -236,10 +240,6 @@ def run_cmd(cmd: List[str], *, print_output: bool) -> int:
     """
 
     cmd = " ".join(cmd)  # type: ignore
-    if IS_WIN32:
-        with_shell = False
-    else:
-        with_shell = True
 
     proc = Popen(
         cmd,
@@ -247,7 +247,7 @@ def run_cmd(cmd: List[str], *, print_output: bool) -> int:
         stderr=PIPE,
         encoding="utf-8",
         errors="utf-8",
-        shell=with_shell,
+        shell=not IS_WIN32,
     )
 
     # live stream STDOUT

@@ -324,7 +324,6 @@ def to_sql(
     quotechar: str = None,
     encoding: str = "65001",
     data_type: str = "-c",
-    separator: str = ";",
     use_format_file: bool = True,
 ):
     """
@@ -457,11 +456,11 @@ def to_sql(
             print_output=print_output,
             sql_type=sql_type,
             schema=schema,
+            col_delimiter=delim,
             batch_size=batch_size,
             bcp_path=bcp_path,
             encoding=encoding,
             data_type=data_type,
-            separator=separator,
             use_format_file=use_format_file,
         )
     finally:
