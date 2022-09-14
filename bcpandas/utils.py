@@ -57,7 +57,6 @@ def bcp(
     See https://docs.microsoft.com/en-us/sql/tools/bcp-utility
     """
 
-
     combos = {TABLE: [IN, OUT], QUERY: [QUERYOUT], VIEW: [IN, OUT]}
     direc = direction.lower()
     # validation
@@ -107,7 +106,9 @@ def bcp(
         if encoding and col_delimiter:
             bcp_command += [str(data_type), "-C", str(encoding), "-t", quote_this(col_delimiter)]
         else:
-            raise ValueError(f'If not using format file, encoding is expected, expected type int or str, got: {type(encoding)}, value: {encoding}')
+            raise ValueError(
+                f"If not using format file, encoding is expected, expected type int or str, got: {type(encoding)}, value: {encoding}"
+            )
 
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
