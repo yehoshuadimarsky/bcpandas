@@ -244,10 +244,9 @@ def run_cmd(cmd: List[str], *, print_output: bool) -> int:
     cmd = " ".join(cmd)  # type: ignore
     if IS_WIN32:
         with_shell = False
-
     else:
         with_shell = True
-        cmd = " ".join(cmd)  # type: ignore
+        
     proc = Popen(
         cmd,
         stdout=PIPE,
