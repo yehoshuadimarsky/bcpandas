@@ -322,7 +322,7 @@ def to_sql(
     print_output: bool = True,
     delimiter: str = None,
     quotechar: str = None,
-    encoding: str = "65001",
+    encoding: str = None,
     data_type: str = "-c",
     use_format_file: bool = True,
 ):

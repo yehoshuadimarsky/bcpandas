@@ -47,7 +47,7 @@ def bcp(
     format_file_path: str = None,
     batch_size: int = None,
     col_delimiter: str = None,
-    encoding: str = "65001",
+    encoding: str = None,
     data_type: str = "-c",
     row_terminator: str = None,
     bcp_path: Union[str, Path] = None,
@@ -109,7 +109,7 @@ def bcp(
             raise ValueError(
                 f"If not using format file, encoding is expected, expected type int or str, got: {type(encoding)}, value: {encoding}"
             )
-
+            
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
             str(data_type),  # marking as character data, not Unicode (maybe make as param?)
