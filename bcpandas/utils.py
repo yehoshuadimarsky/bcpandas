@@ -93,7 +93,7 @@ def bcp(
 
     # check cert
     if "trustservercertificate" in str(creds.engine.url).lower():
-        bcp_command += ["-C"]
+        bcp_command += ["-u"]
 
     if batch_size:
         bcp_command += ["-b", str(batch_size)]
