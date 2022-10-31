@@ -69,7 +69,7 @@ def bcp(
     if creds.with_krb_auth:
         auth = ["-T"]
     else:
-        auth = ["-U", creds.username, "-P", creds.password]
+        auth = ["-U", creds.username, "-P", quote_this(creds.password)]
 
     # prepare SQL item string
     if sql_type == QUERY:
