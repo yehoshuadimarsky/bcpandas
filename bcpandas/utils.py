@@ -92,7 +92,7 @@ def bcp(
     ] + auth
 
     # check cert
-    if "trustservercertificate" in str(creds.engine.url).lower() and os.name == 'posix':
+    if "trustservercertificate" in str(creds.engine.url).lower() and os.name == "posix":
         bcp_command += ["-u"]
 
     if batch_size:
