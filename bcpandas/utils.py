@@ -114,8 +114,7 @@ def bcp(
 
     # execute
     bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
-    # logger.info
-    print(f"Executing BCP command now... \nBCP command is: {bcp_command_log}")
+    logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log}")
     ret_code = run_cmd(bcp_command, print_output=print_output)
     if ret_code:
         raise BCPandasException(f"Bcp command failed with exit code {ret_code}")
