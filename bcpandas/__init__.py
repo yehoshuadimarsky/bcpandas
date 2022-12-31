@@ -1,8 +1,8 @@
 from subprocess import DEVNULL, run
 import warnings
 
-from bcpandas.main import SqlCreds, to_sql  # noqa: F401
-from bcpandas.utils import bcp  # noqa: F401
+from bcpandas.main import SqlCreds, to_sql
+from bcpandas.utils import bcp
 
 name = "bcpandas"
 __version__ = "2.0.0"
