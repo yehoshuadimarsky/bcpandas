@@ -1,4 +1,3 @@
-# flake8: noqa F401
 from subprocess import DEVNULL, run
 import warnings
 
@@ -16,3 +15,5 @@ except FileNotFoundError:
     warnings.warn("BCP utility not installed or not found in PATH, bcpandas will not work!")
 
 del run, DEVNULL, warnings
+
+__all__ = ["SqlCreds", "to_sql", "bcp"]

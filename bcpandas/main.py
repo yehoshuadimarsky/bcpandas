@@ -322,6 +322,7 @@ def to_sql(
     print_output: bool = True,
     delimiter: str = None,
     quotechar: str = None,
+    encoding: Optional[str] = None,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -374,6 +375,8 @@ def to_sql(
         Optional delimiter to use, otherwise will use the result of `constants.get_delimiter`
     quotechar: str, default None
         Optional quotechar to use, otherwise will use the result of `constants.get_quotechar`
+    encoding: str, default None
+        Optional encoding to use for writing the BCP data-file. Defaults to `utf-8`.
 
     Notes
     -----
@@ -406,6 +409,7 @@ def to_sql(
         line_terminator=NEWLINE,
         doublequote=True,
         escapechar=None,  # not needed, as using doublequote
+        encoding=encoding,
     )
     logger.debug(f"Saved dataframe to temp CSV file at {csv_file_path}")
 
