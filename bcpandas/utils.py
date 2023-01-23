@@ -108,6 +108,12 @@ def bcp(
             ),
         ]
 
+    print("USING THE FOLLOWING DATA FILE:")
+    print(Path(flat_file).read_text())
+    if format_file_path is not None:
+        print("USING THE FOLLOWING FORMAT FILE:")
+        print(Path(format_file_path).read_text())
+
     # execute
     bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
     logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log}")

@@ -118,7 +118,7 @@ class DockerDB:
         self,
         container_name: str,
         sa_sql_password: str,
-        mssql_image: str = "mcr.microsoft.com/mssql/server:2017-latest",
+        mssql_image: str = "mcr.microsoft.com/mssql/server:2022-latest",
         port_host: int = 1433,
         port_container: int = 1433,
         accept_eula: bool = True,
