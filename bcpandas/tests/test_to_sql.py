@@ -144,7 +144,11 @@ def test_tosql_full_bcp_path(bcp_path, sql_creds):
         ),
         pytest.param(
             pd.DataFrame(
-                {"col1": [1.5, 2.5, 3.5, 4.5], "col2": [1, 2, 3, 4], "col3": ["a", None, "c", None]}
+                {
+                    "col1": [1.5, 2.5, 3.5, 4.5],
+                    "col2": [1, 2, 3, 4],
+                    "col3": ["a", None, "c", None],
+                }
             ),
             id="None_last_col",
         ),
@@ -330,7 +334,8 @@ class TestToSqlColumnScenarios(_BaseToSql):
             sql=f"SELECT * FROM {self.schema_name}.{self.table_name}", con=self.sql_creds.engine
         )
         expected = prep_df_for_comparison(
-            df=pd.concat([self.df, df_modified], axis=0, ignore_index=True, sort=False), index=False
+            df=pd.concat([self.df, df_modified], axis=0, ignore_index=True, sort=False),
+            index=False,
         )
         assert_frame_equal(expected, actual)
 

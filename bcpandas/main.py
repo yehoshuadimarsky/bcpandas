@@ -175,7 +175,7 @@ def _create_table(
     creds: SqlCreds,
     df: pd.DataFrame,
     if_exists: str,
-    dtype: dict = None,
+    dtype: Optional[dict] = None,
 ):
     """use pandas' own code to create the table and schema"""
 
@@ -314,15 +314,16 @@ def to_sql(
     schema: str = "dbo",
     index: bool = True,
     if_exists: str = "fail",
-    batch_size: int = None,
+    batch_size: Optional[int] = None,
     use_tab_lock: bool = False,
     debug: bool = False,
-    bcp_path: str = None,
-    dtype: dict = None,
+    bcp_path: Optional[str] = None,
+    dtype: Optional[dict] = None,
     process_dest_table: bool = True,
     print_output: bool = True,
-    delimiter: str = None,
-    quotechar: str = None,
+    delimiter: Optional[str] = None,
+    quotechar: Optional[str] = None,
+    encoding: Optional[str] = None,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -375,6 +376,8 @@ def to_sql(
         Optional delimiter to use, otherwise will use the result of `constants.get_delimiter`
     quotechar: str, default None
         Optional quotechar to use, otherwise will use the result of `constants.get_quotechar`
+    encoding: str, default None
+        Optional encoding to use for writing the BCP data-file. Defaults to `utf-8`.
 
     Notes
     -----
@@ -407,6 +410,7 @@ def to_sql(
         line_terminator=NEWLINE,
         doublequote=True,
         escapechar=None,  # not needed, as using doublequote
+        encoding=encoding,
     )
     logger.debug(f"Saved dataframe to temp CSV file at {csv_file_path}")
 

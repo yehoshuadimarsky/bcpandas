@@ -44,12 +44,12 @@ def bcp(
     print_output: bool,
     sql_type: str = "table",
     schema: str = "dbo",
-    format_file_path: str = None,
-    batch_size: int = None,
+    format_file_path: Optional[str] = None,
+    batch_size: Optional[int] = None,
     use_tab_lock: bool = False,
-    col_delimiter: str = None,
-    row_terminator: str = None,
-    bcp_path: Union[str, Path] = None,
+    col_delimiter: Optional[str] = None,
+    row_terminator: Optional[str] = None,
+    bcp_path: Optional[Union[str, Path]] = None,
 ):
     """
     See https://docs.microsoft.com/en-us/sql/tools/bcp-utility

@@ -232,7 +232,7 @@ def save_and_plot(func, results, num_cols):
     plot.set_xticklabels([f"{x:,.0f}" for x in plot.get_xticks()])
     plot.get_figure().savefig(plot_file)
     env_info = gather_env_info()
-    with open(env_file, "wt") as file:
+    with open(env_file, "w") as file:
         json.dump(env_info, file, indent=2)
 
 
