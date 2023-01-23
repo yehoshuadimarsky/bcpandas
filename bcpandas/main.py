@@ -46,8 +46,9 @@ class SqlCreds:
     database : str
     username : str, optional
     password : str, optional
-    driver_version : int, default 17
-        The version of the Microsoft ODBC Driver for SQL Server to use
+    driver_version : int, optional
+        The version of the Microsoft ODBC Driver for SQL Server to use. Defaults to the latest
+        version.
     odbc_kwargs : dict of {str, str or int}, optional
         additional keyword arguments, to pass into ODBC connection string,
         such as Encrypted='yes'

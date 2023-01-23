@@ -5,7 +5,6 @@ Created on Sat Aug  3 23:07:15 2019
 """
 
 import logging
-import os
 from pathlib import Path
 import random
 import shlex
@@ -96,10 +95,6 @@ def bcp(
         creds.database,
         "-q",  # Executes the SET QUOTED_IDENTIFIERS ON statement, needed for Azure SQL DW
     ] + auth
-
-    # check cert
-    if "trustservercertificate" in str(creds.engine.url).lower() and os.name == "posix":
-        bcp_command += ["-u"]
 
     if batch_size:
         bcp_command += ["-b", str(batch_size)]
