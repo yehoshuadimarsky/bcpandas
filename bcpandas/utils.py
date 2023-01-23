@@ -89,8 +89,6 @@ def bcp(
         "-d",
         creds.database,
         "-q",  # Executes the SET QUOTED_IDENTIFIERS ON statement, needed for Azure SQL DW
-        "-e",
-        "failure.txt",
     ] + auth
 
     if batch_size:
@@ -110,22 +108,12 @@ def bcp(
             ),
         ]
 
-    print("USING THE FOLLOWING DATA FILE:")
-    print(Path(flat_file).read_text())
-    if format_file_path is not None:
-        print("USING THE FOLLOWING FORMAT FILE:")
-        print(Path(format_file_path).read_text())
-
     # execute
     bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
     logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log}")
     ret_code = run_cmd(bcp_command, print_output=print_output)
     if ret_code:
         raise BCPandasException(f"Bcp command failed with exit code {ret_code}")
-
-    if Path("failure.txt").exists():
-        print("RESULTING IN THE FOLLOWING ERROR:")
-        print(Path("failure.txt").read_text())
 
 
 def get_temp_file() -> str:
