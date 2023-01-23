@@ -25,7 +25,7 @@ MAX_VAL = 2**31 - 1
 strat_text = st.text(alphabet=st.characters(min_codepoint=32, max_codepoint=127), min_size=0)
 strat_ints = st.integers(min_value=-MAX_VAL, max_value=MAX_VAL)
 strat_floats = st.floats(
-    min_value=-MAX_VAL, max_value=MAX_VAL, allow_nan=False, allow_infinity=False
+    min_value=-MAX_VAL, max_value=MAX_VAL, allow_nan=False, allow_infinity=False, width=32
 )
 strat_dates = st.dates()
 

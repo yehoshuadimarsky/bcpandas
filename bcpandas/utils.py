@@ -115,9 +115,6 @@ def bcp(
     if format_file_path is not None:
         print("USING THE FOLLOWING FORMAT FILE:")
         print(Path(format_file_path).read_text())
-    if Path("failure.txt").exists():
-        print("RESULTING IN THE FOLLOWING ERROR:")
-        print(Path("failure.txt").read_text())
 
     # execute
     bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
@@ -125,6 +122,10 @@ def bcp(
     ret_code = run_cmd(bcp_command, print_output=print_output)
     if ret_code:
         raise BCPandasException(f"Bcp command failed with exit code {ret_code}")
+
+    if Path("failure.txt").exists():
+        print("RESULTING IN THE FOLLOWING ERROR:")
+        print(Path("failure.txt").read_text())
 
 
 def get_temp_file() -> str:
