@@ -38,7 +38,7 @@ types-setuptools = "^65.7.0.3"
 
 [tool.poetry.group.test.dependencies]
 codetiming = "1.4.0"
-docker-py = "1.10.6"
+docker = "6.0.1"
 hypothesis = "6.64.0"
 ipython = "8.8.0"
 matplotlib = "3.6.3"
