@@ -284,6 +284,22 @@ def test_use_tablock_param(sql_creds):
     assert sql_creds.engine.execute("SELECT * FROM some_table").first()[0] == 1.5
 
 
+def test_custom_work_directory(sql_creds):
+    """
+    Test the work directory parameters.
+    """
+    to_sql(
+        df=pd.DataFrame({"col1": [1.5]}),
+        table_name="some_table",
+        creds=sql_creds,
+        if_exists="replace",
+        index=False,
+        sql_type="table",
+        work_directory=Path("."),
+    )
+    assert sql_creds.engine.execute("SELECT * FROM some_table").first()[0] == 1.5
+
+
 @pytest.mark.usefixtures("database")
 class _BaseToSql:
     sql_type = "table"

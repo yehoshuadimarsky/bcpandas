@@ -7,6 +7,7 @@ Created on Sat Aug  3 23:07:15 2019
 import csv
 import logging
 import os
+from pathlib import Path
 from textwrap import dedent
 from typing import Dict, Optional, Union
 from urllib.parse import quote_plus
@@ -324,6 +325,7 @@ def to_sql(
     delimiter: Optional[str] = None,
     quotechar: Optional[str] = None,
     encoding: Optional[str] = None,
+    work_directory: Optional[Path] = None,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -381,6 +383,9 @@ def to_sql(
         Optional quotechar to use, otherwise will use the result of `constants.get_quotechar`
     encoding: str, default None
         Optional encoding to use for writing the BCP data-file. Defaults to `utf-8`.
+    work_directory: pathlib.Path, default None
+        Optional directory where temporary files are written to. If not provided, defaults to the
+        system-default for temporary files.
 
     Notes
     -----
@@ -401,7 +406,7 @@ def to_sql(
     _quotechar = get_quotechar(df) if quotechar is None else quotechar
 
     # save to temp path
-    csv_file_path = get_temp_file()
+    csv_file_path = get_temp_file(work_directory)
     # replace bools with 1 or 0, this is what pandas native does when writing to SQL Server
     df.replace({True: 1, False: 0}).to_csv(
         path_or_buf=csv_file_path,
@@ -418,7 +423,7 @@ def to_sql(
     logger.debug(f"Saved dataframe to temp CSV file at {csv_file_path}")
 
     # build format file
-    fmt_file_path = get_temp_file()
+    fmt_file_path = get_temp_file(work_directory)
 
     sql_item_exists = _sql_item_exists(
         sql_type=sql_type, schema=schema, table_name=table_name, creds=creds
