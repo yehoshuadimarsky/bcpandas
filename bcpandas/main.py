@@ -315,6 +315,7 @@ def to_sql(
     index: bool = True,
     if_exists: str = "fail",
     batch_size: Optional[int] = None,
+    use_tablock: bool = False,
     debug: bool = False,
     bcp_path: Optional[str] = None,
     dtype: Optional[dict] = None,
@@ -356,6 +357,9 @@ def to_sql(
 
     batch_size : int, optional
         Rows will be written in batches of this size at a time. By default, BCP sets this to 1000.
+    use_tablock : bool, default False
+        Whether to acquire a table-level lock rather than row-level locks to improve performance.
+        Setting this option allows for larger batch sizes.
     debug : bool, default False
         If True, will not delete the temporary CSV and format files, and will output their location.
     bcp_path : str, default None
@@ -458,6 +462,7 @@ def to_sql(
             sql_type=sql_type,
             schema=schema,
             batch_size=batch_size,
+            use_tablock=use_tablock,
             bcp_path=bcp_path,
         )
     finally:

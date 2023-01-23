@@ -46,6 +46,7 @@ def bcp(
     schema: str = "dbo",
     format_file_path: Optional[str] = None,
     batch_size: Optional[int] = None,
+    use_tablock: bool = False,
     col_delimiter: Optional[str] = None,
     row_terminator: Optional[str] = None,
     bcp_path: Optional[Union[str, Path]] = None,
@@ -93,6 +94,9 @@ def bcp(
 
     if batch_size:
         bcp_command += ["-b", str(batch_size)]
+
+    if use_tablock:
+        bcp_command += ["-h", "TABLOCK"]
 
     # formats
     if direc == IN:
