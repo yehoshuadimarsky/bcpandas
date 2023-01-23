@@ -221,7 +221,6 @@ For now, we are using the non-XML BCP format file type. In the future, XML forma
 * pytest
 * hypothesis
 * pytest-cov (coverage.py)
-* docker-py (for controlling Docker)
 
 ### What Is Tested?
 We take testing very seriously here. In order to rely on a library like this in production, it **MUST** be ruthlessly tested, which thankfully it is.

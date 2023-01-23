@@ -1,3 +1,54 @@
+[tool.poetry]
+authors = ["yehoshuadimarsky"]
+classifiers = [
+  "Topic :: Database",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: SQL",
+]
+description = "High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!"
+keywords = ["bcp", "mssql", "pandas"]
+license = "MIT"
+maintainers = ["Oliver Borchert <me@borchero.com>"]
+name = "bcpandas"
+readme = "README.md"
+repository = "https://github.com/yehoshuadimarsky/bcpandas"
+version = "0.0.0"
+
+[tool.poetry.plugins."pandas.sql.engine"]
+bcpandas = "bcpandas.main:to_sql"
+
+[tool.poetry.dependencies]
+pandas = ">=0.19"
+pyodbc = "4.0.34"
+python = ">=3.8.1"
+sqlalchemy = ">=1.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "22.12.0"
+flake8 = "6.0.0"
+isort = "5.11.4"
+mypy = "0.991"
+types-setuptools = "^65.7.0.3"
+
+[tool.poetry.group.test.dependencies]
+codetiming = "1.4.0"
+docker-py = "1.10.6"
+hypothesis = "6.64.0"
+ipython = "8.8.0"
+matplotlib = "3.6.3"
+pytest = "7.2.1"
+pytest-cov = "4.0.0"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
+
 # Example configuration for Black.
 
 # NOTE: you have to use single-quoted strings in TOML for regular expressions.
@@ -6,9 +57,6 @@
 # character.
 
 [tool.black]
-line-length = 100
-target-version = ['py36', 'py37', 'py38']
-include = '\.pyi?$'
 exclude = '''
 /(
     \.eggs
@@ -23,3 +71,26 @@ exclude = '''
   | dist
 )/
 '''
+include = '\.pyi?$'
+line-length = 99
+target-version = ["py38"]
+
+[tool.isort]
+combine_as_imports = true
+force_grid_wrap = 0
+force_sort_within_sections = true
+include_trailing_comma = true
+line_length = 100
+multi_line_output = 3
+
+[tool.mypy]
+ignore_missing_imports = true
+pretty = true
+python_version = 3.8
+show_error_codes = true
+
+[tool.pytest.ini_options]
+addopts = "--showlocals --tb=short --strict-markers -v --cov=bcpandas --cov-report html --hypothesis-show-statistics"
+
+[tool.coverage.run]
+omit = ["bcpandas/tests/*", "benchmarks/**"]

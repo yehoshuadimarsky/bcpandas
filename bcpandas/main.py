@@ -175,7 +175,7 @@ def _create_table(
     creds: SqlCreds,
     df: pd.DataFrame,
     if_exists: str,
-    dtype: dict = None,
+    dtype: Optional[dict] = None,
 ):
     """use pandas' own code to create the table and schema"""
 
@@ -314,14 +314,14 @@ def to_sql(
     schema: str = "dbo",
     index: bool = True,
     if_exists: str = "fail",
-    batch_size: int = None,
+    batch_size: Optional[int] = None,
     debug: bool = False,
-    bcp_path: str = None,
-    dtype: dict = None,
+    bcp_path: Optional[str] = None,
+    dtype: Optional[dict] = None,
     process_dest_table: bool = True,
     print_output: bool = True,
-    delimiter: str = None,
-    quotechar: str = None,
+    delimiter: Optional[str] = None,
+    quotechar: Optional[str] = None,
     encoding: Optional[str] = None,
 ):
     """
