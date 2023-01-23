@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Optional
 import warnings
 
 import pandas as pd
@@ -25,11 +26,11 @@ def read_sql(
     creds: SqlCreds,
     sql_type: str = "table",
     schema: str = "dbo",
-    batch_size: int = None,
+    batch_size: Optional[int] = None,
     debug: bool = False,
-    delimiter: str = None,
+    delimiter: Optional[str] = None,
     check_delim: bool = True,
-    bcp_path: str = None,
+    bcp_path: Optional[str] = None,
 ) -> pd.DataFrame:
     """
     ** It is HIGHLY recommended to not use this method, and instead use the native pandas `read_sql*` methods. See README for details. **

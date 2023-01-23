@@ -184,7 +184,7 @@ def _create_table(
     creds: SqlCreds,
     df: pd.DataFrame,
     if_exists: str,
-    dtype: dict = None,
+    dtype: Optional[dict] = None,
 ):
     """use pandas' own code to create the table and schema"""
 
@@ -323,14 +323,16 @@ def to_sql(
     schema: str = "dbo",
     index: bool = True,
     if_exists: str = "fail",
-    batch_size: int = None,
+    batch_size: Optional[int] = None,
+    use_tablock: bool = False,
     debug: bool = False,
-    bcp_path: str = None,
-    dtype: dict = None,
+    bcp_path: Optional[str] = None,
+    dtype: Optional[dict] = None,
     process_dest_table: bool = True,
     print_output: bool = True,
-    delimiter: str = None,
-    quotechar: str = None,
+    delimiter: Optional[str] = None,
+    quotechar: Optional[str] = None,
+    encoding: Optional[str] = None,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -364,6 +366,9 @@ def to_sql(
 
     batch_size : int, optional
         Rows will be written in batches of this size at a time. By default, BCP sets this to 1000.
+    use_tablock : bool, default False
+        Whether to acquire a table-level lock rather than row-level locks to improve performance.
+        Setting this option allows for larger batch sizes.
     debug : bool, default False
         If True, will not delete the temporary CSV and format files, and will output their location.
     bcp_path : str, default None
@@ -383,6 +388,8 @@ def to_sql(
         Optional delimiter to use, otherwise will use the result of `constants.get_delimiter`
     quotechar: str, default None
         Optional quotechar to use, otherwise will use the result of `constants.get_quotechar`
+    encoding: str, default None
+        Optional encoding to use for writing the BCP data-file. Defaults to `utf-8`.
 
     Notes
     -----
@@ -415,6 +422,7 @@ def to_sql(
         line_terminator=NEWLINE,
         doublequote=True,
         escapechar=None,  # not needed, as using doublequote
+        encoding=encoding,
     )
     logger.debug(f"Saved dataframe to temp CSV file at {csv_file_path}")
 
@@ -463,6 +471,7 @@ def to_sql(
             sql_type=sql_type,
             schema=schema,
             batch_size=batch_size,
+            use_tablock=use_tablock,
             bcp_path=bcp_path,
         )
     finally:
