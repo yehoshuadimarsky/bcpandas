@@ -78,6 +78,11 @@ def bcp(
     else:
         sql_item_string = f"{schema}.{sql_item}"
 
+    if creds.port is not None and creds.port != 1433:
+        server = f"{creds.server},{creds.port}"
+    else:
+        server = creds.server
+
     # construct BCP command
     bcp_command = [
         "bcp" if bcp_path is None else quote_this(str(bcp_path)),
@@ -85,7 +90,7 @@ def bcp(
         direc,
         str(flat_file),
         "-S",
-        creds.server,
+        server,
         "-d",
         creds.database,
         "-q",  # Executes the SET QUOTED_IDENTIFIERS ON statement, needed for Azure SQL DW
