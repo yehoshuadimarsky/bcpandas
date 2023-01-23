@@ -268,9 +268,9 @@ def test_batch_size_param(sql_creds, batch_size):
         )
 
 
-def test_use_tab_lock_param(sql_creds):
+def test_use_tablock_param(sql_creds):
     """
-    Test ingest is successful when use_tab_lock param used
+    Test ingest is successful when use_tablock param used.
     """
     to_sql(
         df=pd.DataFrame({"col1": [1.5]}),
@@ -279,7 +279,7 @@ def test_use_tab_lock_param(sql_creds):
         if_exists="replace",
         index=False,
         sql_type="table",
-        use_tab_lock=True,
+        use_tablock=True,
     )
     assert sql_creds.engine.execute("SELECT * FROM some_table").first()[0] == 1.5
 
