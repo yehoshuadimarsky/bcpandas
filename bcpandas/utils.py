@@ -5,7 +5,6 @@ Created on Sat Aug  3 23:07:15 2019
 """
 
 import logging
-import os
 from pathlib import Path
 import random
 import shlex
@@ -39,12 +38,12 @@ logger = logging.getLogger(__name__)
 def bcp(
     sql_item: str,
     direction: str,
-    flat_file: str,
+    flat_file: Path,
     creds,
     print_output: bool,
     sql_type: str = "table",
     schema: str = "dbo",
-    format_file_path: Optional[str] = None,
+    format_file_path: Optional[Path] = None,
     batch_size: Optional[int] = None,
     use_tablock: bool = False,
     col_delimiter: Optional[str] = None,
@@ -79,14 +78,19 @@ def bcp(
     else:
         sql_item_string = f"{schema}.{sql_item}"
 
+    if creds.port is not None and creds.port != 1433:
+        server = f"{creds.server},{creds.port}"
+    else:
+        server = creds.server
+
     # construct BCP command
     bcp_command = [
         "bcp" if bcp_path is None else quote_this(str(bcp_path)),
         sql_item_string,
         direc,
-        flat_file,
+        str(flat_file),
         "-S",
-        creds.server,
+        server,
         "-d",
         creds.database,
         "-q",  # Executes the SET QUOTED_IDENTIFIERS ON statement, needed for Azure SQL DW
@@ -104,7 +108,7 @@ def bcp(
 
     # formats
     if direc == IN:
-        bcp_command += ["-f", format_file_path]
+        bcp_command += ["-f", str(format_file_path)]
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
             "-c",  # marking as character data, not Unicode (maybe make as param?)
@@ -124,15 +128,15 @@ def bcp(
         raise BCPandasException(f"Bcp command failed with exit code {ret_code}")
 
 
-def get_temp_file() -> str:
+def get_temp_file(directory: Optional[Path] = None) -> Path:
     """
     Returns full path to a temporary file without creating it.
     """
-    tmp_dir = tempfile.gettempdir()
-    file_path = os.path.join(
-        tmp_dir, "".join(random.choices(string.ascii_letters + string.digits, k=21))
-    )
-    return file_path
+    if directory is None:
+        tmp_dir = Path(tempfile.gettempdir())
+    else:
+        tmp_dir = directory
+    return tmp_dir / "".join(random.choices(string.ascii_letters + string.digits, k=21))
 
 
 def _escape(input_string: str) -> str:
