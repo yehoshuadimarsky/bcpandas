@@ -44,11 +44,12 @@ def bcp(
     print_output: bool,
     sql_type: str = "table",
     schema: str = "dbo",
-    format_file_path: str = None,
-    batch_size: int = None,
-    col_delimiter: str = None,
-    row_terminator: str = None,
-    bcp_path: Union[str, Path] = None,
+    format_file_path: Optional[str] = None,
+    batch_size: Optional[int] = None,
+    use_tablock: bool = False,
+    col_delimiter: Optional[str] = None,
+    row_terminator: Optional[str] = None,
+    bcp_path: Optional[Union[str, Path]] = None,
 ):
     """
     See https://docs.microsoft.com/en-us/sql/tools/bcp-utility
@@ -69,7 +70,7 @@ def bcp(
     if creds.with_krb_auth:
         auth = ["-T"]
     else:
-        auth = ["-U", creds.username, "-P", creds.password]
+        auth = ["-U", quote_this(creds.username), "-P", quote_this(creds.password)]
 
     # prepare SQL item string
     if sql_type == QUERY:
@@ -98,6 +99,9 @@ def bcp(
 
     if batch_size:
         bcp_command += ["-b", str(batch_size)]
+
+    if use_tablock:
+        bcp_command += ["-h", "TABLOCK"]
 
     # formats
     if direc == IN:
