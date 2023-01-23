@@ -108,7 +108,7 @@ def bcp(
         bcp_command += ["-h", "TABLOCK"]
 
     # formats
-    if direc == IN:
+    if direc == IN and format_file_path is not None:
         bcp_command += ["-f", str(format_file_path)]
     elif direc in (OUT, QUERYOUT):
         bcp_command += [
