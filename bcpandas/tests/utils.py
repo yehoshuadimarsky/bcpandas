@@ -14,16 +14,16 @@ from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS
 #   - DataFrame: at least one row
 #   - Text: All text in ASCII 32-127
 #   - Integers: between -2**31-1 and 2**31-1
-#   - Floats: between -2**31-1 and 2**31-1, without NaN or inf
+#   - Floats: between -2**31 and 2**31, without NaN or inf
 #   - Dates
 #   - Datetimes
 #   - (some) booleans
 
-MAX_VAL = 2**31 - 1
+MAX_VAL = 2**31
 
 # Strategies
 strat_text = st.text(alphabet=st.characters(min_codepoint=32, max_codepoint=127), min_size=0)
-strat_ints = st.integers(min_value=-MAX_VAL, max_value=MAX_VAL)
+strat_ints = st.integers(min_value=-MAX_VAL + 1, max_value=MAX_VAL - 1)
 strat_floats = st.floats(
     min_value=-MAX_VAL, max_value=MAX_VAL, allow_nan=False, allow_infinity=False, width=32
 )
