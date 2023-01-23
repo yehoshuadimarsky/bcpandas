@@ -115,8 +115,9 @@ def bcp(
     if format_file_path is not None:
         print("USING THE FOLLOWING FORMAT FILE:")
         print(Path(format_file_path).read_text())
-    print("RESULTING IN THE FOLLOWING ERROR:")
-    print(Path("failure.txt").read_text())
+    if Path("failure.txt").exists():
+        print("RESULTING IN THE FOLLOWING ERROR:")
+        print(Path("failure.txt").read_text())
 
     # execute
     bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
