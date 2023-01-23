@@ -39,8 +39,6 @@ def test_bcpandas_creates_command_without_port_if_default(run_cmd):
             "me",
             "-P",
             "secret",
-            "-f",
-            None,
         ],
         print_output=True,
     )
@@ -72,8 +70,6 @@ def test_bcpandas_creates_command_with_port_if_not_default(run_cmd):
             "me",
             "-P",
             "secret",
-            "-f",
-            None,
         ],
         print_output=True,
     )
