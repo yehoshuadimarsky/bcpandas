@@ -62,7 +62,7 @@ class SqlCreds:
         database: str,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        driver_version: int = None,
+        driver_version: Optional[int] = None,
         port: int = 1433,
         odbc_kwargs: Optional[Dict[str, Union[str, int]]] = None,
     ):
