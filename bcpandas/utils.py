@@ -89,7 +89,7 @@ def bcp(
         "-d",
         creds.database,
         "-q",  # Executes the SET QUOTED_IDENTIFIERS ON statement, needed for Azure SQL DW
-        "-f",
+        "-e",
         "failure.txt",
     ] + auth
 
