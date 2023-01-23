@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   test:
-    name: Run Tests
+    name: Run Tests - Python ${{ matrix.python-version }}
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: true
