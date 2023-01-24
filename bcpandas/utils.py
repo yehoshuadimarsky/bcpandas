@@ -238,7 +238,7 @@ def run_cmd(cmd: List[str], *, print_output: bool) -> int:
         with_shell = False
     else:
         with_shell = True
-        cmd = " ".join(cmd)  # type: ignore
+        cmd = " ".join(cmd).replace("\\", "\\\\")  # type: ignore
     proc = Popen(
         cmd,
         stdout=PIPE,

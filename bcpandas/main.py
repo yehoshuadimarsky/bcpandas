@@ -9,11 +9,12 @@ import logging
 import os
 from pathlib import Path
 from textwrap import dedent
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 from urllib.parse import quote_plus
 
 import pandas as pd
 from pandas.io.sql import SQLDatabase, SQLTable
+import pyodbc
 import sqlalchemy as sa
 
 from bcpandas.constants import (
@@ -45,8 +46,9 @@ class SqlCreds:
     database : str
     username : str, optional
     password : str, optional
-    driver_version : int, default 17
-        The version of the Microsoft ODBC Driver for SQL Server to use
+    driver_version : int, optional
+        The version of the Microsoft ODBC Driver for SQL Server to use. Defaults to the latest
+        version.
     odbc_kwargs : dict of {str, str or int}, optional
         additional keyword arguments, to pass into ODBC connection string,
         such as Encrypted='yes'
@@ -62,7 +64,7 @@ class SqlCreds:
         database: str,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        driver_version: int = 17,
+        driver_version: Optional[int] = None,
         port: int = 1433,
         odbc_kwargs: Optional[Dict[str, Union[str, int]]] = None,
     ):
@@ -70,7 +72,15 @@ class SqlCreds:
         self.database = database
         self.port = port
 
-        self.driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
+        if driver_version is None:
+            all_drivers: List[str] = pyodbc.drivers()
+            driver_candidates: List[str] = [
+                d.split("Driver ")[-1].split(" ")[0] for d in all_drivers if "SQL Server" in d
+            ]
+            new_driver_version: int = max(int(v) for v in driver_candidates if v.isnumeric())
+            self.driver = f"{{ODBC Driver {new_driver_version} for SQL Server}}"
+        else:
+            self.driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
 
         # Append a comma for use in connection strings (optionally blank)
         if port:
