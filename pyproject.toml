@@ -25,7 +25,7 @@ bcpandas = "bcpandas.main:to_sql"
 
 [tool.poetry.dependencies]
 pandas = ">=0.19"
-pyodbc = "4.0.34"
+pyodbc = "*"
 python = ">=3.8.1"
 sqlalchemy = ">=1.0"
 
