@@ -52,7 +52,7 @@ jobs:
       - name: Test BCP
         run: bcp -v
       - name: Run tests
-        run: poetry run pytest -x --cov-report=xml bcpandas/tests/
+        run: poetry run python -m pytest -x --cov-report=xml tests
       - name: Upload codecov
         uses: codecov/codecov-action@v3
         with:
