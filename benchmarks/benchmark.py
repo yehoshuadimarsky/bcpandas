@@ -121,7 +121,6 @@ def _run_single_func(title, func, **kwargs):
 
 
 def run_benchmark_tosql(df: pd.DataFrame, creds: SqlCreds) -> Dict[str, float]:
-
     # using multi-insert in MS SQL is limited by hard limit of 2100 params
     # in SQL SPs. Using 2000 to be safe.
     # https://stackoverflow.com/a/56583204/6067848
