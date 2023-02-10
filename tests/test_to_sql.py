@@ -802,4 +802,4 @@ def test_bcp_login_failure(sql_creds: SqlCreds):
         to_sql(df=df, table_name="tbl_login_failure", creds=wrong_sql_creds, if_exists="replace")
         pytest.fail("to_sql is not expected to succeed")
     except BCPandasException as e:
-        assert any("login" in message for message in e.details)
+        assert any("Login failed" in message for message in e.details)
