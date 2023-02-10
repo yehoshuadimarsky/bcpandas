@@ -102,3 +102,4 @@ def test_bcp_login_failure(sql_creds: SqlCreds):
             pytest.fail("utils.bcp is not expected to succeed")
         except BCPandasException as e:
             assert any("Login failed" in message for message in e.details)
+            assert not any("not a real error" in message for message in e.details)
