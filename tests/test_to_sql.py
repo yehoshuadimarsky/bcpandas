@@ -23,13 +23,8 @@ from pandas.testing import assert_frame_equal
 import pytest
 import sqlalchemy
 
-from bcpandas import SqlCreds, to_sql
-from bcpandas.constants import (
-    _DELIMITER_OPTIONS,
-    _QUOTECHAR_OPTIONS,
-    BCPandasException,
-    BCPandasValueError,
-)
+from bcpandas import to_sql
+from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS, BCPandasValueError
 
 from .utils import (
     assume_not_all_delims_and_quotechars,
@@ -787,19 +782,3 @@ class TestToSqlOther(_BaseToSql):
     @settings(deadline=None)
     def test_df_dates(self, df, sql_creds, index):
         self._test_df_template(df, sql_creds, index)
-
-
-@pytest.mark.usefixtures("database")
-def test_bcp_login_failure(sql_creds: SqlCreds):
-    wrong_sql_creds = SqlCreds(
-        server=sql_creds.server,
-        database=sql_creds.database,
-        username=sql_creds.username,
-        password="mywrongpassword",
-    )
-    df = pd.DataFrame([{"col1": "value"}])
-    try:
-        to_sql(df=df, table_name="tbl_login_failure", creds=wrong_sql_creds, if_exists="replace")
-        pytest.fail("to_sql is not expected to succeed")
-    except BCPandasException as e:
-        assert any("Login failed" in message for message in e.details)

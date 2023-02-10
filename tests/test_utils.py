@@ -1,9 +1,13 @@
 from collections import namedtuple
+from pathlib import Path
+import tempfile
 from unittest import mock
 
+import pandas as pd
 import pytest
 
-from bcpandas import utils
+from bcpandas import SqlCreds, utils
+from bcpandas.constants import IN, BCPandasException
 
 
 @pytest.fixture(name="run_cmd")
@@ -73,3 +77,28 @@ def test_bcpandas_creates_command_with_port_if_not_default(run_cmd):
         ],
         print_output=True,
     )
+
+
+@pytest.mark.usefixtures("database")
+def test_bcp_login_failure(sql_creds: SqlCreds):
+    wrong_sql_creds = SqlCreds(
+        server=sql_creds.server,
+        database=sql_creds.database,
+        username=sql_creds.username,
+        password="mywrongpassword",
+    )
+    df = pd.DataFrame([{"col1": "value"}])
+    with tempfile.TemporaryDirectory() as tmpdir:
+        csv_path = Path(tmpdir) / "data.csv"
+        df.to_csv(csv_path)
+        try:
+            utils.bcp(
+                sql_item="tbl_login_failure",
+                direction=IN,
+                flat_file=csv_path,
+                creds=wrong_sql_creds,
+                print_output=False,
+            )
+            pytest.fail("utils.bcp is not expected to succeed")
+        except BCPandasException as e:
+            assert any("Login failed" in message for message in e.details)
