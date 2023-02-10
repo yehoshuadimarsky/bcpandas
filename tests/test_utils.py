@@ -12,7 +12,7 @@ from bcpandas.constants import IN, BCPandasException
 
 @pytest.fixture(name="run_cmd")
 def fixture_run_cmd_capture(monkeypatch):
-    run_cmd = mock.MagicMock(return_value=0)
+    run_cmd = mock.MagicMock(return_value=(0, []))
     monkeypatch.setattr(utils, "run_cmd", run_cmd)
     return run_cmd
 

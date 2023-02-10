@@ -27,7 +27,7 @@ bcpandas = "bcpandas.main:to_sql"
 pandas = ">=0.19"
 pyodbc = "*"
 python = ">=3.8.1"
-sqlalchemy = ">=1.0"
+sqlalchemy = ">=1.0,<2.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "22.12.0"
