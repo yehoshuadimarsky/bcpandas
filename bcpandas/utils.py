@@ -9,9 +9,9 @@ from pathlib import Path
 import random
 import shlex
 import string
-from subprocess import PIPE, Popen
+from subprocess import PIPE, STDOUT, Popen
 import tempfile
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -119,9 +119,12 @@ def bcp(
     # execute
     bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
     logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log}")
-    ret_code = run_cmd(bcp_command, print_output=print_output)
-    if ret_code:
-        raise BCPandasException(f"Bcp command failed with exit code {ret_code}")
+    ret_code, output = run_cmd(bcp_command, print_output=print_output)
+    if ret_code != 0:
+        raise BCPandasException(
+            f"Bcp command failed with exit code {ret_code}",
+            details=[line for line in output if line.startswith("Error =")],
+        )
 
 
 def get_temp_file(directory: Optional[Path] = None) -> Path:
@@ -215,7 +218,7 @@ def quote_this(this: str, skip: bool = False) -> str:
         return this
 
 
-def run_cmd(cmd: List[str], *, print_output: bool) -> int:
+def run_cmd(cmd: List[str], *, print_output: bool) -> Tuple[int, List[str]]:
     """
     Runs the given command.
 
@@ -232,7 +235,7 @@ def run_cmd(cmd: List[str], *, print_output: bool) -> int:
 
     Returns
     -------
-    The exit code of the command
+    The exit code of the command and all of its output.
     """
     if IS_WIN32:
         with_shell = False
@@ -242,23 +245,20 @@ def run_cmd(cmd: List[str], *, print_output: bool) -> int:
     proc = Popen(
         cmd,
         stdout=PIPE,
-        stderr=PIPE,
+        stderr=STDOUT,
         encoding="utf-8",
         errors="utf-8",
         shell=with_shell,
     )
-    # live stream STDOUT
+    stdout = []
+    # live stream STDOUT and STDERR
     while True:
         outs = proc.stdout.readline()  # type: ignore[union-attr]
         if outs:
             if print_output:
                 print(outs, end="")
             logger.info(outs)
+            stdout.append(outs)
         if proc.poll() is not None and outs == "":
             break
-    errs = proc.stderr.readlines()  # type: ignore[union-attr]
-    if errs:
-        if print_output:
-            print(errs, end="")
-        logger.error(errs)
-    return proc.returncode
+    return proc.returncode, stdout
