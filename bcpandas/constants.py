@@ -6,12 +6,15 @@ Created on Sat Aug  3 23:20:19 2019
 
 import os
 import sys
+from typing import List, Optional
 
 import pandas as pd
 
 
 class BCPandasException(Exception):
-    pass
+    def __init__(self, message: str, details: Optional[List[str]] = None):
+        super().__init__(message)
+        self.details = details or []
 
 
 class BCPandasValueError(BCPandasException):
