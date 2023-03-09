@@ -1,3 +1,0 @@
-[flake8]
-ignore = W291,E501,W293,E203,W503,W504
-exclude = build
