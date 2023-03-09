@@ -30,11 +30,10 @@ python = ">=3.8.1"
 sqlalchemy = ">=1.0,<2.0"
 
 [tool.poetry.group.dev.dependencies]
-black = "22.12.0"
-flake8 = "6.0.0"
-isort = "5.11.4"
-mypy = "0.991"
-types-setuptools = "^65.7.0.3"
+black = "*"
+ruff = "^0"
+mypy = "*"
+types-setuptools = "*"
 
 [tool.poetry.group.test.dependencies]
 codetiming = "1.4.0"
@@ -75,13 +74,27 @@ include = '\.pyi?$'
 line-length = 99
 target-version = ["py38"]
 
-[tool.isort]
-combine_as_imports = true
-force_grid_wrap = 0
-force_sort_within_sections = true
-include_trailing_comma = true
-line_length = 100
-multi_line_output = 3
+[tool.ruff]
+exclude = ["build"]
+ignore = ["E501"]
+line-length = 99
+select = [
+    "E",
+    "F",
+    "W",
+]
+target-version = "py38"
+
+[tool.ruff.isort]
+combine-as-imports = true
+force-wrap-aliases = true
+force-sort-within-sections = true
+
+
+[tool.ruff.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`.
+keep-runtime-typing = true
+
 
 [tool.mypy]
 ignore_missing_imports = true

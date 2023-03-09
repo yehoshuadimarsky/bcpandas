@@ -249,7 +249,11 @@ def cli():
     help="The Bcpandas function to benchmark",
 )
 @click.option(
-    "--num-cols", type=int, default=6, show_default=True, help="Number of columns in the DataFrames"
+    "--num-cols",
+    type=int,
+    default=6,
+    show_default=True,
+    help="Number of columns in the DataFrames",
 )
 @click.option(
     "--min-rows",
