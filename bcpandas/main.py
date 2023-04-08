@@ -190,7 +190,7 @@ def _create_table(
 ):
     """use pandas' own code to create the table and schema"""
 
-    sql_db = SQLDatabase(engine=creds.engine, schema=schema)
+    sql_db = SQLDatabase(creds.engine, schema=schema)
     table = SQLTable(
         table_name,
         sql_db,
@@ -425,7 +425,7 @@ def to_sql(
         index=False,  # already set as new col earlier if index=True
         quoting=csv.QUOTE_MINIMAL,  # pandas default
         quotechar=_quotechar,
-        line_terminator=NEWLINE,
+        lineterminator=NEWLINE,
         doublequote=True,
         escapechar=None,  # not needed, as using doublequote
         encoding=encoding,
