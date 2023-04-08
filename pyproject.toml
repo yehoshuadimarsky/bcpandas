@@ -24,15 +24,15 @@ version = "0.0.0"
 bcpandas = "bcpandas.main:to_sql"
 
 [tool.poetry.dependencies]
-pandas = ">=0.19"
+pandas = ">=1.5"
 pyodbc = "*"
 python = ">=3.8.1"
 sqlalchemy = ">=1.0,<2.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
-ruff = "^0"
 mypy = "*"
+ruff = "^0"
 types-setuptools = "*"
 
 [tool.poetry.group.test.dependencies]
@@ -79,22 +79,20 @@ exclude = ["build"]
 ignore = ["E501"]
 line-length = 99
 select = [
-    "E",
-    "F",
-    "W",
+  "E",
+  "F",
+  "W",
 ]
 target-version = "py38"
 
 [tool.ruff.isort]
 combine-as-imports = true
-force-wrap-aliases = true
 force-sort-within-sections = true
-
+force-wrap-aliases = true
 
 [tool.ruff.pyupgrade]
 # Preserve types, even if a file imports `from __future__ import annotations`.
 keep-runtime-typing = true
-
 
 [tool.mypy]
 ignore_missing_imports = true
