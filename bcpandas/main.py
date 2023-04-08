@@ -190,7 +190,7 @@ def _create_table(
 ):
     """use pandas' own code to create the table and schema"""
 
-    sql_db = SQLDatabase(con=creds.engine, schema=schema)
+    sql_db = SQLDatabase(creds.engine, schema=schema)
     table = SQLTable(
         table_name,
         sql_db,
