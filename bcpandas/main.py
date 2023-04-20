@@ -410,7 +410,7 @@ def to_sql(
 
     if index:
         indexes = range(len(df.index))
-        df.insert(loc=0, column='index', value=indexes)
+        df.insert(loc=0, column="index", value=indexes)
         df.index = indexes
 
     delim = get_delimiter(df) if delimiter is None else delimiter
