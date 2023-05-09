@@ -239,7 +239,7 @@ def test_duplicate_columns(sql_creds):
 @pytest.mark.usefixtures("database")
 def test_non_string_columns(sql_creds):
     table_name = "tosql_non_string_columns"
-    
+
     df = pd.DataFrame(
         {
             0: [1, 2, 3],
@@ -256,7 +256,7 @@ def test_non_string_columns(sql_creds):
             creds=sql_creds,
             if_exists="replace",
             index=False,
-            sql_type="table"
+            sql_type="table",
         )
 
 
