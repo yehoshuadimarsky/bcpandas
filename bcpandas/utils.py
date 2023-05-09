@@ -49,6 +49,7 @@ def bcp(
     col_delimiter: Optional[str] = None,
     row_terminator: Optional[str] = None,
     bcp_path: Optional[Union[str, Path]] = None,
+    trust_certificate: bool = False,
 ):
     """
     See https://docs.microsoft.com/en-us/sql/tools/bcp-utility
@@ -101,6 +102,9 @@ def bcp(
 
     if use_tablock:
         bcp_command += ["-h", "TABLOCK"]
+
+    if trust_certificate:
+        bcp_command += ["-u"]
 
     # formats
     if direc == IN and format_file_path is not None:

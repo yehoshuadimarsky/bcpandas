@@ -336,6 +336,7 @@ def to_sql(
     quotechar: Optional[str] = None,
     encoding: Optional[str] = None,
     work_directory: Optional[Path] = None,
+    trust_certificate: bool = False,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -396,6 +397,8 @@ def to_sql(
     work_directory: pathlib.Path, default None
         Optional directory where temporary files are written to. If not provided, defaults to the
         system-default for temporary files.
+    trust_certificate: bool, default False
+        Optional flag to trust the SQL Server certificate. This is useful when connecting to Azure SQL Server.
 
     Notes
     -----
@@ -479,6 +482,7 @@ def to_sql(
             batch_size=batch_size,
             use_tablock=use_tablock,
             bcp_path=bcp_path,
+            trust_certificate=trust_certificate,
         )
     finally:
         if not debug:
