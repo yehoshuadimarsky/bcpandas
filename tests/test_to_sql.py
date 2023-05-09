@@ -236,10 +236,28 @@ def test_duplicate_columns(sql_creds):
         )
 
 
-@pytest.mark.skip(reason="Didn't test yet")
-def test_non_string_columns():
-    # TODO
-    pass
+@pytest.mark.usefixtures("database")
+def test_non_string_columns(sql_creds):
+    table_name = "tosql_non_string_columns"
+    
+    df = pd.DataFrame(
+        {
+            0: [1, 2, 3],
+            1: [4, 5, 6],
+            2: [7, 8, 9],
+            3: [10, 11, 12],
+        }
+    )
+
+    with pytest.raises(BCPandasValueError):
+        to_sql(
+            df=df,
+            table_name=table_name,
+            creds=sql_creds,
+            if_exists="replace",
+            index=False,
+            sql_type="table"
+        )
 
 
 @pytest.mark.parametrize("batch_size", [0, 50])
