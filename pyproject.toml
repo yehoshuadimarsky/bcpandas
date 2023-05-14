@@ -30,6 +30,7 @@ python = ">=3.8.1"
 sqlalchemy = ">=1.0,<2.0"
 
 [tool.poetry.group.dev.dependencies]
+pre-commit = "*"
 black = "*"
 mypy = "*"
 ruff = "^0"
