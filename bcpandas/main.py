@@ -408,9 +408,8 @@ def to_sql(
 
     _validate_args(df=df, sql_type=sql_type, if_exists=if_exists, batch_size=batch_size)
 
-    # TODO diff way to implement? could be big performance hit with big dataframe
     if index:
-        df = df.copy(deep=True).reset_index()
+        df = df.reset_index()
 
     delim = get_delimiter(df) if delimiter is None else delimiter
     _quotechar = get_quotechar(df) if quotechar is None else quotechar
