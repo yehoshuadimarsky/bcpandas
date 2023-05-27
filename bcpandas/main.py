@@ -408,7 +408,6 @@ def to_sql(
 
     _validate_args(df=df, sql_type=sql_type, if_exists=if_exists, batch_size=batch_size)
 
-    # TODO diff way to implement? could be big performance hit with big dataframe
     if index:
         df = df.reset_index()
 
