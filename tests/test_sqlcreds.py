@@ -69,7 +69,7 @@ def test_sql_creds_for_username_password():
     assert isinstance(creds.engine, engine.Connectable)
     assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database;"
-        "UID=test_user;PWD=test_password"
+        "UID=test_user;PWD=test_password;"
     )
 
 
@@ -98,7 +98,7 @@ def test_sql_creds_for_username_password_version_not_specified():
     assert isinstance(creds.engine, engine.Connectable)
     assert (
         new_url
-        == "mssql+pyodbc:///?odbc_connect=Driver%D%BODBC+Driver++for+SQL+Server%D%BServer%Dtcp%Atest_server%C%BDatabase%Dtest_database%BUID%Dtest_user%BPWD%Dtest_password"
+        == "mssql+pyodbc:///?odbc_connect=Driver%D%BODBC+Driver++for+SQL+Server%D%BServer%Dtcp%Atest_server%C%BDatabase%Dtest_database%BUID%Dtest_user%BPWD%Dtest_password%B"
     )
 
 
@@ -141,7 +141,7 @@ def test_sql_creds_for_username_password_non_default_port():
     assert isinstance(creds.engine, engine.Connectable)
     assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,9999;Database=test_database;"
-        "UID=test_user;PWD=test_password"
+        "UID=test_user;PWD=test_password;"
     )
 
 
@@ -181,7 +181,7 @@ def test_sql_creds_for_username_password_blank_port():
     assert creds.port is None
     assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database;"
-        "UID=test_user;PWD=test_password"
+        "UID=test_user;PWD=test_password;"
     )
 
 

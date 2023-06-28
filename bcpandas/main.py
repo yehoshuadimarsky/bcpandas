@@ -95,7 +95,7 @@ class SqlCreds:
             self.username = username
             self.password = password
             self.with_krb_auth = False
-            db_url += f"UID={username};PWD={password}"
+            db_url += f"UID={username};PWD={password};"
         else:
             self.username = ""
             self.password = ""
