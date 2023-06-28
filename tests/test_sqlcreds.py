@@ -18,6 +18,7 @@ Not included (yet):
 
 # TODO creating SqlCreds from SqlAlchemy engine case insensitivity
 """
+import re
 from functools import lru_cache
 from urllib.parse import quote_plus
 
@@ -200,6 +201,26 @@ def test_sql_creds_for_windows_auth_blank_port():
     assert creds.port is None
     assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database;Trusted_Connection=yes;"
+    )
+
+
+def test_sql_creds_for_odbc_kwargs():
+    """
+    Tests that the SqlCreds object can be created
+
+    * Without Username and Password (Windows Auth)
+    * Use blank port
+    """
+    creds = SqlCreds(
+        server="test_server",
+        database="test_database",
+        username="me",
+        password="secret",
+        driver_version=99,
+        odbc_kwargs=dict(Encrypt="yes"),
+    )
+    assert str(creds.engine.url) == _quote_engine_url(
+        "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database;UID=me;PWD=secret;Encrypt=yes"
     )
 
 
@@ -387,5 +408,31 @@ def test_sqlcreds_connection_from_sqlalchemy(sql_creds):
 
     # Check the SqlCreds version works
     df = pd.read_sql(con=test_engine, sql="SELECT TOP 1 * FROM sys.objects")
+
+    assert df.shape[0] == 1
+
+
+@pytest.mark.usefixtures("database")
+def test_sql_creds_connection_for_odbc_kwargs_encrypt(sql_creds):
+    """
+    Tests that the SqlCreds object can be created
+
+    * Without Username and Password (Windows Auth)
+    * Use blank port
+    """
+    creds = SqlCreds(
+        server=sql_creds.server,
+        database=sql_creds.database,
+        username=sql_creds.username,
+        password=sql_creds.password,
+        driver_version=re.findall(r"\d+", sql_creds.driver)[0],
+        port=sql_creds.port,
+        odbc_kwargs=dict(Encrypt="no"),
+    )
+    assert str(creds.engine.url) == _quote_engine_url(
+        "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database;UID=me;PWD=secret;Encrypt=no"
+    )
+    # Check the SqlCreds version works
+    df = pd.read_sql(con=creds.engine, sql="SELECT TOP 1 * FROM sys.objects")
 
     assert df.shape[0] == 1
