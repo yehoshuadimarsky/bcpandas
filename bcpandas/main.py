@@ -71,6 +71,7 @@ class SqlCreds:
         self.server = server
         self.database = database
         self.port = port
+        self.odbc_kwargs = odbc_kwargs
 
         if driver_version is None:
             all_drivers: List[str] = pyodbc.drivers()
@@ -79,8 +80,10 @@ class SqlCreds:
             ]
             new_driver_version: int = max(int(v) for v in driver_candidates if v.isnumeric())
             self.driver = f"{{ODBC Driver {new_driver_version} for SQL Server}}"
+            self.driver_version = new_driver_version  # simplifies copy construction
         else:
             self.driver = f"{{ODBC Driver {driver_version} for SQL Server}}"
+            self.driver_version = driver_version  # simplifies copy construction
 
         # Append a comma for use in connection strings (optionally blank)
         if port:

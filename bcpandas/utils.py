@@ -70,6 +70,12 @@ def bcp(
         auth = ["-T"]
     else:
         auth = ["-U", quote_this(creds.username), "-P", quote_this(creds.password)]
+    if creds.odbc_kwargs:
+        kwargs = {k.lower(): v for k, v in creds.odbc_kwargs.items()}
+        false_values = ("n", "no", "f", "false", "off", "0")
+
+        if "encrypt" in kwargs:
+            auth += [f"-Y{'m' if kwargs['encrypt'] not in false_values else 'o'}"]
 
     # prepare SQL item string
     if sql_type == QUERY:
@@ -82,6 +88,8 @@ def bcp(
         server = f"{creds.server},{creds.port}"
     else:
         server = creds.server
+
+    kwargs = creds.odbc_kwargs
 
     # construct BCP command
     bcp_command = [

@@ -18,7 +18,6 @@ Not included (yet):
 
 # TODO creating SqlCreds from SqlAlchemy engine case insensitivity
 """
-import re
 from functools import lru_cache
 from urllib.parse import quote_plus
 
@@ -425,12 +424,14 @@ def test_sql_creds_connection_for_odbc_kwargs_encrypt(sql_creds):
         database=sql_creds.database,
         username=sql_creds.username,
         password=sql_creds.password,
-        driver_version=re.findall(r"\d+", sql_creds.driver)[0],
+        driver_version=sql_creds.driver_version,
         port=sql_creds.port,
         odbc_kwargs=dict(Encrypt="no"),
     )
     assert str(creds.engine.url) == _quote_engine_url(
-        "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database;UID=me;PWD=secret;Encrypt=no"
+        f"Driver={sql_creds.driver};Server=tcp:{sql_creds.server},{sql_creds.port};"
+        f"Database={sql_creds.database};UID={sql_creds.username};"
+        f"PWD={sql_creds.password};Encrypt=no"
     )
     # Check the SqlCreds version works
     df = pd.read_sql(con=creds.engine, sql="SELECT TOP 1 * FROM sys.objects")
