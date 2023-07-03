@@ -89,8 +89,6 @@ def bcp(
     else:
         server = creds.server
 
-    kwargs = creds.odbc_kwargs
-
     # construct BCP command
     bcp_command = [
         "bcp" if bcp_path is None else quote_this(str(bcp_path)),
