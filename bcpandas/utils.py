@@ -5,6 +5,7 @@ Created on Sat Aug  3 23:07:15 2019
 """
 
 import logging
+import sys
 from pathlib import Path
 import random
 import shlex
@@ -74,7 +75,7 @@ def bcp(
         kwargs = {k.lower(): v for k, v in creds.odbc_kwargs.items()}
         false_values = ("n", "no", "f", "false", "off", "0")
 
-        if "encrypt" in kwargs:
+        if sys.platform != "win32" and "encrypt" in kwargs:
             auth += [f"-Y{'m' if kwargs['encrypt'] not in false_values else 'o'}"]
 
     # prepare SQL item string

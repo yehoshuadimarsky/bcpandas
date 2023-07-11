@@ -1,3 +1,4 @@
+import sys
 from collections import namedtuple
 from pathlib import Path
 import tempfile
@@ -141,8 +142,14 @@ def test_bcpandas_creates_command_with_encrypt_yes(run_cmd):
             "me",
             "-P",
             "secret",
-            "-Ym",
-        ],
+        ]
+        + (
+            [
+                "-Ym",
+            ]
+            if sys.platform != "win32"
+            else []
+        ),
         print_output=True,
     )
 
