@@ -145,7 +145,7 @@ def test_bcpandas_creates_command_with_encrypt_yes(run_cmd):
         ]
         + (
             [
-                "-Ym",
+                "-Ym"
             ]
             if sys.platform != "win32"
             else []
