@@ -68,7 +68,7 @@ def test_sql_creds_for_username_password():
     assert isinstance(creds.engine, engine.Connectable)
     assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database;"
-        "UID=test_user;PWD=test_password"
+        "UID=test_user;PWD=test_password;"
     )
 
 
@@ -97,7 +97,7 @@ def test_sql_creds_for_username_password_version_not_specified():
     assert isinstance(creds.engine, engine.Connectable)
     assert (
         new_url
-        == "mssql+pyodbc:///?odbc_connect=Driver%D%BODBC+Driver++for+SQL+Server%D%BServer%Dtcp%Atest_server%C%BDatabase%Dtest_database%BUID%Dtest_user%BPWD%Dtest_password"
+        == "mssql+pyodbc:///?odbc_connect=Driver%D%BODBC+Driver++for+SQL+Server%D%BServer%Dtcp%Atest_server%C%BDatabase%Dtest_database%BUID%Dtest_user%BPWD%Dtest_password%B"
     )
 
 
@@ -140,7 +140,7 @@ def test_sql_creds_for_username_password_non_default_port():
     assert isinstance(creds.engine, engine.Connectable)
     assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,9999;Database=test_database;"
-        "UID=test_user;PWD=test_password"
+        "UID=test_user;PWD=test_password;"
     )
 
 
@@ -180,7 +180,7 @@ def test_sql_creds_for_username_password_blank_port():
     assert creds.port is None
     assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database;"
-        "UID=test_user;PWD=test_password"
+        "UID=test_user;PWD=test_password;"
     )
 
 
@@ -200,6 +200,26 @@ def test_sql_creds_for_windows_auth_blank_port():
     assert creds.port is None
     assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database;Trusted_Connection=yes;"
+    )
+
+
+def test_sql_creds_for_odbc_kwargs():
+    """
+    Tests that the SqlCreds object can be created
+
+    * Without Username and Password (Windows Auth)
+    * Use blank port
+    """
+    creds = SqlCreds(
+        server="test_server",
+        database="test_database",
+        username="me",
+        password="secret",
+        driver_version=99,
+        odbc_kwargs=dict(Encrypt="yes"),
+    )
+    assert str(creds.engine.url) == _quote_engine_url(
+        "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server,1433;Database=test_database;UID=me;PWD=secret;Encrypt=yes"
     )
 
 
@@ -387,5 +407,33 @@ def test_sqlcreds_connection_from_sqlalchemy(sql_creds):
 
     # Check the SqlCreds version works
     df = pd.read_sql(con=test_engine, sql="SELECT TOP 1 * FROM sys.objects")
+
+    assert df.shape[0] == 1
+
+
+@pytest.mark.usefixtures("database")
+def test_sql_creds_connection_for_odbc_kwargs_encrypt(sql_creds):
+    """
+    Tests that the SqlCreds object can be created
+
+    * Without Username and Password (Windows Auth)
+    * Use blank port
+    """
+    creds = SqlCreds(
+        server=sql_creds.server,
+        database=sql_creds.database,
+        username=sql_creds.username,
+        password=sql_creds.password,
+        driver_version=sql_creds.driver_version,
+        port=sql_creds.port,
+        odbc_kwargs=dict(Encrypt="no"),
+    )
+    assert str(creds.engine.url) == _quote_engine_url(
+        f"Driver={sql_creds.driver};Server=tcp:{sql_creds.server},{sql_creds.port};"
+        f"Database={sql_creds.database};UID={sql_creds.username};"
+        f"PWD={sql_creds.password};Encrypt=no"
+    )
+    # Check the SqlCreds version works
+    df = pd.read_sql(con=creds.engine, sql="SELECT TOP 1 * FROM sys.objects")
 
     assert df.shape[0] == 1
