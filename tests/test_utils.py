@@ -143,13 +143,7 @@ def test_bcpandas_creates_command_with_encrypt_yes(run_cmd):
             "-P",
             "secret",
         ]
-        + (
-            [
-                "-Ym"
-            ]
-            if sys.platform != "win32"
-            else []
-        ),
+        + (["-Ym"] if sys.platform != "win32" else []),
         print_output=True,
     )
 
