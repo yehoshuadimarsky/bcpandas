@@ -366,13 +366,15 @@ def test_sql_creds_from_sqlalchemy_windows_auth_blank_port():
     assert str(creds.engine.url) == _quote_engine_url(
         "Driver={ODBC Driver 99 for SQL Server};Server=tcp:test_server;Database=test_database"
     )
+
+
 @pytest.fixture(autouse=True)
 def test_sql_creds_for_username_password_logs_redacted(caplog):
     """
     Tests that the SqlCreds object does not info log the password in plain text
     """
     caplog.set_level(logging.INFO)
-    creds = SqlCreds(
+    SqlCreds(
         server="test_server",
         database="test_database",
         username="test_user",
@@ -382,6 +384,7 @@ def test_sql_creds_for_username_password_logs_redacted(caplog):
     info = caplog.text
     assert "test_password" not in info
     assert "%3BPWD%3D[REDACTED]%3B" in info
+
 
 @pytest.mark.usefixtures("database")
 def test_sqlcreds_connection(sql_creds):
