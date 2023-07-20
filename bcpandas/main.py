@@ -114,7 +114,7 @@ class SqlCreds:
             db_url += ";".join(f"{k}={v}" for k, v in odbc_kwargs.items())
         conn_string = f"mssql+pyodbc:///?odbc_connect={quote_plus(db_url)}"
         self.engine = sa.engine.create_engine(conn_string)
-        engine_msg = sub('PWD%3D.*%3B', 'PWD%3D[REDACTED]%3B', str(self.engine))
+        engine_msg = sub("PWD%3D.*%3B", "PWD%3D[REDACTED]%3B", str(self.engine))
 
         logger.info(f"Created engine for sqlalchemy:\t{engine_msg}")
 
