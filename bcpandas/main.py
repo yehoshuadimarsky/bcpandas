@@ -106,7 +106,7 @@ class SqlCreds:
             self.with_krb_auth = True
             db_url += "Trusted_Connection=yes;"
 
-        self_msg = sub(r'password=\'.*\'', "password=[REDACTED]", str(self))
+        self_msg = sub(r"password=\'.*\'", "password=[REDACTED]", str(self))
         logger.info(f"Created creds:\t{self_msg}")
 
         # construct the engine for sqlalchemy
@@ -114,7 +114,11 @@ class SqlCreds:
             db_url += ";".join(f"{k}={v}" for k, v in odbc_kwargs.items())
         conn_string = f"mssql+pyodbc:///?odbc_connect={quote_plus(db_url)}"
         self.engine = sa.engine.create_engine(conn_string)
+<<<<<<< HEAD
         engine_msg = sub('PWD%3D.*%3B', 'PWD%3D[REDACTED]%3B', str(self.engine))
+=======
+        engine_msg = sub(r"PWD\%3D.*\%3B", "PWD%3D[REDACTED]\%3B", str(self.engine))
+>>>>>>> a666b1c6e24aec978158a206e35768fb2ededab9
 
         logger.info(f"Created engine for sqlalchemy:\t{engine_msg}")
 

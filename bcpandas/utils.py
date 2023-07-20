@@ -126,7 +126,7 @@ def bcp(
 
     # execute
     bcp_command_log = ", ".join(bcp_command)
-    bcp_command_log_msg = sub(r'-P,\s.*,',"-P, [REDACTED],",bcp_command_log)
+    bcp_command_log_msg = sub(r"-P,\s.*,", "-P, [REDACTED],", bcp_command_log)
     logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log_msg}")
     ret_code, output = run_cmd(bcp_command, print_output=print_output)
     if ret_code != 0:
