@@ -3,7 +3,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/bcpandas.svg)](https://pypi.org/project/bcpandas/)
 [![Conda-Forge version](https://img.shields.io/conda/vn/conda-forge/bcpandas.svg)](https://anaconda.org/conda-forge/bcpandas)
 [![GitHub license](https://img.shields.io/github/license/yehoshuadimarsky/bcpandas.svg)](https://github.com/yehoshuadimarsky/bcpandas/blob/master/LICENSE)
-[![CI](https://github.com/yehoshuadimarsky/bcpandas/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/yehoshuadimarsky/bcpandas/actions/workflows/CI.yml)
+[![CI](https://github.com/yehoshuadimarsky/bcpandas/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/yehoshuadimarsky/bcpandas/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/yehoshuadimarsky/bcpandas/branch/master/graph/badge.svg)](https://codecov.io/gh/yehoshuadimarsky/bcpandas)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/bcpandas.svg)](https://pypi.python.org/pypi/bcpandas/)
