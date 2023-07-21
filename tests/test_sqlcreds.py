@@ -368,7 +368,6 @@ def test_sql_creds_from_sqlalchemy_windows_auth_blank_port():
     )
 
 
-@pytest.fixture(autouse=True)
 def test_sql_creds_for_username_password_logs_redacted(caplog):
     """
     Tests that the SqlCreds object does not info log the password in plain text
