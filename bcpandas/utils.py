@@ -13,6 +13,7 @@ import string
 from subprocess import PIPE, STDOUT, Popen
 import tempfile
 from typing import Dict, List, Optional, Tuple, Union
+from re import sub
 
 import pandas as pd
 
@@ -124,8 +125,9 @@ def bcp(
         ]
 
     # execute
-    bcp_command_log = [c if c != creds.password else "[REDACTED]" for c in bcp_command]
-    logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log}")
+    bcp_command_log = ", ".join(bcp_command)
+    bcp_command_log_msg = sub(r"-P,\s.*,", "-P, [REDACTED],", bcp_command_log)
+    logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log_msg}")
     ret_code, output = run_cmd(bcp_command, print_output=print_output)
     if ret_code != 0:
         raise BCPandasException(
