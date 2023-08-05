@@ -156,9 +156,9 @@ Azure versions.
   See the
   [pyodbc docs](https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Windows)
   for more on different driver versions.
-- Python >= 3.7
-- `pandas` >= 0.19
-- `sqlalchemy` >= 1.0
+- Python >= 3.8
+- `pandas` >= 1.5
+- `sqlalchemy` >= 1.4
 - `pyodbc` as the
   [supported DBAPI](https://docs.sqlalchemy.org/en/13/dialects/mssql.html#module-sqlalchemy.dialects.mssql.pyodbc)
 

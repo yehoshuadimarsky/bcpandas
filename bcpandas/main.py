@@ -196,18 +196,19 @@ def _create_table(
 ):
     """use pandas' own code to create the table and schema"""
 
-    sql_db = SQLDatabase(creds.engine, schema=schema)
-    table = SQLTable(
-        table_name,
-        sql_db,
-        frame=df,
-        index=False,  # already set as new col earlier if index=True
-        if_exists=if_exists,
-        index_label=None,
-        schema=schema,
-        dtype=dtype,
-    )
-    table.create()
+    with creds.engine.begin() as conn:
+        sql_db = SQLDatabase(conn, schema=schema)
+        table = SQLTable(
+            table_name,
+            sql_db,
+            frame=df,
+            index=False,  # already set as new col earlier if index=True
+            if_exists=if_exists,
+            index_label=None,
+            schema=schema,
+            dtype=dtype,
+        )
+        table.create()
 
 
 def _handle_cols_for_append(
