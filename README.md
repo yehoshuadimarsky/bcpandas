@@ -31,6 +31,10 @@ knowledge of BCP required!! (pronounced _BEE-CEE-Pandas_)
   - [Credential/Connection object](#credentialconnection-object)
   - [Recommended Usage](#recommended-usage)
 - [Known Issues](#known-issues)
+  - [Troubleshooting](#troubleshooting)
+    - [All quote characters appear in the data](#all-quote-characters-appear-in-the-data)
+    - [All delimiter characters appear in the data](#all-delimiter-characters-appear-in-the-data)
+    - [Write to database fails due to spaces in columns](#write-to-database-fails-due-to-spaces-in-columns)
 - [Background](#background)
   - [Existing Solutions](#existing-solutions)
   - [Design and Scope](#design-and-scope)
@@ -244,6 +248,54 @@ Here are some caveats and limitations of bcpandas.
   to a BCP issue. See my issue with Microsoft about this
   [here](https://github.com/MicrosoftDocs/sql-docs/issues/2689).~~ This doesn't seem to be a
   problem based on the tests.
+
+### Troubleshooting
+
+#### All quote characters appear in the data
+
+If you encounter the error:
+```
+bcpandas.constants.BCPandasValueError: Data contains all of the possible quote characters ('"', "'", '`', '~'),
+cannot use BCP to import it. Replace one of the possible quote characters in
+your data, or use another method besides bcpandas.
+```
+
+And want to still use BCPandas, you will need to pick a quote character and remove all instances of it from the dataframe.  Note
+that you are modifying your data and take care that replacing e.g., the `~` character will not have undesired consequences.
+
+In this case we are looking to remove `~`, replacing it with `-`.  Hunt for its presence in a column:
+```
+my_df['some_text_column'].str.contains('~').sum()
+```
+If that returns a value greater than zero, you can perform replacement in that column like this:
+```
+my_df['some_text_column'] = my_df['some_text_column'].str.replace('~','-')
+```
+Then use the first command to confirm that the number of occurences is now 0.
+
+#### All delimiter characters appear in the data
+
+Very similar to above, but with the error message:
+```
+bcpandas.constants.BCPandasValueError: Data contains all of the possible delimiter characters (',', '|', '\t'),
+cannot use BCP to import it. Replace one of the possible delimiter characters in
+your data, or use another method besides bcpandas.
+```
+
+Approach this as is described above for quote characters.  If you target the `|` character for replacement, note that it
+must be escaped in a regular expression with a backslash.  So the relevant commands would be (here the pipe `|` is replaced with a front slash):
+```
+my_df['some_text_column'] = my_df['some_text_column'].str.replace('\|','/')
+my_df['some_text_column'].str.contains('\|').sum()
+```
+
+#### Write to database fails due to spaces in columns
+
+If you get this error message when writing to the database:
+```
+Error = [Microsoft][ODBC Driver 17 for SQL Server]Incorrect host-column number found in BCP format-file
+```
+Try replacing any space characters in your column names, with a command like `my_df.columns = my_df.columns.str.replace(' ','_')` ([source](https://github.com/yehoshuadimarsky/bcpandas/issues/30)).
 
 ## Background
 
