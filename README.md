@@ -278,12 +278,20 @@ cannot use BCP to import it. Replace one of the possible delimiter characters in
 your data, or use another method besides bcpandas.
 ```
 
-Approach this as is described above for quote characters.  If you target the `\` character for replacement, note that it
-must be escaped in a regular expression with a backslash.  So the relevant commands would be:
+Approach this as is described above for quote characters.  If you target the `|` character for replacement, note that it
+must be escaped in a regular expression with a backslash.  So the relevant commands would be (here the pipe `|` is replaced with a front slash):
 ```
 my_df['some_text_column'] = my_df['some_text_column'].str.replace('\|','/')
 my_df['some_text_column'].str.contains('\|').sum()
 ```
+
+#### Write to database fails due to spaces in columns
+
+If you get this error message when writing to the database:
+```
+Error = [Microsoft][ODBC Driver 17 for SQL Server]Incorrect host-column number found in BCP format-file
+```
+Try replacing any space characters in your column names, with a command like `my_df.columns = my_df.columns.str.replace(' ','_')` ([source](https://github.com/yehoshuadimarsky/bcpandas/issues/30)).
 
 ## Background
 
