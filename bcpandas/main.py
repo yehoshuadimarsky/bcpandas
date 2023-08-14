@@ -152,7 +152,7 @@ class SqlCreds:
                     password=conn_dict.get("pwd", None),
                     port=conn_dict.get("port", None),
                 )
-            else:
+            elif "driver" in engine.url.query:
                 sql_creds = cls(
                     server=engine.url.host,
                     database=engine.url.database,
