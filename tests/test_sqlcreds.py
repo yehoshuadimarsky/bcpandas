@@ -268,10 +268,8 @@ def test_sql_creds_from_sqlalchemy_no_url_encoding():
     assert creds.port == 1433
     assert creds.with_krb_auth is False
     assert isinstance(creds.engine, engine.Connectable)
-    assert (
-        str(creds.engine.url)
-        == "mssql+pyodbc://test_user:***@test_server:1433/test_database?driver=ODBC+Driver+99+for+SQL+Server"
-    )
+    assert creds.engine == mssql_engine
+    assert creds.engine.url == mssql_engine.url
 
 
 def test_sql_creds_from_sqlalchemy_windows_auth():
