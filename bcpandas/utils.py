@@ -199,7 +199,9 @@ def build_format_file(
                 str(
                     col_num if not db_cols_order else db_cols_order[str(col_name)]
                 ),  # Server column order
-                str(col_name),  # Server column name, optional as long as not blank
+                str(col_name).replace(
+                    " ", r"\s"
+                ),  # Server column name, optional as long as not blank
                 sql_collation,  # Column collation
                 "\n",
             ]
