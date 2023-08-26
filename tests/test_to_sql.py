@@ -315,6 +315,29 @@ class _BaseToSql:
             setattr(self, name, request.getfixturevalue(name))
 
 
+@pytest.mark.usefixtures("database")
+def test_columns_with_spaces(sql_creds):
+    table_name = "tosql_column_scenarios_2"
+    df = pd.DataFrame(
+        {
+            "col 1": [1.5, 2.5, 3.5, 4.5],
+            "col 2": [5.5, 6.5, 7.5, 8.5],
+            "col3": [9.5, 10.5, 11.5, 12.5],
+            "col4": [13.5, 14.5, 15.5, 16.5],
+        }
+    )
+
+    with pytest.raises(BCPandasValueError):
+        to_sql(
+            df=df,
+            table_name=table_name,
+            creds=sql_creds,
+            if_exists="replace",
+            index=False,
+            sql_type="table",
+        )
+
+
 class TestToSqlColumnScenarios(_BaseToSql):
     """
     Various tests for scenarios where the dataframe columns don't map exactly to the database columns,
