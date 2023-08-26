@@ -327,15 +327,14 @@ def test_columns_with_spaces(sql_creds):
         }
     )
 
-    with pytest.raises(BCPandasValueError):
-        to_sql(
-            df=df,
-            table_name=table_name,
-            creds=sql_creds,
-            if_exists="replace",
-            index=False,
-            sql_type="table",
-        )
+    to_sql(
+        df=df,
+        table_name=table_name,
+        creds=sql_creds,
+        if_exists="replace",
+        index=False,
+        sql_type="table",
+    )
 
 
 class TestToSqlColumnScenarios(_BaseToSql):
