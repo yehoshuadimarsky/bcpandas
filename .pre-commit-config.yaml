@@ -5,11 +5,11 @@ repos:
       - id: identity
       - id: check-hooks-apply
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 'v0.0.285'
+    rev: 'v0.0.291'
     hooks:
       - id: ruff
   - repo: https://github.com/psf/black
-    rev: 23.7.0
+    rev: 23.9.1
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -38,6 +38,6 @@ repos:
       - id: check-yaml
       - id: debug-statements
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.17.0
+    rev: v8.18.0
     hooks:
       - id: gitleaks
