@@ -9,23 +9,22 @@ There are 2 categories of tests we want to do:
     - Test with different datasets that have different properties
 """
 
+import sys
 from datetime import date
 from os.path import expandvars
 from pathlib import Path
-import sys
 from typing import Optional, no_type_check
 
-from hypothesis import HealthCheck, given, settings
 import hypothesis.strategies as st
 import numpy as np
 import pandas as pd
-from pandas.testing import assert_frame_equal
 import pytest
 import sqlalchemy
+from hypothesis import HealthCheck, given, settings
+from pandas.testing import assert_frame_equal
 
 from bcpandas import to_sql
 from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS, BCPandasValueError
-
 from .utils import (
     assume_not_all_delims_and_quotechars,
     df_hypo_dates,
@@ -64,7 +63,7 @@ def _get_bcp_path() -> Optional[str]:
     try:
         if sys.platform == "win32":
             first_part = (
-                Path(expandvars("%ProgramFiles%")) / "Microsoft SQL Server" / "Client SDK" / "ODBC"
+                    Path(expandvars("%ProgramFiles%")) / "Microsoft SQL Server" / "Client SDK" / "ODBC"
             )
             version = max(x.parts[-1] for x in first_part.iterdir())
             bcp_path = first_part / version / "Tools" / "Binn"
@@ -208,6 +207,22 @@ def test_tosql_empty_df(df, sql_creds):
     res = pd.read_sql_query(sql=qry, con=sql_creds.engine)
     # assert that rows == 0, it has columns even without rows because it is an internal system table
     assert res.shape[0] == 0
+
+
+@pytest.mark.usefixtures("database")
+@pytest.mark.parametrize(
+    "df",
+    [pd.DataFrame({"a": ["A", "¢", "1"]})],
+    ids=["df_with_unicode"],
+)
+def test_tosql_with_collate(df, sql_creds):
+    tbl_name = "tbl_df_empty"
+    schema_name = "dbo"
+    execute_sql_statement(sql_creds.engine, f"DROP TABLE IF EXISTS {schema_name}.{tbl_name}")
+    to_sql(df=df, table_name=tbl_name, creds=sql_creds, schema=schema_name, if_exists="replace",
+           collation="Latin1_General_100_CI_AS_SC_UTF8")
+    res = pd.read_sql_query(sql=f"select a from {schema_name}.{tbl_name}", con=sql_creds.engine)
+    assert res["a"].to_list() == ["A", "¢", "1"]
 
 
 @pytest.mark.usefixtures("database")
