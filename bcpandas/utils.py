@@ -160,7 +160,10 @@ def _escape(input_string: str) -> str:
 
 
 def build_format_file(
-    df: pd.DataFrame, delimiter: str, db_cols_order: Optional[Dict[str, int]] = None, collation: str = sql_collation
+    df: pd.DataFrame,
+    delimiter: str,
+    db_cols_order: Optional[Dict[str, int]] = None,
+    collation: str = sql_collation,
 ) -> str:
     """
     Creates the non-xml SQL format file. Puts 4 spaces between each section.

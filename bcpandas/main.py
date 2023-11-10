@@ -25,7 +25,8 @@ from bcpandas.constants import (
     TABLE,
     BCPandasValueError,
     get_delimiter,
-    get_quotechar, sql_collation,
+    get_quotechar,
+    sql_collation,
 )
 from bcpandas.utils import bcp, build_format_file, get_temp_file
 
@@ -454,7 +455,9 @@ def to_sql(
         if_exists=if_exists,
     )
 
-    fmt_file_txt = build_format_file(df=df, delimiter=delim, db_cols_order=cols_dict, collation=collation)
+    fmt_file_txt = build_format_file(
+        df=df, delimiter=delim, db_cols_order=cols_dict, collation=collation
+    )
     with open(fmt_file_path, "w") as ff:
         ff.write(fmt_file_txt)
     logger.debug(f"Created BCP format file at {fmt_file_path}")

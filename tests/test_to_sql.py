@@ -63,7 +63,7 @@ def _get_bcp_path() -> Optional[str]:
     try:
         if sys.platform == "win32":
             first_part = (
-                    Path(expandvars("%ProgramFiles%")) / "Microsoft SQL Server" / "Client SDK" / "ODBC"
+                Path(expandvars("%ProgramFiles%")) / "Microsoft SQL Server" / "Client SDK" / "ODBC"
             )
             version = max(x.parts[-1] for x in first_part.iterdir())
             bcp_path = first_part / version / "Tools" / "Binn"
@@ -219,8 +219,14 @@ def test_tosql_with_collate(df, sql_creds):
     tbl_name = "tbl_df_empty"
     schema_name = "dbo"
     execute_sql_statement(sql_creds.engine, f"DROP TABLE IF EXISTS {schema_name}.{tbl_name}")
-    to_sql(df=df, table_name=tbl_name, creds=sql_creds, schema=schema_name, if_exists="replace",
-           collation="Latin1_General_100_CI_AS_SC_UTF8")
+    to_sql(
+        df=df,
+        table_name=tbl_name,
+        creds=sql_creds,
+        schema=schema_name,
+        if_exists="replace",
+        collation="Latin1_General_100_CI_AS_SC_UTF8",
+    )
     res = pd.read_sql_query(sql=f"select a from {schema_name}.{tbl_name}", con=sql_creds.engine)
     assert res["a"].to_list() == ["A", "¢", "1"]
 
