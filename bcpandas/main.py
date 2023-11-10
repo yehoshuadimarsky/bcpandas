@@ -342,7 +342,7 @@ def to_sql(
     quotechar: Optional[str] = None,
     encoding: Optional[str] = None,
     work_directory: Optional[Path] = None,
-    collation: Optional[str] = sql_collation,
+    collation: str = sql_collation,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
