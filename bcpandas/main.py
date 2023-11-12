@@ -137,20 +137,30 @@ class SqlCreds:
         """
         try:
             # get the odbc url part from the engine, split by ';' delimiter
-            conn_url = engine.url.query["odbc_connect"].split(";")
-            # convert into dict
-            conn_dict = {x.split("=")[0].lower(): x.split("=")[1] for x in conn_url if "=" in x}
+            if "odbc_connect" in engine.url.query:
+                conn_url = engine.url.query["odbc_connect"].split(";")
+                # convert into dict
+                conn_dict = {
+                    x.split("=")[0].lower(): x.split("=")[1] for x in conn_url if "=" in x
+                }
 
-            if "," in conn_dict["server"]:
-                conn_dict["port"] = int(conn_dict["server"].split(",")[1])
-
-            sql_creds = cls(
-                server=conn_dict["server"].replace("tcp:", "").split(",")[0],
-                database=conn_dict["database"],
-                username=conn_dict.get("uid", None),
-                password=conn_dict.get("pwd", None),
-                port=conn_dict.get("port", None),
-            )
+                if "," in conn_dict["server"]:
+                    conn_dict["port"] = int(conn_dict["server"].split(",")[1])
+                sql_creds = cls(
+                    server=conn_dict["server"].replace("tcp:", "").split(",")[0],
+                    database=conn_dict["database"],
+                    username=conn_dict.get("uid", None),
+                    password=conn_dict.get("pwd", None),
+                    port=conn_dict.get("port", None),
+                )
+            elif "driver" in engine.url.query:
+                sql_creds = cls(
+                    server=engine.url.host,
+                    database=engine.url.database,
+                    username=engine.url.username,
+                    password=engine.url.password,
+                    port=engine.url.port,
+                )
 
             # add Engine object as attribute
             sql_creds.engine = engine

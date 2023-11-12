@@ -250,6 +250,28 @@ def test_sql_creds_from_sqlalchemy():
     )
 
 
+def test_sql_creds_from_sqlalchemy_no_url_encoding():
+    """
+    Tests that the SqlCreds object can be created from a SqlAlchemy engine using a traditional url
+    (no odbc_connect parameter)
+
+    * With Username and Password
+    * Use default port (1433)
+    """
+    url = "mssql+pyodbc://test_user:test_password@test_server:1433/test_database?driver=ODBC+Driver+99+for+SQL+Server"
+    mssql_engine = create_engine(url)
+    creds = SqlCreds.from_engine(mssql_engine)
+    assert creds.server == "test_server"
+    assert creds.database == "test_database"
+    assert creds.username == "test_user"
+    assert creds.password == "test_password"
+    assert creds.port == 1433
+    assert creds.with_krb_auth is False
+    assert isinstance(creds.engine, engine.Connectable)
+    assert creds.engine == mssql_engine
+    assert creds.engine.url == mssql_engine.url
+
+
 def test_sql_creds_from_sqlalchemy_windows_auth():
     """
     Tests that the SqlCreds object can be created from a SqlAlchemy engine
