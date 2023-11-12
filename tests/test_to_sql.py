@@ -303,7 +303,8 @@ def test_use_tablock_param(sql_creds):
         sql_type="table",
         use_tablock=True,
     )
-    assert sql_creds.engine.execute("SELECT * FROM some_table").first()[0] == 1.5
+    with sql_creds.engine.connect() as conn:
+        assert conn.exec_driver_sql("SELECT * FROM some_table").first()[0] == 1.5
 
 
 def test_custom_work_directory(sql_creds):
@@ -319,7 +320,8 @@ def test_custom_work_directory(sql_creds):
         sql_type="table",
         work_directory=Path("."),
     )
-    assert sql_creds.engine.execute("SELECT * FROM some_table").first()[0] == 1.5
+    with sql_creds.engine.connect() as conn:
+        assert conn.exec_driver_sql("SELECT * FROM some_table").first()[0] == 1.5
 
 
 @pytest.mark.usefixtures("database")
