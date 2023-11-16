@@ -433,7 +433,7 @@ def to_sql(
 
     # suppress pandas FutureWarning: DataFrame.applymap has been deprecated.
     with warnings.catch_warnings():
-        warnings.simplefilter(action='ignore', category=FutureWarning)
+        warnings.simplefilter(action="ignore", category=FutureWarning)
         delim = get_delimiter(df) if delimiter is None else delimiter
         _quotechar = get_quotechar(df) if quotechar is None else quotechar
 
