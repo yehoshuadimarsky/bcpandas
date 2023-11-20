@@ -7,7 +7,6 @@ Created on Sat Aug  3 23:07:15 2019
 import csv
 import logging
 import os
-import warnings
 from pathlib import Path
 from textwrap import dedent
 from typing import Dict, List, Optional, Union
@@ -431,11 +430,8 @@ def to_sql(
     if index:
         df = df.reset_index()
 
-    # suppress pandas FutureWarning: DataFrame.applymap has been deprecated.
-    with warnings.catch_warnings():
-        warnings.simplefilter(action="ignore", category=FutureWarning)
-        delim = get_delimiter(df) if delimiter is None else delimiter
-        _quotechar = get_quotechar(df) if quotechar is None else quotechar
+    delim = get_delimiter(df) if delimiter is None else delimiter
+    _quotechar = get_quotechar(df) if quotechar is None else quotechar
 
     # save to temp path
     csv_file_path = get_temp_file(work_directory)
