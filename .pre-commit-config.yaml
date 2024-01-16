@@ -5,7 +5,7 @@ repos:
       - id: identity
       - id: check-hooks-apply
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 'v0.1.11'
+    rev: 'v0.1.13'
     hooks:
       - id: ruff
   - repo: https://github.com/psf/black
