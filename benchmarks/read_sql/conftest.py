@@ -4,7 +4,6 @@ Created on Sat Aug  3 23:36:07 2019
 @author: ydima
 """
 
-
 import time
 import urllib
 
