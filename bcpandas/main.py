@@ -26,6 +26,7 @@ from bcpandas.constants import (
     BCPandasValueError,
     get_delimiter,
     get_quotechar,
+    sql_collation,
 )
 from bcpandas.utils import bcp, build_format_file, get_temp_file
 
@@ -206,18 +207,19 @@ def _create_table(
 ):
     """use pandas' own code to create the table and schema"""
 
-    sql_db = SQLDatabase(creds.engine, schema=schema)
-    table = SQLTable(
-        table_name,
-        sql_db,
-        frame=df,
-        index=False,  # already set as new col earlier if index=True
-        if_exists=if_exists,
-        index_label=None,
-        schema=schema,
-        dtype=dtype,
-    )
-    table.create()
+    with creds.engine.begin() as conn:
+        sql_db = SQLDatabase(conn, schema=schema)
+        table = SQLTable(
+            table_name,
+            sql_db,
+            frame=df,
+            index=False,  # already set as new col earlier if index=True
+            if_exists=if_exists,
+            index_label=None,
+            schema=schema,
+            dtype=dtype,
+        )
+        table.create()
 
 
 def _handle_cols_for_append(
@@ -352,6 +354,7 @@ def to_sql(
     quotechar: Optional[str] = None,
     encoding: Optional[str] = None,
     work_directory: Optional[Path] = None,
+    collation: str = sql_collation,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -463,7 +466,9 @@ def to_sql(
         if_exists=if_exists,
     )
 
-    fmt_file_txt = build_format_file(df=df, delimiter=delim, db_cols_order=cols_dict)
+    fmt_file_txt = build_format_file(
+        df=df, delimiter=delim, db_cols_order=cols_dict, collation=collation
+    )
     with open(fmt_file_path, "w") as ff:
         ff.write(fmt_file_txt)
     logger.debug(f"Created BCP format file at {fmt_file_path}")

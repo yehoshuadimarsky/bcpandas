@@ -9,23 +9,22 @@ There are 2 categories of tests we want to do:
     - Test with different datasets that have different properties
 """
 
+import sys
 from datetime import date
 from os.path import expandvars
 from pathlib import Path
-import sys
 from typing import Optional, no_type_check
 
-from hypothesis import HealthCheck, given, settings
 import hypothesis.strategies as st
 import numpy as np
 import pandas as pd
-from pandas.testing import assert_frame_equal
 import pytest
 import sqlalchemy
+from hypothesis import HealthCheck, given, settings
+from pandas.testing import assert_frame_equal
 
 from bcpandas import to_sql
 from bcpandas.constants import _DELIMITER_OPTIONS, _QUOTECHAR_OPTIONS, BCPandasValueError
-
 from .utils import (
     assume_not_all_delims_and_quotechars,
     df_hypo_dates,
@@ -211,6 +210,28 @@ def test_tosql_empty_df(df, sql_creds):
 
 
 @pytest.mark.usefixtures("database")
+@pytest.mark.parametrize(
+    "df",
+    [pd.DataFrame({"a": ["A", "¢", "1"]})],
+    ids=["df_with_unicode"],
+)
+def test_tosql_with_collate(df, sql_creds):
+    tbl_name = "tbl_df_empty"
+    schema_name = "dbo"
+    execute_sql_statement(sql_creds.engine, f"DROP TABLE IF EXISTS {schema_name}.{tbl_name}")
+    to_sql(
+        df=df,
+        table_name=tbl_name,
+        creds=sql_creds,
+        schema=schema_name,
+        if_exists="replace",
+        collation="Latin1_General_100_CI_AS_SC_UTF8",
+    )
+    res = pd.read_sql_query(sql=f"select a from {schema_name}.{tbl_name}", con=sql_creds.engine)
+    assert res["a"].to_list() == ["A", "¢", "1"]
+
+
+@pytest.mark.usefixtures("database")
 def test_duplicate_columns(sql_creds):
     table_name = "tosql_column_scenarios_1"
     df = pd.DataFrame(
@@ -282,7 +303,8 @@ def test_use_tablock_param(sql_creds):
         sql_type="table",
         use_tablock=True,
     )
-    assert sql_creds.engine.execute("SELECT * FROM some_table").first()[0] == 1.5
+    with sql_creds.engine.connect() as conn:
+        assert conn.exec_driver_sql("SELECT * FROM some_table").first()[0] == 1.5
 
 
 def test_custom_work_directory(sql_creds):
@@ -298,7 +320,8 @@ def test_custom_work_directory(sql_creds):
         sql_type="table",
         work_directory=Path("."),
     )
-    assert sql_creds.engine.execute("SELECT * FROM some_table").first()[0] == 1.5
+    with sql_creds.engine.connect() as conn:
+        assert conn.exec_driver_sql("SELECT * FROM some_table").first()[0] == 1.5
 
 
 @pytest.mark.usefixtures("database")

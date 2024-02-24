@@ -18,6 +18,7 @@ Not included (yet):
 
 # TODO creating SqlCreds from SqlAlchemy engine case insensitivity
 """
+
 from functools import lru_cache
 from urllib.parse import quote_plus
 

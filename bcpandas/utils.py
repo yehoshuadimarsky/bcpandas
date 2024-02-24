@@ -160,7 +160,10 @@ def _escape(input_string: str) -> str:
 
 
 def build_format_file(
-    df: pd.DataFrame, delimiter: str, db_cols_order: Optional[Dict[str, int]] = None
+    df: pd.DataFrame,
+    delimiter: str,
+    db_cols_order: Optional[Dict[str, int]] = None,
+    collation: str = sql_collation,
 ) -> str:
     """
     Creates the non-xml SQL format file. Puts 4 spaces between each section.
@@ -179,6 +182,8 @@ def build_format_file(
         Maps existing columns in the database to their ordinal position, i.e. the order of the columns in the db table.
         1-indexed, so the first columns is 1, second is 2, etc.
         Only needed if the order of the columns in the dataframe doesn't match the database.
+    collation: str, optional
+        Collation to be used in the format file. The default value is 'SQL_Latin1_General_CP1_CI_AS'
 
     Returns
     -------
@@ -202,7 +207,7 @@ def build_format_file(
                 str(col_name).replace(
                     " ", r"\s"
                 ),  # Server column name, optional as long as not blank
-                sql_collation,  # Column collation
+                collation,  # Column collation
                 "\n",
             ]
         )
