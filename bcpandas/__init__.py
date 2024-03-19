@@ -19,7 +19,9 @@ try:
 except FileNotFoundError:
     warnings.warn("BCP utility not installed or not found in PATH, bcpandas will not work!")
 except PermissionError:
-    warnings.warn("BCP utility not found due to permission issues, consider supplying path to bcp or bcpandas will not work!")
+    warnings.warn(
+        "BCP utility not found due to permission issues, consider supplying path to bcp or bcpandas will not work!"
+    )
 except Exception as e:
     warnings.warn(f"An unhandled error occurred while checking for BCP utility: {e}")
 
