@@ -5,7 +5,6 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -24,9 +23,9 @@ version = "0.0.0"
 bcpandas = "bcpandas.main:to_sql"
 
 [tool.poetry.dependencies]
-pandas = ">=1.5"
+pandas = ">=2.1.0"
 pyodbc = "*"
-python = ">=3.8.1"
+python = ">=3.9"
 sqlalchemy = ">=1.4"
 
 [tool.poetry.group.dev.dependencies]
@@ -75,7 +74,7 @@ exclude = '''
 '''
 include = '\.pyi?$'
 line-length = 99
-target-version = ["py38"]
+target-version = ["py39"]
 
 [tool.ruff]
 exclude = ["build"]
@@ -86,7 +85,7 @@ select = [
   "F",
   "W",
 ]
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.isort]
 combine-as-imports = true
@@ -100,7 +99,7 @@ keep-runtime-typing = true
 [tool.mypy]
 ignore_missing_imports = true
 pretty = true
-python_version = 3.8
+python_version = 3.9
 show_error_codes = true
 
 [tool.pytest.ini_options]
