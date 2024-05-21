@@ -44,7 +44,7 @@ ipython = "8.10.0"
 matplotlib = "3.6.3"
 pytest = "7.2.1"
 pytest-cov = "4.0.0"
-requests = "2.31.0"
+requests = "2.32.0"
 urllib3 = "1.26.18"
 
 [build-system]
