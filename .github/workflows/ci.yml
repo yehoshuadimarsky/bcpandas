@@ -9,6 +9,8 @@ on:
   pull_request:
     paths:
       - bcpandas/**
+      - pyproject.toml
+      - poetry.lock
   workflow_dispatch:
     inputs:
       reason:
