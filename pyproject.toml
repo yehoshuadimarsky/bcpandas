@@ -37,15 +37,14 @@ ruff = "^0"
 types-setuptools = "*"
 
 [tool.poetry.group.test.dependencies]
-codetiming = "1.4.0"
-docker = "6.0.1"
-hypothesis = "6.64.0"
+codetiming = "*"
+docker = "*"
+hypothesis = "*"
 ipython = "8.10.0"
-matplotlib = "3.6.3"
-pytest = "7.2.1"
-pytest-cov = "4.0.0"
-requests = "2.32.0"
-urllib3 = "1.26.18"
+matplotlib = "*"
+pytest = "*"
+pytest-cov = "*"
+requests = "*"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
