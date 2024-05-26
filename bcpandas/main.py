@@ -355,6 +355,7 @@ def to_sql(
     encoding: Optional[str] = None,
     work_directory: Optional[Path] = None,
     collation: str = sql_collation,
+    identity_insert: bool = False,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -415,6 +416,8 @@ def to_sql(
     work_directory: pathlib.Path, default None
         Optional directory where temporary files are written to. If not provided, defaults to the
         system-default for temporary files.
+    identity_insert: bool, default False
+        Specifies that identity value or values in the imported data file are to be used for the identity column.
 
     Notes
     -----
@@ -499,6 +502,7 @@ def to_sql(
             batch_size=batch_size,
             use_tablock=use_tablock,
             bcp_path=bcp_path,
+            identity_insert=identity_insert,
         )
     finally:
         if not debug:
