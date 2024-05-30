@@ -356,6 +356,7 @@ def to_sql(
     work_directory: Optional[Path] = None,
     collation: str = sql_collation,
     identity_insert: bool = False,
+    err_file: Optional[Path] = None,
 ):
     """
     Writes the pandas DataFrame to a SQL table or view.
@@ -418,6 +419,10 @@ def to_sql(
         system-default for temporary files.
     identity_insert: bool, default False
         Specifies that identity value or values in the imported data file are to be used for the identity column.
+    err_file: pathlib.Path, default None
+        Specifies the full path of an error file used to store any rows that the bcp utility can't transfer from
+        the file to the database. Error messages from the bcp command go to the workstation of the user.
+        If this option isn't used, an error file isn't created.
 
     Notes
     -----
