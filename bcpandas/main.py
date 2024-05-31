@@ -508,6 +508,7 @@ def to_sql(
             use_tablock=use_tablock,
             bcp_path=bcp_path,
             identity_insert=identity_insert,
+            err_file=err_file,
         )
     finally:
         if not debug:
