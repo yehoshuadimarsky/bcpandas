@@ -98,7 +98,7 @@ keep-runtime-typing = true
 [tool.mypy]
 ignore_missing_imports = true
 pretty = true
-python_version = 3.9
+python_version = "3.9"
 show_error_codes = true
 
 [tool.pytest.ini_options]
