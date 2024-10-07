@@ -5,7 +5,7 @@ repos:
       - id: identity
       - id: check-hooks-apply
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 'v0.6.3'
+    rev: 'v0.6.8'
     hooks:
       - id: ruff
   - repo: https://github.com/psf/black
@@ -38,6 +38,6 @@ repos:
       - id: check-yaml
       - id: debug-statements
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.18.4
+    rev: v8.19.3
     hooks:
       - id: gitleaks
