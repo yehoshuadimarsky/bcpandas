@@ -5,7 +5,7 @@ repos:
       - id: identity
       - id: check-hooks-apply
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 'v0.6.8'
+    rev: 'v0.6.9'
     hooks:
       - id: ruff
   - repo: https://github.com/psf/black
@@ -30,7 +30,7 @@ repos:
         args: ["--strict"]
         types: [yaml]
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
@@ -38,6 +38,6 @@ repos:
       - id: check-yaml
       - id: debug-statements
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.19.3
+    rev: v8.20.1
     hooks:
       - id: gitleaks
