@@ -29,6 +29,7 @@ pandas = ">=1.5"
 pyodbc = "*"
 python = ">=3.9"
 sqlalchemy = ">=1.4"
+numpy = "<2"  # indirect dependency, but need to pin until make code compat changes
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "*"
