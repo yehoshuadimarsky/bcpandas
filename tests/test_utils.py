@@ -19,7 +19,7 @@ def fixture_run_cmd_capture(monkeypatch):
 
 
 def test_bcpandas_creates_command_without_port_if_default(run_cmd):
-    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs")
+    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs entra_id_token")
     creds = Creds(
         server="localhost",
         port=1433,
@@ -52,7 +52,7 @@ def test_bcpandas_creates_command_without_port_if_default(run_cmd):
 
 
 def test_bcpandas_creates_command_with_port_if_not_default(run_cmd):
-    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs")
+    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs entra_id_token")
     creds = Creds(
         server="localhost",
         port=1234,
@@ -85,7 +85,7 @@ def test_bcpandas_creates_command_with_port_if_not_default(run_cmd):
 
 
 def test_bcpandas_creates_command_with_encrypt_no(run_cmd):
-    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs")
+    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs entra_id_token")
     creds = Creds(
         server="localhost",
         port=1433,
@@ -119,7 +119,7 @@ def test_bcpandas_creates_command_with_encrypt_no(run_cmd):
 
 
 def test_bcpandas_creates_command_with_encrypt_yes(run_cmd):
-    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs")
+    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs entra_id_token")
     creds = Creds(
         server="localhost",
         port=1433,
@@ -153,7 +153,7 @@ def test_bcpandas_creates_command_with_encrypt_yes(run_cmd):
 
 
 def test_bcpandas_creates_command_with_entra_id_token(run_cmd):
-    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs")
+    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs entra_id_token")
     creds = Creds(
         server="localhost",
         port=1433,
