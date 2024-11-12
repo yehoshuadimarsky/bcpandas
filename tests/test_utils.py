@@ -176,7 +176,6 @@ def test_bcpandas_creates_command_with_entra_id_token(run_cmd):
             "-d",
             "DB",
             "-q",
-            "",
             "-G",
             "-P",
             "secret_token",
