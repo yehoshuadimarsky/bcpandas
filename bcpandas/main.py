@@ -39,8 +39,9 @@ class SqlCreds:
     engine that uses `pyodbc` as the DBAPI, and store it in the `self.engine` attribute.
 
     If `username` and `password` are not provided, `with_krb_auth` will be `True`.
+    If `entra_id_token` are provided uses Microsoft Entra ID Authentication.
 
-    Only supports SQL based logins, not Active Directory or Azure AD.
+    Only supports SQL based logins and Microsoft Entra ID, not Active Directory.
 
     Parameters
     ----------
@@ -54,6 +55,8 @@ class SqlCreds:
     odbc_kwargs : dict of {str, str or int}, optional
         additional keyword arguments, to pass into ODBC connection string,
         such as Encrypted='yes'
+    entra_id_token: str, optional
+        Microsoft Entra ID Authentication token
 
     Returns
     -------
@@ -69,6 +72,7 @@ class SqlCreds:
         driver_version: Optional[int] = None,
         port: int = 1433,
         odbc_kwargs: Optional[Dict[str, Union[str, int]]] = None,
+        entra_id_token: Optional[str] = None,
     ):
         self.server = server
         self.database = database
@@ -106,6 +110,8 @@ class SqlCreds:
             self.password = ""
             self.with_krb_auth = True
             db_url += "Trusted_Connection=yes;"
+
+        self.entra_id_token = entra_id_token
 
         self_msg = sub(r"password=\'.*\'", "password=[REDACTED]", str(self))
         logger.info(f"Created creds:\t{self_msg}")
