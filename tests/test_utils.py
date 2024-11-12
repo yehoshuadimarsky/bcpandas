@@ -177,8 +177,7 @@ def test_bcpandas_creates_command_with_entra_id_token(run_cmd):
             "DB",
             "-q",
             "",
-            "-G"
-            "-P",
+            "-G" "-P",
             "secret_token",
         ]
         + (["-Ym"] if sys.platform != "win32" else []),
