@@ -201,9 +201,7 @@ def test_tosql_empty_df(df, sql_creds):
         FROM INFORMATION_SCHEMA.TABLES
         WHERE TABLE_SCHEMA = '{_schema}'
         AND TABLE_NAME = '{_tbl}'
-        """.format(
-        _tbl=tbl_name, _schema=schema_name
-    )
+        """.format(_tbl=tbl_name, _schema=schema_name)
     res = pd.read_sql_query(sql=qry, con=sql_creds.engine)
     # assert that rows == 0, it has columns even without rows because it is an internal system table
     assert res.shape[0] == 0

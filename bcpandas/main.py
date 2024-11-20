@@ -195,9 +195,7 @@ def _sql_item_exists(sql_type: str, schema: str, table_name: str, creds: SqlCred
         FROM INFORMATION_SCHEMA.{_typ}S
         WHERE TABLE_SCHEMA = '{_schema}'
         AND TABLE_NAME = '{_tbl}'
-        """.format(
-            _typ=sql_type.upper(), _schema=schema, _tbl=table_name
-        )
+        """.format(_typ=sql_type.upper(), _schema=schema, _tbl=table_name)
     )
     res = pd.read_sql_query(sql=_qry, con=creds.engine)
     return res.shape[0] > 0
@@ -247,9 +245,7 @@ def _handle_cols_for_append(
                 FROM INFORMATION_SCHEMA.COLUMNS
                 WHERE TABLE_SCHEMA = '{_schema}'
                 AND TABLE_NAME = '{_tbl}'
-            """.format(
-                        _schema=schema, _tbl=table_name
-                    )
+            """.format(_schema=schema, _tbl=table_name)
                 ),
                 creds.engine,
             ).values
