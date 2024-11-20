@@ -1,5 +1,7 @@
-[tool.poetry]
-authors = ["yehoshuadimarsky"]
+[project]
+authors = [
+  { name = "Josh Dimarsky", email = "24758845+yehoshuadimarsky@users.noreply.github.com" }
+]
 classifiers = [
   "Topic :: Database",
   "Intended Audience :: Developers",
@@ -13,51 +15,59 @@ classifiers = [
 ]
 description = "High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!"
 keywords = ["bcp", "mssql", "pandas"]
-license = "MIT"
-maintainers = ["Oliver Borchert <me@borchero.com>"]
+license = {file = "LICENSE"}
+maintainers = [
+  { name = "Oliver Borchert", email = "me@borchero.com"}
+]
 name = "bcpandas"
 readme = "README.md"
-repository = "https://github.com/yehoshuadimarsky/bcpandas"
-version = "0.0.0"
+urls = { repository = "https://github.com/yehoshuadimarsky/bcpandas" }
+dynamic = ["version"]
+dependencies = [
+  "pandas >=1.5",
+  "pyodbc >=5",
+  "sqlalchemy >=1.4",
+  "setuptools"
+]
+requires-python = ">=3.8.1"
 
-[tool.poetry.plugins."pandas.sql.engine"]
+[dependency-groups]
+dev = [
+  "pre-commit",
+  "black",
+  "mypy",
+  "ruff",
+  "types-setuptools",
+]
+test = [
+  "codetiming",
+  "docker",
+  "hypothesis" ,
+  "ipython >=8.10.0",
+  "matplotlib" ,
+  "pytest" ,
+  "pytest-cov" ,
+  "requests",
+]
+
+[tool.uv]
+default-groups = ["dev", "test"]
+
+[project.entry-points."pandas.sql.engine"]
 bcpandas = "bcpandas.main:to_sql"
 
-[tool.poetry.dependencies]
-pandas = ">=1.5"
-pyodbc = "*"
-python = ">=3.8.1"
-sqlalchemy = ">=1.4"
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "*"
-black = "*"
-mypy = "*"
-ruff = "^0"
-types-setuptools = "*"
-
-[tool.poetry.group.test.dependencies]
-codetiming = "*"
-docker = "*"
-hypothesis = "*"
-ipython = "8.10.0"
-matplotlib = "*"
-pytest = "*"
-pytest-cov = "*"
-requests = "*"
-
 [build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core"]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
 
 [tool.ruff]
 exclude = ["build"]
-ignore = ["E501"]
 line-length = 99
 
 target-version = "py38"
 
 [tool.ruff.lint]
+ignore = ["E501"]
 select = [
   "E",
   "F",
@@ -69,7 +79,7 @@ combine-as-imports = true
 force-sort-within-sections = true
 force-wrap-aliases = true
 
-[tool.ruff.pyupgrade]
+[tool.ruff.lint.pyupgrade]
 # Preserve types, even if a file imports `from __future__ import annotations`.
 keep-runtime-typing = true
 

@@ -10,16 +10,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
         with:
-          python-version: "3.11"
-      - name: Install poetry
-        uses: snok/install-poetry@v1
+          version: "0.5.x"
+          enable-cache: true
+
       - name: Build and publish
         run: |
-          poetry version ${{ github.event.release.tag_name }}
-          poetry build
-          poetry publish \
+          poetry version ${{ github.event.release.tag_name }}  # TODO change for uv!
+          uv build
+          uv publish \
             --username "${{ secrets.PYPI_USERNAME }}" \
             --password "${{ secrets.PYPI_PASSWORD }}"
