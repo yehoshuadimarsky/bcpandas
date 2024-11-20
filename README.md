@@ -17,6 +17,7 @@ knowledge of BCP required!! (pronounced _BEE-CEE-Pandas_)
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+
 - [Quickstart](#quickstart)
 - [IMPORTANT - Read vs. Write](#important---read-vs-write)
 - [Benchmarks](#benchmarks)

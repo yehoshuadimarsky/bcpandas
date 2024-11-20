@@ -8,10 +8,8 @@ repos:
     rev: 'v0.7.3'
     hooks:
       - id: ruff
-  - repo: https://github.com/psf/black
-    rev: 24.10.0
-    hooks:
-      - id: black
+        args: ["--fix"]
+      - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.13.0
     hooks:
