@@ -20,7 +20,7 @@ jobs:
       - name: Verify version matches in code and release
         run: |
           VER=$(uv run python -c 'import bcpandas; print(bcpandas.__version__)')
-          if [[ $VER != $RELEASE_VAR ]] then
+          if [[ $VER != $RELEASE_VAR ]]; then
             echo "version does not match released version, needs a bump!" && exit 1
           fi
         env:
