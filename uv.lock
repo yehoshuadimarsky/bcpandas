@@ -3,7 +3,8 @@ requires-python = ">=3.9, <=3.14"
 resolution-markers = [
     "python_full_version < '3.11'",
     "python_full_version == '3.11.*'",
-    "python_full_version >= '3.12'",
+    "python_full_version == '3.12.*'",
+    "python_full_version >= '3.13'",
 ]
 
 [[package]]
@@ -61,7 +62,8 @@ requires-dist = [
     { name = "pandas", marker = "python_full_version < '3.9'", specifier = ">=1.5.3,<2.2" },
     { name = "pandas", marker = "python_full_version >= '3.9' and python_full_version < '3.12'", specifier = ">=2.1.2,<2.2" },
     { name = "pandas", marker = "python_full_version >= '3.12'", specifier = ">=2.2" },
-    { name = "pyodbc", specifier = ">=5" },
+    { name = "pyodbc", marker = "python_full_version < '3.13'", specifier = ">=5" },
+    { name = "pyodbc", marker = "python_full_version >= '3.13'", specifier = ">=5.2" },
     { name = "sqlalchemy", specifier = ">=1.4" },
 ]
 
@@ -77,7 +79,7 @@ test = [
     { name = "docker", specifier = ">=6" },
     { name = "hypothesis", specifier = ">=6" },
     { name = "ipython", specifier = ">=8.10.0" },
-    { name = "matplotlib", specifier = ">=3.7" },
+    { name = "matplotlib", specifier = ">=3.9" },
     { name = "pytest", specifier = ">=7" },
     { name = "pytest-cov", specifier = ">=4" },
     { name = "requests", specifier = ">=2" },
@@ -944,7 +946,8 @@ name = "pandas"
 version = "2.2.3"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.12'",
+    "python_full_version == '3.12.*'",
+    "python_full_version >= '3.13'",
 ]
 dependencies = [
     { name = "numpy", marker = "python_full_version >= '3.12'" },
