@@ -25,9 +25,8 @@ urls = { repository = "https://github.com/yehoshuadimarsky/bcpandas" }
 dynamic = ["version"]
 dependencies = [
   # per https://github.com/apache/airflow/pull/40272 and https://github.com/numpy/numpy/issues/26710
-  "pandas >=2.2; python_version >=\"3.12\"",
-  "pandas >=2.1.2, <2.2; python_version >=\"3.9\" and python_version <=\"3.11\"",
-  "pandas >=1.5.3, <2.2; python_version <\"3.9\"",
+  "pandas[sql-other] >=2.2, <3; python_version >=\"3.12\"",
+  "pandas[sql-other] >=2, <2.2; python_version >=\"3.9\" and python_version <=\"3.11\"",
   "pyodbc >=5; python_version <=\"3.12\"",
   "pyodbc >=5.2; python_version >=\"3.13\"",
   "sqlalchemy >=1.4",
@@ -49,7 +48,7 @@ test = [
   "docker >=6",
   "hypothesis >=6.110",
   "ipython >=8.10.0",
-  "matplotlib >=3.9",
+  "matplotlib >=3.9.2",
   "pytest >=7",
   "pytest-cov >=4",
   "requests >=2",
