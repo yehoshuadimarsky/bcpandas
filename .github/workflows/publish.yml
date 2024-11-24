@@ -20,8 +20,9 @@ jobs:
       - name: Verify version matches in code and release
         run: |
           VER=$(uv run python -c 'import bcpandas; print(bcpandas.__version__)')
-          if [[ $VER != $RELEASE_VAR ]]; then
-            echo "version $VER does not match released version $RELEASE_VAR, needs a bump!" && exit 1
+          CLEAN_RELEASE_VAR=${RELEASE_VAR#v}
+          if [[ $VER != $CLEAN_RELEASE_VAR ]]; then
+            echo "version $VER does not match released version $CLEAN_RELEASE_VAR, needs a bump!" && exit 1
           fi
         env:
           RELEASE_VAR: ${{ github.event.release.tag_name }}
