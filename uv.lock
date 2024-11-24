@@ -47,7 +47,7 @@ wheels = [
 
 [[package]]
 name = "bcpandas"
-version = "0.0.0"
+version = "2.6.7"
 source = { editable = "." }
 dependencies = [
     { name = "pandas" },
