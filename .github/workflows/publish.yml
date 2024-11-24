@@ -10,16 +10,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
         with:
-          python-version: "3.11"
-      - name: Install poetry
-        uses: snok/install-poetry@v1
+          version: "0.5.x"
+          enable-cache: true
+
+      - name: Verify version matches in code and release
+        run: |
+          VER=$(uv run python -c 'import bcpandas; print(bcpandas.__version__)')
+          if [[ $VER != ${{ github.event.release.tag_name }} ]] then;
+            echo "version does not match released version, needs a bump!" && exit 1;
+          fi
+
       - name: Build and publish
         run: |
-          poetry version ${{ github.event.release.tag_name }}
-          poetry build
-          poetry publish \
+          uv build
+          uv publish \
             --username "${{ secrets.PYPI_USERNAME }}" \
             --password "${{ secrets.PYPI_PASSWORD }}"
