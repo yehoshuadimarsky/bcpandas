@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   test:
-    name: Run Tests - Python ${{ matrix.python-version }}
+    name: Run Tests - Python ${{ matrix.python-version }} - Strat ${{ matrix.uv-resolution-strategy }}
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: true
