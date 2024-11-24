@@ -35,21 +35,20 @@ version = {attr = "bcpandas.__version__.version"}
 
 [dependency-groups]
 dev = [
-  "pre-commit",
-  "black",
-  "mypy",
+  "pre-commit >=3",
+  "mypy >=1",
   "ruff",
   "types-setuptools",
 ]
 test = [
-  "codetiming",
-  "docker",
-  "hypothesis" ,
+  "codetiming >=1",
+  "docker >=6",
+  "hypothesis >=6",
   "ipython >=8.10.0",
-  "matplotlib" ,
-  "pytest" ,
-  "pytest-cov" ,
-  "requests",
+  "matplotlib >=3.7",
+  "pytest >=7",
+  "pytest-cov >=4",
+  "requests >=2",
 ]
 
 [tool.uv]
