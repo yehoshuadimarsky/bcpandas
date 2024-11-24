@@ -24,7 +24,10 @@ readme = "README.md"
 urls = { repository = "https://github.com/yehoshuadimarsky/bcpandas" }
 dynamic = ["version"]
 dependencies = [
-  "pandas >=1.5",
+  # per https://github.com/apache/airflow/pull/40272 and https://github.com/numpy/numpy/issues/26710
+  "pandas >=2.2; python_version >=\"3.12\"",
+  "pandas >=2.1.2, <2.2; python_version >=\"3.9\" and python_version <=\"3.11\"",
+  "pandas >=1.5.3, <2.2; python_version <\"3.9\"",
   "pyodbc >=5",
   "sqlalchemy >=1.4",
 ]
@@ -37,7 +40,7 @@ version = {attr = "bcpandas.__version__.version"}
 dev = [
   "pre-commit >=3",
   "mypy >=1",
-  "ruff",
+  "ruff >=0.6",
   "types-setuptools",
 ]
 test = [
