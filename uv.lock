@@ -1,5 +1,5 @@
 version = 1
-requires-python = ">=3.9, <=3.14"
+requires-python = ">=3.9, <=3.13"
 resolution-markers = [
     "python_full_version < '3.11'",
     "python_full_version == '3.11.*'",
@@ -77,7 +77,7 @@ dev = [
 test = [
     { name = "codetiming", specifier = ">=1" },
     { name = "docker", specifier = ">=6" },
-    { name = "hypothesis", specifier = ">=6" },
+    { name = "hypothesis", specifier = ">=6.110" },
     { name = "ipython", specifier = ">=8.10.0" },
     { name = "matplotlib", specifier = ">=3.9" },
     { name = "pytest", specifier = ">=7" },
