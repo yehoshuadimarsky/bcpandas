@@ -4,7 +4,7 @@ import warnings
 from bcpandas.main import SqlCreds, to_sql
 from bcpandas.utils import bcp
 
-__version__ = "2.6.7"
+__version__ = "2.6.6"
 
 # BCP check
 try:
