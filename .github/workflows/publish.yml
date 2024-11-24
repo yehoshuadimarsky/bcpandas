@@ -17,9 +17,15 @@ jobs:
           version: "0.5.x"
           enable-cache: true
 
+      - name: Verify version matches in code and release
+        run: |
+          VER=$(uv run python -c 'import bcpandas; print(bcpandas.__version__)')
+          if [[ $VER != ${{ github.event.release.tag_name }} ]] then;
+            echo "version does not match released version, needs a bump!" && exit 1;
+          fi
+
       - name: Build and publish
         run: |
-          poetry version ${{ github.event.release.tag_name }}  # TODO change for uv!
           uv build
           uv publish \
             --username "${{ secrets.PYPI_USERNAME }}" \

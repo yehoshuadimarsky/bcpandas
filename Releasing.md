@@ -9,6 +9,7 @@
 # Instructions for creating a new release
 
 * Update Readme with any new information, as needed
+* Bump the version in `__init__.py`
 * Commit to git with the message `v{num}`, like `v1.4.0`, push
 * Make a new release in Github
     * Add release notes based on the changes (best to use "Generate Release Notes" in the UI)
