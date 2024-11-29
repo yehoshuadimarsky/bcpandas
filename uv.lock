@@ -128,7 +128,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "pandas", extras = ["sql-other"], specifier = ">=1.5,<3" },
+    { name = "pandas", extras = ["sql-other"], specifier = ">=2.1.2,<3" },
     { name = "pyodbc", marker = "python_full_version < '3.13'", specifier = ">=5" },
     { name = "pyodbc", marker = "python_full_version >= '3.13'", specifier = ">=5.2" },
     { name = "sqlalchemy", specifier = ">=1.4" },

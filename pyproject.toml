@@ -24,7 +24,7 @@ readme = "README.md"
 urls = { repository = "https://github.com/yehoshuadimarsky/bcpandas" }
 dynamic = ["version"]
 dependencies = [
-  "pandas[sql-other] >=1.5, <3",
+  "pandas[sql-other] >=2.1.2, <3",
   "pyodbc >=5; python_version <='3.12'",
   "pyodbc >=5.2; python_version >='3.13'",
   "sqlalchemy >=1.4",
