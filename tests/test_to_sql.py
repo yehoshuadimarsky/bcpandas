@@ -126,7 +126,7 @@ def test_tosql_full_bcp_path(bcp_path, sql_creds):
             pd.DataFrame(
                 {
                     "col1": ["a", "b", "c", "d"],
-                    "col2": [1, np.NaN, 3, np.NaN],
+                    "col2": [1, np.nan, 3, np.nan],
                     "col3": [1.5, 2.5, 3.5, 4.5],
                 }
             ),
@@ -137,7 +137,7 @@ def test_tosql_full_bcp_path(bcp_path, sql_creds):
                 {
                     "col1": ["a", "b", "c", "d"],
                     "col2": [1, 2, 3, 4],
-                    "col3": [1.5, np.NaN, 3.5, np.NaN],
+                    "col3": [1.5, np.nan, 3.5, np.nan],
                 }
             ),
             id="nan_last_col",
@@ -740,7 +740,7 @@ class TestToSqlDtypeScenarios(_BaseToSql):
             {
                 "COLUMN_NAME": ["col1", "col2", "col3", "col4", "col5"],
                 "DATA_TYPE": ["bigint", "float", "varchar", "date", "bit"],
-                "CHARACTER_MAXIMUM_LENGTH": [np.NaN, np.NaN, -1.0, np.NaN, np.NaN],
+                "CHARACTER_MAXIMUM_LENGTH": [np.nan, np.nan, -1.0, np.nan, np.nan],
             }
         )
         assert_frame_equal(expected, actual)
@@ -778,7 +778,7 @@ class TestToSqlDtypeScenarios(_BaseToSql):
             {
                 "COLUMN_NAME": ["col1", "col2", "col3", "col4", "col5"],
                 "DATA_TYPE": ["int", "float", "nvarchar", "date", "bit"],
-                "CHARACTER_MAXIMUM_LENGTH": [np.NaN, np.NaN, 10.0, np.NaN, np.NaN],
+                "CHARACTER_MAXIMUM_LENGTH": [np.nan, np.nan, 10.0, np.nan, np.nan],
             }
         )
         assert_frame_equal(expected, actual)
