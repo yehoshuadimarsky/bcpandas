@@ -7,10 +7,11 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: SQL",
 ]
 description = "High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!"
@@ -24,9 +25,12 @@ readme = "README.md"
 urls = { repository = "https://github.com/yehoshuadimarsky/bcpandas" }
 dynamic = ["version"]
 dependencies = [
-  "pandas[sql-other] >=2.1.2, <3",
-  "pyodbc >=5; python_version <='3.12'",
+  # per https://github.com/apache/airflow/pull/40272 and https://github.com/numpy/numpy/issues/26710
+  "pandas[sql-other] >=2.2; python_version >='3.12'",
+  "pandas[sql-other] >=2.1.2, <2.2; python_version >='3.9' and python_version <='3.11'",
+  "pandas >=1.5.3, <2.2; python_version <'3.9'",
   "pyodbc >=5.2; python_version >='3.13'",
+  "pyodbc >=5; python_version <='3.12'",
   "sqlalchemy >=1.4",
 ]
 requires-python = ">=3.9,<=3.13"
@@ -88,7 +92,7 @@ keep-runtime-typing = true
 [tool.mypy]
 ignore_missing_imports = true
 pretty = true
-python_version = "3.8"
+python_version = "3.9"
 show_error_codes = true
 
 [tool.pytest.ini_options]
