@@ -29,7 +29,7 @@ jobs:
       fail-fast: true
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        uv-resolution-strategy: ["highest", "lowest-direct"]
+        uv-resolution-strategy: ["lowest-direct", "highest"]
     steps:
       - name: Checkout
         uses: actions/checkout@v3

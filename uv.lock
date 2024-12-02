@@ -126,12 +126,12 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "pandas", marker = "python_full_version < '3.9'", specifier = ">=1.5.3,<2.2" },
     { name = "pandas", extras = ["sql-other"], marker = "python_full_version >= '3.9' and python_full_version < '3.12'", specifier = ">=2.1.2,<2.2" },
     { name = "pandas", extras = ["sql-other"], marker = "python_full_version >= '3.12'", specifier = ">=2.2" },
     { name = "pyodbc", marker = "python_full_version < '3.13'", specifier = ">=5" },
     { name = "pyodbc", marker = "python_full_version >= '3.13'", specifier = ">=5.2" },
-    { name = "sqlalchemy", specifier = ">=1.4" },
+    { name = "sqlalchemy", marker = "python_full_version < '3.13'", specifier = ">=1.4" },
+    { name = "sqlalchemy", marker = "python_full_version >= '3.13'", specifier = ">=2.0.31" },
 ]
 
 [package.metadata.requires-dev]
@@ -147,7 +147,8 @@ test = [
     { name = "hypothesis", specifier = ">=6.110" },
     { name = "ipython", specifier = ">=8.10.0" },
     { name = "matplotlib", specifier = ">=3.9.2" },
-    { name = "pytest", specifier = ">=7" },
+    { name = "pytest", marker = "python_full_version >= '3.9' and python_full_version < '3.13'", specifier = ">=7" },
+    { name = "pytest", marker = "python_full_version >= '3.13'", specifier = ">=8" },
     { name = "pytest-cov", specifier = ">=4" },
     { name = "requests", specifier = ">=2" },
 ]
