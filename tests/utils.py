@@ -53,14 +53,14 @@ df_hypo_dates = hpd.data_frames(columns=hpd.columns(5, elements=strat_dates), in
 
 def not_has_all_delims(df: pd.DataFrame) -> bool:
     return not all(
-        df.applymap(lambda x: delim in x if isinstance(x, str) else False).any().any()
+        df.map(lambda x: delim in x if isinstance(x, str) else False).any().any()
         for delim in _DELIMITER_OPTIONS
     )
 
 
 def not_has_all_quotechars(df: pd.DataFrame) -> bool:
     return not all(
-        df.applymap(lambda x: qc in x if isinstance(x, str) else False).any().any()
+        df.map(lambda x: qc in x if isinstance(x, str) else False).any().any()
         for qc in _QUOTECHAR_OPTIONS
     )
 
