@@ -10,11 +10,13 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: SQL",
 ]
 description = "High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!"
 keywords = ["bcp", "mssql", "pandas"]
-license = {file = "LICENSE"}
+license = {text = "MIT License"}
 maintainers = [
   { name = "Oliver Borchert", email = "me@borchero.com"}
 ]
@@ -24,12 +26,14 @@ urls = { repository = "https://github.com/yehoshuadimarsky/bcpandas" }
 dynamic = ["version"]
 dependencies = [
   # per https://github.com/apache/airflow/pull/40272 and https://github.com/numpy/numpy/issues/26710
-  "pandas >=2.2; python_version >=\"3.12\"",
-  "pandas >=2.1.2, <2.2; python_version >=\"3.9\" and python_version <=\"3.11\"",
-  "pyodbc >=5",
-  "sqlalchemy >=1.4",
+  "pandas[sql-other] >=2.2; python_version >='3.12'",
+  "pandas[sql-other] >=2.1.2, <2.2; python_version >='3.9' and python_version <='3.11'",
+  "pyodbc >=5.2; python_version >='3.13'",
+  "pyodbc >=5; python_version <='3.12'",
+  "sqlalchemy >=1.4; python_version <='3.12'",
+  "sqlalchemy >=2.0.31; python_version >='3.13'",
 ]
-requires-python = ">=3.9,<=3.11"
+requires-python = ">=3.9,<=3.13"
 
 [tool.setuptools.dynamic]
 version = {attr = "bcpandas.__version__"}
@@ -44,10 +48,11 @@ dev = [
 test = [
   "codetiming >=1",
   "docker >=6",
-  "hypothesis >=6",
+  "hypothesis >=6.110",
   "ipython >=8.10.0",
-  "matplotlib >=3.7",
-  "pytest >=7",
+  "matplotlib >=3.9.2",
+  "pytest >=7; python_version >='3.9' and python_version <='3.12'",
+  "pytest >=8; python_version >='3.13'",
   "pytest-cov >=4",
   "requests >=2",
 ]
@@ -65,6 +70,7 @@ build-backend = "setuptools.build_meta"
 [tool.ruff]
 exclude = ["build"]
 line-length = 99
+
 target-version = "py39"
 
 [tool.ruff.lint]

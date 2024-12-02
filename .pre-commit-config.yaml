@@ -5,7 +5,7 @@ repos:
       - id: identity
       - id: check-hooks-apply
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 'v0.7.3'
+    rev: 'v0.8.0'
     hooks:
       - id: ruff
         args: ["--fix"]
