@@ -97,7 +97,7 @@ wheels = [
 
 [[package]]
 name = "bcpandas"
-version = "2.6.6"
+version = "2.7.0"
 source = { editable = "." }
 dependencies = [
     { name = "pandas", version = "2.1.4", source = { registry = "https://pypi.org/simple" }, extra = ["sql-other"], marker = "python_full_version < '3.12'" },

@@ -16,7 +16,7 @@ classifiers = [
 ]
 description = "High-level wrapper around BCP for high performance data transfers between pandas and SQL Server. No knowledge of BCP required!!"
 keywords = ["bcp", "mssql", "pandas"]
-license = {file = "LICENSE"}
+license = {text = "MIT License"}
 maintainers = [
   { name = "Oliver Borchert", email = "me@borchero.com"}
 ]
