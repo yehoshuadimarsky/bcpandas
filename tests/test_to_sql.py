@@ -126,7 +126,7 @@ def test_tosql_full_bcp_path(bcp_path, sql_creds):
             pd.DataFrame(
                 {
                     "col1": ["a", "b", "c", "d"],
-                    "col2": [1, np.NaN, 3, np.NaN],
+                    "col2": [1, np.nan, 3, np.nan],
                     "col3": [1.5, 2.5, 3.5, 4.5],
                 }
             ),
@@ -137,7 +137,7 @@ def test_tosql_full_bcp_path(bcp_path, sql_creds):
                 {
                     "col1": ["a", "b", "c", "d"],
                     "col2": [1, 2, 3, 4],
-                    "col3": [1.5, np.NaN, 3.5, np.NaN],
+                    "col3": [1.5, np.nan, 3.5, np.nan],
                 }
             ),
             id="nan_last_col",
@@ -201,9 +201,7 @@ def test_tosql_empty_df(df, sql_creds):
         FROM INFORMATION_SCHEMA.TABLES
         WHERE TABLE_SCHEMA = '{_schema}'
         AND TABLE_NAME = '{_tbl}'
-        """.format(
-        _tbl=tbl_name, _schema=schema_name
-    )
+        """.format(_tbl=tbl_name, _schema=schema_name)
     res = pd.read_sql_query(sql=qry, con=sql_creds.engine)
     # assert that rows == 0, it has columns even without rows because it is an internal system table
     assert res.shape[0] == 0
@@ -742,7 +740,7 @@ class TestToSqlDtypeScenarios(_BaseToSql):
             {
                 "COLUMN_NAME": ["col1", "col2", "col3", "col4", "col5"],
                 "DATA_TYPE": ["bigint", "float", "varchar", "date", "bit"],
-                "CHARACTER_MAXIMUM_LENGTH": [np.NaN, np.NaN, -1.0, np.NaN, np.NaN],
+                "CHARACTER_MAXIMUM_LENGTH": [np.nan, np.nan, -1.0, np.nan, np.nan],
             }
         )
         assert_frame_equal(expected, actual)
@@ -780,7 +778,7 @@ class TestToSqlDtypeScenarios(_BaseToSql):
             {
                 "COLUMN_NAME": ["col1", "col2", "col3", "col4", "col5"],
                 "DATA_TYPE": ["int", "float", "nvarchar", "date", "bit"],
-                "CHARACTER_MAXIMUM_LENGTH": [np.NaN, np.NaN, 10.0, np.NaN, np.NaN],
+                "CHARACTER_MAXIMUM_LENGTH": [np.nan, np.nan, 10.0, np.nan, np.nan],
             }
         )
         assert_frame_equal(expected, actual)

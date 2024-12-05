@@ -1,17 +1,10 @@
 from subprocess import DEVNULL, run
 import warnings
 
-import pkg_resources
-
 from bcpandas.main import SqlCreds, to_sql
 from bcpandas.utils import bcp
 
-name = "bcpandas"
-try:
-    __version__ = pkg_resources.get_distribution(__name__).version
-except Exception:
-    __version__ = "unknown"
-
+__version__ = "2.7.1"
 
 # BCP check
 try:

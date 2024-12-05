@@ -8,3 +8,4 @@ rules:
     max: 130
   truthy:
     check-keys: false
+  new-lines: disable

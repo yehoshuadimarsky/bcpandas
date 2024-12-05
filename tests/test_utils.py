@@ -19,7 +19,9 @@ def fixture_run_cmd_capture(monkeypatch):
 
 
 def test_bcpandas_creates_command_without_port_if_default(run_cmd):
-    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs")
+    Creds = namedtuple(
+        "Creds", "server port database with_krb_auth username password odbc_kwargs entra_id_token"
+    )
     creds = Creds(
         server="localhost",
         port=1433,
@@ -28,6 +30,7 @@ def test_bcpandas_creates_command_without_port_if_default(run_cmd):
         username="me",
         password="secret",
         odbc_kwargs=None,
+        entra_id_token=None,
     )
     utils.bcp("table", "in", "", creds, True)
     assert run_cmd.call_args == mock.call(
@@ -51,7 +54,9 @@ def test_bcpandas_creates_command_without_port_if_default(run_cmd):
 
 
 def test_bcpandas_creates_command_with_port_if_not_default(run_cmd):
-    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs")
+    Creds = namedtuple(
+        "Creds", "server port database with_krb_auth username password odbc_kwargs entra_id_token"
+    )
     creds = Creds(
         server="localhost",
         port=1234,
@@ -60,6 +65,7 @@ def test_bcpandas_creates_command_with_port_if_not_default(run_cmd):
         username="me",
         password="secret",
         odbc_kwargs=None,
+        entra_id_token=None,
     )
     utils.bcp("table", "in", "", creds, True)
     assert run_cmd.call_args == mock.call(
@@ -83,7 +89,9 @@ def test_bcpandas_creates_command_with_port_if_not_default(run_cmd):
 
 
 def test_bcpandas_creates_command_with_encrypt_no(run_cmd):
-    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs")
+    Creds = namedtuple(
+        "Creds", "server port database with_krb_auth username password odbc_kwargs entra_id_token"
+    )
     creds = Creds(
         server="localhost",
         port=1433,
@@ -92,6 +100,7 @@ def test_bcpandas_creates_command_with_encrypt_no(run_cmd):
         username="me",
         password="secret",
         odbc_kwargs=dict(encrypt="no"),
+        entra_id_token=None,
     )
     utils.bcp("table", "in", "", creds, True)
     assert run_cmd.call_args == mock.call(
@@ -116,7 +125,9 @@ def test_bcpandas_creates_command_with_encrypt_no(run_cmd):
 
 
 def test_bcpandas_creates_command_with_encrypt_yes(run_cmd):
-    Creds = namedtuple("Creds", "server port database with_krb_auth username password odbc_kwargs")
+    Creds = namedtuple(
+        "Creds", "server port database with_krb_auth username password odbc_kwargs entra_id_token"
+    )
     creds = Creds(
         server="localhost",
         port=1433,
@@ -125,6 +136,7 @@ def test_bcpandas_creates_command_with_encrypt_yes(run_cmd):
         username="me",
         password="secret",
         odbc_kwargs=dict(Encrypt="1"),
+        entra_id_token=None,
     )
     utils.bcp("table", "in", "", creds, True)
     assert run_cmd.call_args == mock.call(
@@ -142,6 +154,41 @@ def test_bcpandas_creates_command_with_encrypt_yes(run_cmd):
             "me",
             "-P",
             "secret",
+        ]
+        + (["-Ym"] if sys.platform != "win32" else []),
+        print_output=True,
+    )
+
+
+def test_bcpandas_creates_command_with_entra_id_token(run_cmd):
+    Creds = namedtuple(
+        "Creds", "server port database with_krb_auth username password odbc_kwargs entra_id_token"
+    )
+    creds = Creds(
+        server="localhost",
+        port=1433,
+        database="DB",
+        with_krb_auth=False,
+        username=None,
+        password=None,
+        odbc_kwargs=dict(Encrypt="1"),
+        entra_id_token="secret_token",
+    )
+    utils.bcp("table", "in", "", creds, True)
+    assert run_cmd.call_args == mock.call(
+        [
+            "bcp",
+            "dbo.table",
+            "in",
+            "",
+            "-S",
+            "localhost",
+            "-d",
+            "DB",
+            "-q",
+            "-G",
+            "-P",
+            "secret_token",
         ]
         + (["-Ym"] if sys.platform != "win32" else []),
         print_output=True,
