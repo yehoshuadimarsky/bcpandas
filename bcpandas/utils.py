@@ -52,6 +52,7 @@ def bcp(
     row_terminator: Optional[str] = None,
     bcp_path: Optional[Union[str, Path]] = None,
     identity_insert: bool = False,
+    err_file: Optional[Union[str, Path]] = None,
 ):
     """
     See https://docs.microsoft.com/en-us/sql/tools/bcp-utility
@@ -115,6 +116,9 @@ def bcp(
 
     if identity_insert:
         bcp_command += ["-E"]
+
+    if err_file:
+        bcp_command += ["-e", str(err_file)]
 
     # formats
     if direc == IN and format_file_path is not None:
