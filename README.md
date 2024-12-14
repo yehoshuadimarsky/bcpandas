@@ -347,9 +347,11 @@ added.
 ### Testing Requirements
 
 - Docker Desktop installed, either of the Linux or Windows runtimes, doesn't matter
-- pytest
-- hypothesis
-- pytest-cov (coverage.py)
+- Python packages:
+  - `pip install docker`
+  - `pip install hypothesis`
+  - `pip install pytest`
+  - `pip install pytest-cov` (coverage.py)
 
 ### What Is Tested?
 
@@ -383,7 +385,7 @@ tested so far. Pull Requests welcome!
   - When running the tests, we can specify a specific Docker image to use, by invoking the custom
     command line option called `--mssql-docker-image`. For example:
     ```bash
-    pytest bcpandas/tests --mssql-docker-image mcr.microsoft.com/mssql/server:2019-latest
+    pytest bcpandas/tests --mssql-docker-image mcr.microsoft.com/mssql/server:2022-latest
     ```
 - Instead of using the `subprocess` library to control Docker manually, we use the elegant
   `docker-py` library which works very nicely. A `DockerDB` Python class is defined in
