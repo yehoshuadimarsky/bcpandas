@@ -355,7 +355,8 @@ def test_custom_err_file(sql_creds):
     )
     with open(err_file) as f:
         assert 'Invalid character value for cast specification' in f.read()
-
+    
+    err_file.unlink(missing_ok=True)
 
 @pytest.mark.usefixtures("database")
 class _BaseToSql:
