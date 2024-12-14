@@ -343,7 +343,7 @@ def test_custom_err_file(sql_creds):
     """
     Test the err_file parameters.
     """
-    err_file = Path(__file__).parent.joinpath('err_file.log')
+    err_file = Path(__file__).parent.joinpath("err_file.log")
     to_sql(
         df=pd.DataFrame({"col1": [pd.Timedelta(days=1)]}),
         table_name="some_table",
@@ -357,6 +357,7 @@ def test_custom_err_file(sql_creds):
         assert 'Invalid character value for cast specification' in f.read()
     
     err_file.unlink(missing_ok=True)
+
 
 @pytest.mark.usefixtures("database")
 class _BaseToSql:
