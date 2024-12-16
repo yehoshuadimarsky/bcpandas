@@ -38,6 +38,10 @@ requires-python = ">=3.9,<=3.13"
 [tool.setuptools.dynamic]
 version = {attr = "bcpandas.__version__"}
 
+[tool.setuptools]
+# https://github.com/astral-sh/uv/issues/9513#issuecomment-2519527822
+license-files = []
+
 [dependency-groups]
 dev = [
   "pre-commit >=3",
