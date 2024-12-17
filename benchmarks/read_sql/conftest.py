@@ -54,7 +54,6 @@ def sql_creds():
         database=_db_name,
         username="sa",
         password=docker_db_obj.sa_sql_password,
-        odbc_kwargs=dict(TrustServerCertificate="yes"),
     )
     return creds
 
