@@ -5,13 +5,13 @@ repos:
       - id: identity
       - id: check-hooks-apply
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 'v0.8.0'
+    rev: 'v0.8.6'
     hooks:
       - id: ruff
         args: ["--fix"]
       - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.13.0
+    rev: v1.14.1
     hooks:
       - id: mypy
         additional_dependencies: [types-setuptools]
@@ -36,6 +36,6 @@ repos:
       - id: check-yaml
       - id: debug-statements
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.21.2
+    rev: v8.22.1
     hooks:
       - id: gitleaks
