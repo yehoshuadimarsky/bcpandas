@@ -135,11 +135,13 @@ class DockerDB:
 
     def start(self):
         if not self.accept_eula:
-            raise ValueError("Must accept Microsft's End User License Agreement")
+            raise ValueError("Must accept Microsoft's End User License Agreement")
+
         env = {
             "ACCEPT_EULA": "Y",
             "SA_PASSWORD": self.sa_sql_password,
         }
+
         if self.mssql_image.startswith("mcr.microsoft.com/mssql/server"):
             # means it's linux
             env["MSSQL_PID"] = self.mssql_pid
