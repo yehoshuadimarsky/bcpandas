@@ -322,6 +322,43 @@ def test_custom_work_directory(sql_creds):
         assert conn.exec_driver_sql("SELECT * FROM some_table").first()[0] == 1.5
 
 
+def test_identity_insert_param(sql_creds):
+    """
+    Test ingest is successful when identity_insert param used.
+    """
+    to_sql(
+        df=pd.DataFrame({"col1": [1.5]}),
+        table_name="some_table",
+        creds=sql_creds,
+        if_exists="replace",
+        index=False,
+        sql_type="table",
+        identity_insert=True,
+    )
+    with sql_creds.engine.connect() as conn:
+        assert conn.exec_driver_sql("SELECT * FROM some_table").first()[0] == 1.5
+
+
+def test_custom_err_file(sql_creds):
+    """
+    Test the err_file parameters.
+    """
+    err_file = Path(__file__).parent.joinpath("err_file.log")
+    to_sql(
+        df=pd.DataFrame({"col1": [pd.Timedelta(days=1)]}),
+        table_name="some_table",
+        creds=sql_creds,
+        if_exists="replace",
+        index=False,
+        sql_type="table",
+        err_file=err_file,
+    )
+    with open(err_file) as f:
+        assert "Invalid character value for cast specification" in f.read()
+
+    err_file.unlink(missing_ok=True)
+
+
 @pytest.mark.usefixtures("database")
 class _BaseToSql:
     sql_type = "table"

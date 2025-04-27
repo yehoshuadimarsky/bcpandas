@@ -347,9 +347,11 @@ added.
 ### Testing Requirements
 
 - Docker Desktop installed, either of the Linux or Windows runtimes, doesn't matter
-- pytest
-- hypothesis
-- pytest-cov (coverage.py)
+- Python packages:
+  - `docker`
+  - `hypothesis`
+  - `pytest`
+  - `pytest-cov` (coverage.py)
 
 ### What Is Tested?
 
