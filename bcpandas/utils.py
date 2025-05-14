@@ -269,7 +269,7 @@ def run_cmd(cmd: List[str], *, print_output: bool) -> Tuple[int, List[str]]:
         stdout=PIPE,
         stderr=STDOUT,
         encoding="utf-8",
-        errors="utf-8",
+        errors="replace",
         shell=with_shell,
     )
     stdout = []
