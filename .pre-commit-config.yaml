@@ -5,7 +5,7 @@ repos:
       - id: identity
       - id: check-hooks-apply
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 'v0.9.10'
+    rev: 'v0.11.10'
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -22,7 +22,7 @@ repos:
         args:
           - "--github"
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
+    rev: v1.37.1
     hooks:
       - id: yamllint
         args: ["--strict"]
@@ -36,6 +36,6 @@ repos:
       - id: check-yaml
       - id: debug-statements
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.24.0
+    rev: v8.26.0
     hooks:
       - id: gitleaks
