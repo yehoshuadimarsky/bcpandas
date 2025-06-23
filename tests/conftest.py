@@ -57,6 +57,7 @@ def sql_creds():
         database=_db_name,
         username="sa",
         password=docker_db_obj.sa_sql_password,
+        odbc_kwargs=dict(encrypt="no"),
     )
     return creds
 
@@ -64,9 +65,9 @@ def sql_creds():
 @pytest.fixture(scope="session")
 def pyodbc_creds(database):
     db_url = (
-        "Driver={ODBC Driver 17 for SQL Server};"
+        "Driver={ODBC Driver 18 for SQL Server};"
         + f"Server={docker_db_obj.address};"
-        + f"Database={_db_name};UID=sa;PWD={docker_db_obj.sa_sql_password};"
+        + f"Database={_db_name};UID=sa;PWD={docker_db_obj.sa_sql_password};encrypt=no"
     )
     engine = sa.engine.create_engine(
         f"mssql+pyodbc:///?odbc_connect={urllib.parse.quote_plus(db_url)}"

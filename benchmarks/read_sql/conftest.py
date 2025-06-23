@@ -61,7 +61,7 @@ def sql_creds():
 @pytest.fixture(scope="session")
 def pyodbc_creds(database):
     db_url = (
-        "Driver={ODBC Driver 17 for SQL Server};"
+        "Driver={ODBC Driver 18 for SQL Server};"
         + f"Server={docker_db_obj.address};"
         + f"Database={_db_name};UID=sa;PWD={docker_db_obj.sa_sql_password};"
     )

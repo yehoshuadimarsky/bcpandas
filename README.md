@@ -196,7 +196,7 @@ The user has 2 options when constructing it.
    In [2]: creds = SqlCreds('my_server', 'my_db', 'my_username', 'my_password')
 
    In [3]: creds.engine
-   Out[3]: Engine(mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 17 for SQL Server};Server=tcp:my_server,1433;Database=my_db;UID=my_username;PWD=my_password)
+   Out[3]: Engine(mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 18 for SQL Server};Server=tcp:my_server,1433;Database=my_db;UID=my_username;PWD=my_password)
 
    ```
 
@@ -210,10 +210,10 @@ The user has 2 options when constructing it.
    In [4]: creds2 = SqlCreds.from_engine(creds.engine)
 
    In [5]: creds2.engine
-   Out[5]: Engine(mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 17 for SQL Server};Server=tcp:my_server,1433;Database=my_db;UID=my_username;PWD=my_password)
+   Out[5]: Engine(mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 18 for SQL Server};Server=tcp:my_server,1433;Database=my_db;UID=my_username;PWD=my_password)
 
    In [6]: creds2
-   Out[6]: SqlCreds(server='my_server', database='my_db', username='my_username', with_krb_auth=False, engine=Engine(mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 17 for SQL Server};Server=tcp:my_server,1433;Database=my_db;UID=my_username;PWD=my_password), password=[REDACTED])
+   Out[6]: SqlCreds(server='my_server', database='my_db', username='my_username', with_krb_auth=False, engine=Engine(mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 18 for SQL Server};Server=tcp:my_server,1433;Database=my_db;UID=my_username;PWD=my_password), password=[REDACTED])
    ```
 
 ### Recommended Usage
@@ -293,7 +293,7 @@ my_df['some_text_column'].str.contains('\|').sum()
 
 If you get this error message when writing to the database:
 ```
-Error = [Microsoft][ODBC Driver 17 for SQL Server]Incorrect host-column number found in BCP format-file
+Error = [Microsoft][ODBC Driver 18 for SQL Server]Incorrect host-column number found in BCP format-file
 ```
 Try replacing any space characters in your column names, with a command like `my_df.columns = my_df.columns.str.replace(' ','_')` ([source](https://github.com/yehoshuadimarsky/bcpandas/issues/30)).
 

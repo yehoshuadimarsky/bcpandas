@@ -202,6 +202,7 @@ def test_bcp_login_failure(sql_creds: SqlCreds):
         database=sql_creds.database,
         username=sql_creds.username,
         password="mywrongpassword",
+        odbc_kwargs=dict(encrypt="no"),
     )
     df = pd.DataFrame([{"col1": "value"}])
     with tempfile.TemporaryDirectory() as tmpdir:

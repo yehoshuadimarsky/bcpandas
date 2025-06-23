@@ -438,6 +438,7 @@ def test_sqlcreds_connection_from_sqlalchemy(sql_creds):
         f"Database={sql_creds.database};"
         f"UID={sql_creds.username};"
         f"PWD={sql_creds.password};"
+        f"encrypt={sql_creds.odbc_kwargs.get('encrypt', 'no')};"
     )
     params = quote_plus(conn_str)
 
