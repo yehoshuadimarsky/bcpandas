@@ -455,7 +455,7 @@ def to_sql(
         }
     )
     # write to CSV
-    df_out.replace({True: 1, False: 0}).to_csv(
+    df_out.to_csv(
         path_or_buf=csv_file_path,
         sep=delim,
         header=False,
