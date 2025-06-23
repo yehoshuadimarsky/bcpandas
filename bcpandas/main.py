@@ -7,7 +7,6 @@ Created on Sat Aug  3 23:07:15 2019
 import csv
 import logging
 import os
-from copy import copy
 from pathlib import Path
 from textwrap import dedent
 from typing import Dict, List, Optional, Union
