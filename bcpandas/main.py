@@ -446,9 +446,7 @@ def to_sql(
     # needed to ensure loop iterations create lambdas working on different columns.
     df_out = df.assign(
         **{
-            col: (lambda col: lambda df: df[col].map({True: 1, False: 0}).astype(pd.Int8Dtype()))(
-                copy(col)
-            )
+            col: lambda df, col=col: df[col].map({True: 1, False: 0}).astype(pd.Int8Dtype())
             for col, dtype in df.dtypes[
                 (df.dtypes == "bool[pyarrow]") | (df.dtypes == "bool") | (df.dtypes == "boolean")
             ].items()
