@@ -63,15 +63,25 @@ https://docs.microsoft.com/en-us/sql/relational-databases/import-export/specify-
 """
 
 
-def get_delimiter(df: pd.DataFrame) -> str:
-    for delim in _DELIMITER_OPTIONS:
+def get_delimiter(df: pd.DataFrame, additional_char: Optional[str] = None) -> str:
+    delims = (
+        _DELIMITER_OPTIONS + (additional_char,)
+        if additional_char is not None
+        else _DELIMITER_OPTIONS
+    )
+    for delim in delims:
         if not df.map(lambda x: delim in x if isinstance(x, str) else False).any().any():
             return delim
     raise BCPandasValueError(error_msg.format(typ="delimiter", opts=_DELIMITER_OPTIONS))
 
 
-def get_quotechar(df: pd.DataFrame) -> str:
-    for qc in _QUOTECHAR_OPTIONS:
+def get_quotechar(df: pd.DataFrame, additional_char: Optional[str] = None) -> str:
+    qcs = (
+        _QUOTECHAR_OPTIONS + (additional_char,)
+        if additional_char is not None
+        else _QUOTECHAR_OPTIONS
+    )
+    for qc in qcs:
         if not df.map(lambda x: qc in x if isinstance(x, str) else False).any().any():
             return qc
     raise BCPandasValueError(error_msg.format(typ="quote", opts=_QUOTECHAR_OPTIONS))

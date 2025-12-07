@@ -435,8 +435,8 @@ def to_sql(
     if index:
         df = df.reset_index()
 
-    delim = get_delimiter(df) if delimiter is None else delimiter
-    _quotechar = get_quotechar(df) if quotechar is None else quotechar
+    delim = get_delimiter(df, additional_char=delimiter)
+    _quotechar = get_quotechar(df, additional_char=quotechar)
 
     # save to temp path
     csv_file_path = get_temp_file(work_directory)

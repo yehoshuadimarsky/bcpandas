@@ -135,7 +135,11 @@ def bcp(
     bcp_command_log_msg = sub(r"-P,\s.*,", "-P, [REDACTED],", bcp_command_log)
     logger.info(f"Executing BCP command now... \nBCP command is: {bcp_command_log_msg}")
     ret_code, output = run_cmd(bcp_command, print_output=print_output)
-    if ret_code != 0:
+    errors_check = [
+        True if "Error = [Microsoft][ODBC Driver 17 for SQL Server]" in x else False
+        for x in output
+    ]
+    if ret_code != 0 or any(errors_check):
         raise BCPandasException(
             f"Bcp command failed with exit code {ret_code}",
             details=[line for line in output if line.startswith("Error =")],
